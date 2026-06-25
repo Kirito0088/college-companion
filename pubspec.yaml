@@ -1,0 +1,66 @@
+name: college_companion
+description: "College Companion - Your college life, organized."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management
+  flutter_riverpod: ^2.6.1
+
+  # Routing
+  go_router: ^15.1.3
+
+  # Local Database (Offline-first source of truth)
+  drift: ^2.25.0
+  sqlite3_flutter_libs: ^0.5.30
+
+  # Backend & Auth
+  supabase_flutter: ^2.10.3
+  google_sign_in: ^6.3.0
+
+  # Secure Storage
+  flutter_secure_storage: ^9.2.4
+
+  # Connectivity
+  connectivity_plus: ^6.1.4
+  internet_connection_checker_plus: ^2.7.1
+
+  # File System & Preferences
+  path_provider: ^2.1.6
+  shared_preferences: ^2.5.3
+
+  # Firebase
+  firebase_core: ^3.14.0
+  firebase_messaging: ^15.2.7
+  firebase_crashlytics: ^4.3.7
+  firebase_analytics: ^11.4.7
+
+  # Icons (Material Symbols Rounded only - per design tokens)
+  material_symbols_icons: ^4.2815.0
+
+  # Utilities
+  intl: ^0.20.3
+  uuid: ^4.5.1
+
+  # Typography (Inter font - per design tokens)
+  google_fonts: ^6.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+  # Code Generation (Drift)
+  drift_dev: ^2.25.0
+  build_runner: ^2.4.15
+
+flutter:
+  uses-material-design: true

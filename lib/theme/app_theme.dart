@@ -46,15 +46,10 @@ abstract final class AppTheme {
         height: 80,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         labelTextStyle: WidgetStatePropertyAll(
-          textTheme.labelMedium?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-          ),
+          textTheme.labelMedium?.copyWith(color: colorScheme.onSurfaceVariant),
         ),
         iconTheme: const WidgetStatePropertyAll(
-          IconThemeData(
-            color: ColorTokens.onSurfaceVariant,
-            size: 24,
-          ),
+          IconThemeData(color: ColorTokens.onSurfaceVariant, size: 24),
         ),
       ),
 
@@ -215,10 +210,7 @@ abstract final class AppTheme {
       ),
 
       // ── Icon ───────────────────────────────────────────────────────────
-      iconTheme: IconThemeData(
-        color: colorScheme.onSurface,
-        size: 24,
-      ),
+      iconTheme: IconThemeData(color: colorScheme.onSurface, size: 24),
 
       // ── Tooltip ────────────────────────────────────────────────────────
       tooltipTheme: TooltipThemeData(
@@ -226,9 +218,7 @@ abstract final class AppTheme {
           color: ColorTokens.surfaceContainerHighest,
           borderRadius: RadiusTokens.borderRadiusSm,
         ),
-        textStyle: textTheme.bodySmall?.copyWith(
-          color: ColorTokens.onSurface,
-        ),
+        textStyle: textTheme.bodySmall?.copyWith(color: ColorTokens.onSurface),
       ),
 
       // ── Tab Bar ────────────────────────────────────────────────────────

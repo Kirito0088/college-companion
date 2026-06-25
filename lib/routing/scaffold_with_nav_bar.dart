@@ -14,10 +14,7 @@ import 'package:material_symbols_icons/symbols.dart';
 /// A scaffold that wraps [StatefulNavigationShell] with bottom navigation.
 class ScaffoldWithNavBar extends StatelessWidget {
   /// Creates a [ScaffoldWithNavBar] with the given [navigationShell].
-  const ScaffoldWithNavBar({
-    required this.navigationShell,
-    super.key,
-  });
+  const ScaffoldWithNavBar({required this.navigationShell, super.key});
 
   /// The navigation shell provided by [StatefulShellRoute].
   final StatefulNavigationShell navigationShell;

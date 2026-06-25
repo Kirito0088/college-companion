@@ -17,10 +17,22 @@ abstract final class RadiusTokens {
   static const double circle = 999;
 
   // ── Pre-built BorderRadius instances ──────────────────────────────────
-  static const BorderRadius borderRadiusXs = BorderRadius.all(Radius.circular(xs));
-  static const BorderRadius borderRadiusSm = BorderRadius.all(Radius.circular(sm));
-  static const BorderRadius borderRadiusMd = BorderRadius.all(Radius.circular(md));
-  static const BorderRadius borderRadiusLg = BorderRadius.all(Radius.circular(lg));
-  static const BorderRadius borderRadiusXl = BorderRadius.all(Radius.circular(xl));
-  static const BorderRadius borderRadiusPill = BorderRadius.all(Radius.circular(pill));
+  static const BorderRadius borderRadiusXs = BorderRadius.all(
+    Radius.circular(xs),
+  );
+  static const BorderRadius borderRadiusSm = BorderRadius.all(
+    Radius.circular(sm),
+  );
+  static const BorderRadius borderRadiusMd = BorderRadius.all(
+    Radius.circular(md),
+  );
+  static const BorderRadius borderRadiusLg = BorderRadius.all(
+    Radius.circular(lg),
+  );
+  static const BorderRadius borderRadiusXl = BorderRadius.all(
+    Radius.circular(xl),
+  );
+  static const BorderRadius borderRadiusPill = BorderRadius.all(
+    Radius.circular(pill),
+  );
 }

@@ -11,10 +11,7 @@ import 'package:flutter/material.dart';
 /// A simple placeholder screen for unimplemented features.
 class PlaceholderScreen extends StatelessWidget {
   /// Creates a [PlaceholderScreen] with the given [title].
-  const PlaceholderScreen({
-    required this.title,
-    super.key,
-  });
+  const PlaceholderScreen({required this.title, super.key});
 
   /// The name of the feature or screen to display.
   final String title;
@@ -24,9 +21,7 @@ class PlaceholderScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-      ),
+      appBar: AppBar(title: Text(title)),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(SpacingTokens.xl),

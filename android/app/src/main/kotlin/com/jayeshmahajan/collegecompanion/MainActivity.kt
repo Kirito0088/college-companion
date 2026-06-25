@@ -1,4 +1,4 @@
-package com.collegecompanion.college_companion
+package com.jayeshmahajan.collegecompanion
 
 import io.flutter.embedding.android.FlutterActivity
 

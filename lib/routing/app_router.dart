@@ -44,14 +44,14 @@ abstract final class RouteNames {
 /// Navigator keys for each bottom navigation branch.
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _homeNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'home');
-final _attendanceNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'attendance');
-final _calendarNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'calendar');
-final _assignmentsNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'assignments');
-final _profileNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'profile');
+final _attendanceNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'attendance',
+);
+final _calendarNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'calendar');
+final _assignmentsNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'assignments',
+);
+final _profileNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'profile');
 
 /// Creates the application's [GoRouter] instance.
 ///
@@ -68,14 +68,12 @@ GoRouter createRouter() {
     //   if (!isAuthenticated) return RoutePaths.login;
     //   return null;
     // },
-
     routes: [
       // ── Login (outside shell) ──────────────────────────────────────────
       GoRoute(
         path: RoutePaths.login,
         name: RouteNames.login,
-        builder: (context, state) =>
-            const PlaceholderScreen(title: 'Login'),
+        builder: (context, state) => const PlaceholderScreen(title: 'Login'),
       ),
 
       // ── Main shell with bottom navigation ──────────────────────────────
@@ -177,8 +175,7 @@ GoRouter createRouter() {
         path: RoutePaths.settings,
         name: RouteNames.settings,
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) =>
-            const PlaceholderScreen(title: 'Settings'),
+        builder: (context, state) => const PlaceholderScreen(title: 'Settings'),
       ),
     ],
   );

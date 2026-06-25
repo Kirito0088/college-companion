@@ -49,6 +49,9 @@ dependencies:
   intl: ^0.20.3
   uuid: ^4.5.1
 
+  # Environment Configuration
+  flutter_dotenv: ^5.2.1
+
   # Typography (Inter font - per design tokens)
   google_fonts: ^6.2.1
 
@@ -64,3 +67,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - .env

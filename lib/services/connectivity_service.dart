@@ -19,8 +19,8 @@ class ConnectivityService {
   ConnectivityService({
     Connectivity? connectivity,
     InternetConnection? internetConnection,
-  })  : _connectivity = connectivity ?? Connectivity(),
-        _internetConnection = internetConnection ?? InternetConnection();
+  }) : _connectivity = connectivity ?? Connectivity(),
+       _internetConnection = internetConnection ?? InternetConnection();
 
   final Connectivity _connectivity;
   final InternetConnection _internetConnection;
@@ -30,8 +30,7 @@ class ConnectivityService {
       _connectivity.onConnectivityChanged;
 
   /// Checks if the device currently has internet access.
-  Future<bool> get hasInternetAccess =>
-      _internetConnection.hasInternetAccess;
+  Future<bool> get hasInternetAccess => _internetConnection.hasInternetAccess;
 
   /// Stream indicating whether internet is available.
   Stream<InternetStatus> get onStatusChange =>

@@ -184,7 +184,56 @@ Active
 
 ---
 
+## CC-0007
+
+### Date
+2026-06-26
+
+### Category
+Architecture
+
+### Decision
+Firebase owns authentication. Supabase owns data storage. No dual authentication.
+
+### Reason
+Firebase Auth handles Google Sign-In, session persistence, and credential management. Supabase stores user profile data (uid, name, email, photo) for RLS-protected data queries. Duplicating authentication across both services would add unnecessary complexity and potential session conflicts.
+
+### Alternatives Considered
+- Supabase Auth only (lacks Firebase services: Crashlytics, Analytics, Messaging)
+- Dual authentication with both Firebase and Supabase Auth
+
+### Status
+Active
+
+---
+
+## CC-0008
+
+### Date
+2026-06-26
+
+### Category
+Architecture
+
+### Decision
+Authentication state is managed via Riverpod `Notifier` with a sealed `AuthState` class containing five states: Initial, Loading, Authenticated, Unauthenticated, Error.
+
+### Reason
+A sealed class provides exhaustive pattern matching in Dart, ensuring every auth state is explicitly handled. Riverpod's `Notifier` integrates with the existing state management approach and allows GoRouter redirects to read auth state synchronously.
+
+### Alternatives Considered
+- StreamProvider watching Firebase authStateChanges
+- AsyncNotifier with AsyncValue wrapping
+
+### Status
+Active
+
+---
+
 ## Revision History
+
+### v1.1
+Added CC-0007 (Firebase/Supabase auth split) and CC-0008 (auth state management).
 
 ### v1.0
 Initial decision log created.

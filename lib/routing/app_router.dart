@@ -3,15 +3,30 @@
 /// GoRouter with shell route for bottom navigation.
 /// Tab order per 05-navigation.md: Home, Attendance, Calendar, Assignments, Profile.
 /// Maximum navigation depth: 3 levels.
+///
+/// Authentication redirect protects all routes behind login.
+/// Splash → Login → Dashboard flow per 08-screen-specifications.md.
+///
+/// All navigation decisions are centralized in [GoRouter.redirect].
+/// UI widgets do not perform navigation for authentication state changes.
 library;
 
+import 'package:college_companion/features/authentication/models/auth_state.dart';
+import 'package:college_companion/features/authentication/providers/auth_provider.dart';
+import 'package:college_companion/features/authentication/screens/login_screen.dart';
+import 'package:college_companion/features/authentication/screens/splash_screen.dart';
 import 'package:college_companion/routing/scaffold_with_nav_bar.dart';
 import 'package:college_companion/shared/widgets/placeholder_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 /// Route path constants.
 abstract final class RoutePaths {
+  // ── Auth ────────────────────────────────────────────────────────────────
+  static const String splash = '/splash';
+  static const String login = '/login';
+
   // ── Root tabs ──────────────────────────────────────────────────────────
   static const String home = '/';
   static const String attendance = '/attendance';
@@ -20,21 +35,24 @@ abstract final class RoutePaths {
   static const String profile = '/profile';
 
   // ── Secondary routes ───────────────────────────────────────────────────
-  static const String login = '/login';
   static const String timetable = '/timetable';
   static const String internalMarks = '/internal-marks';
   static const String semester = '/semester';
   static const String settings = '/settings';
+
+  /// Routes that do not require authentication.
+  static const List<String> publicRoutes = [splash, login];
 }
 
 /// Route name constants for named navigation.
 abstract final class RouteNames {
+  static const String splash = 'splash';
+  static const String login = 'login';
   static const String home = 'home';
   static const String attendance = 'attendance';
   static const String calendar = 'calendar';
   static const String assignments = 'assignments';
   static const String profile = 'profile';
-  static const String login = 'login';
   static const String timetable = 'timetable';
   static const String internalMarks = 'internal-marks';
   static const String semester = 'semester';
@@ -56,24 +74,57 @@ final _profileNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'profile');
 /// Creates the application's [GoRouter] instance.
 ///
 /// Uses a [StatefulShellRoute] to maintain state across bottom navigation tabs.
-GoRouter createRouter() {
+/// The [ref] parameter is required for authentication redirect logic.
+/// The [refreshListenable] triggers redirect re-evaluation when auth
+/// state changes.
+GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: RoutePaths.home,
+    initialLocation: RoutePaths.splash,
     debugLogDiagnostics: false,
+    refreshListenable: refreshListenable,
+    redirect: (context, state) {
+      final authState = ref.read(authStateProvider);
+      final currentPath = state.matchedLocation;
 
-    // TODO(auth): Add redirect logic for authentication state.
-    // redirect: (context, state) {
-    //   final isAuthenticated = ...;
-    //   if (!isAuthenticated) return RoutePaths.login;
-    //   return null;
-    // },
+      // While auth is initializing, keep user on splash.
+      if (authState is AuthInitial || authState is AuthLoading) {
+        if (currentPath != RoutePaths.splash) return RoutePaths.splash;
+        return null;
+      }
+
+      final isAuthenticated = authState is AuthAuthenticated;
+
+      // Auth resolved: redirect away from splash.
+      if (currentPath == RoutePaths.splash) {
+        return isAuthenticated ? RoutePaths.home : RoutePaths.login;
+      }
+
+      // Authenticated user on login page → send to home.
+      if (isAuthenticated && currentPath == RoutePaths.login) {
+        return RoutePaths.home;
+      }
+
+      // Unauthenticated user on protected route → send to login.
+      if (!isAuthenticated && !RoutePaths.publicRoutes.contains(currentPath)) {
+        return RoutePaths.login;
+      }
+
+      return null;
+    },
     routes: [
+      // ── Splash ───────────────────────────────────────────────────────────
+      GoRoute(
+        path: RoutePaths.splash,
+        name: RouteNames.splash,
+        builder: (context, state) => const SplashScreen(),
+      ),
+
       // ── Login (outside shell) ──────────────────────────────────────────
       GoRoute(
         path: RoutePaths.login,
         name: RouteNames.login,
-        builder: (context, state) => const PlaceholderScreen(title: 'Login'),
+        builder: (context, state) => const LoginScreen(),
       ),
 
       // ── Main shell with bottom navigation ──────────────────────────────

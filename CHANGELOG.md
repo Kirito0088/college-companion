@@ -23,3 +23,21 @@ All notable changes to this project will be documented here.
 * Design specifications
 * Backend specifications
 * Prompt templates
+
+---
+
+## v0.2.0
+
+### Added
+
+* Supabase database implementation
+* Database migration scripts
+* Authentication service
+* Unit test infrastructure
+* Unit tests
+
+### Changed
+
+* Refactored project structure
+* Implemented authentication flow
+* Added database schema

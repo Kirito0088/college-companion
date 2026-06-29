@@ -15,10 +15,10 @@
 --   docs/backend/sync-engine.md — offline-first, conflict resolution
 --   docs/00-project-vision.md   — core modules, philosophy
 --   docs/08-screen-specifications.md — screen data requirements
---   docs/11-decision-log.md     — CC-0007 (Firebase/Supabase split)
+--   docs/11-decision-log.md     — CC-0007 (Supabase Auth)
 --
 -- Key decisions:
---   - Firebase UID (text) as users PK (CC-0007)
+--   - Supabase user ID (text) as users PK (CC-0007)
 --   - UUID PKs on all other tables (database.md)
 --   - Soft delete via deleted_at (database.md)
 --   - RLS on every table — production policies only (security.md)
@@ -26,7 +26,7 @@
 --   - updated_at auto-trigger on every table
 --   - No sync metadata — sync state belongs in local SQLite (sync-engine.md)
 --   - working_days as smallint[] for consistency with timetable.day_of_week
---   - auth.uid()::text cast — Firebase UIDs are text, auth.uid() returns uuid
+--   - auth.uid()::text cast — user_id columns are text, auth.uid() returns uuid
 --
 -- RLS timing decision:
 --   RLS is enabled immediately with production policies, even before the
@@ -71,12 +71,11 @@ COMMENT ON FUNCTION public.update_updated_at_column()
 
 
 -- ────────────────────────────────────────────────────────────────────────────
--- 1. users — User profiles (Firebase UID as PK)
+-- 1. users — User profiles (Supabase user ID as PK)
 -- ────────────────────────────────────────────────────────────────────────────
 -- Stores the minimum user information documented in database.md:
 -- User ID, Name, Email, Profile Photo, Created At.
--- The PK is a text column holding the Firebase UID (not a UUID)
--- because Firebase generates its own 28-character string identifiers.
+-- The PK is a text column holding the Supabase user ID.
 
 CREATE TABLE public.users (
   id            text        PRIMARY KEY,
@@ -87,8 +86,8 @@ CREATE TABLE public.users (
   updated_at    timestamptz NOT NULL DEFAULT now()
 );
 
-COMMENT ON TABLE  public.users              IS 'User profiles synced from Firebase Auth. One row per authenticated user.';
-COMMENT ON COLUMN public.users.id           IS 'Firebase UID — canonical user identifier (text, not UUID).';
+COMMENT ON TABLE  public.users              IS 'User profiles synced from Supabase Auth. One row per authenticated user.';
+COMMENT ON COLUMN public.users.id           IS 'Supabase user ID — canonical user identifier (text).';
 COMMENT ON COLUMN public.users.name         IS 'Display name from the Google account.';
 COMMENT ON COLUMN public.users.email        IS 'Email address from the Google account.';
 COMMENT ON COLUMN public.users.profile_photo IS 'Google profile photo URL. Nullable if unavailable.';
@@ -388,18 +387,14 @@ ALTER TABLE public.user_settings  ENABLE ROW LEVEL SECURITY;
 
 
 -- ════════════════════════════════════════════════════════════════════════════
--- RLS POLICIES — Production only (auth.uid()::text)
+-- RLS POLICIES — Production only (auth.jwt()->>'sub')
 -- ════════════════════════════════════════════════════════════════════════════
 -- Per security.md: "Every query must be restricted to the authenticated user."
 -- Per security.md: "User A must never be capable of viewing, editing or
 -- deleting User B's data. No exceptions."
 --
--- auth.uid() returns the JWT 'sub' claim as uuid. Since users.id and
--- user_id columns are text (Firebase UID), we cast with ::text.
---
--- Before JWT bridge: auth.uid() is NULL → policies evaluate to false →
--- all operations denied → offline-first app handles gracefully.
--- After JWT bridge:  auth.uid()::text = Firebase UID → policies work.
+-- auth.jwt()->>'sub' extracts the raw text user ID from the verified JWT.
+-- This works for Supabase-generated user IDs stored as text in user_id columns.
 
 -- ── users ──────────────────────────────────────────────────────────────────
 

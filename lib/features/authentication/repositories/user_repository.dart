@@ -1,7 +1,7 @@
 /// User Repository
 ///
 /// Handles Supabase user profile synchronization.
-/// Firebase owns authentication. Supabase owns data storage.
+/// Supabase Auth owns authentication. Supabase owns data storage.
 /// This repository only stores the minimum user information
 /// documented in `backend/database.md`.
 library;
@@ -39,7 +39,7 @@ class UserRepository {
       AppLogger.info('User profile synced to Supabase', tag: _tag);
     } on Exception catch (error, stackTrace) {
       // Supabase sync failure should not prevent the user from using the app.
-      // The app is offline-first — authentication is handled by Firebase.
+      // The app is offline-first — authentication is handled by Supabase Auth.
       AppLogger.error(
         'Failed to sync user profile to Supabase',
         error: error,

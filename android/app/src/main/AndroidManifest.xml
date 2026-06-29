@@ -1,8 +1,23 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Required for Google Sign-In -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- Check for Google Play Services -->
+        <package android:name="com.google.android.gms" />
+    </queries>
+
     <application
         android:label="college_companion"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- Google Sign-In required meta-data -->
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

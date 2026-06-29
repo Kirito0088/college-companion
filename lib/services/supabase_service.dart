@@ -4,6 +4,8 @@
 /// Credentials are read from environment configuration — never hardcoded
 /// (per backend/security.md).
 ///
+/// Authentication is handled by Supabase Auth.
+///
 /// Never expose Service Role Keys (per backend/security.md).
 library;
 

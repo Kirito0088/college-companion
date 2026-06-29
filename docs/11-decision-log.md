@@ -187,20 +187,53 @@ Active
 ## CC-0007
 
 ### Date
-2026-06-26
+2026-06-26 (updated 2026-06-29)
 
 ### Category
 Architecture
 
 ### Decision
-Firebase owns authentication. Supabase owns data storage. No dual authentication.
+Supabase Auth owns authentication. Supabase owns data storage. Native Google Sign-In via `google_sign_in` + `signInWithIdToken()`.
 
 ### Reason
-Firebase Auth handles Google Sign-In, session persistence, and credential management. Supabase stores user profile data (uid, name, email, photo) for RLS-protected data queries. Duplicating authentication across both services would add unnecessary complexity and potential session conflicts.
+Per official Supabase Flutter documentation, the recommended approach for mobile is:
+1. Use `google_sign_in` package for native Google Sign-In (system dialog)
+2. Exchange the ID token via `supabaseClient.auth.signInWithIdToken()`
+
+This eliminates the need for:
+- JWT bridge / Edge Functions
+- Firebase Authentication
+- Browser-based OAuth flow (`signInWithOAuth()`)
+
+Firebase is retained only for Analytics, Crashlytics, and FCM — not for authentication.
+
+### OAuth Configuration
+**Google Cloud Console** (apis.cloud.google.com):
+1. Create OAuth 2.0 Client ID → Application type: **"Web application"**
+2. The resulting **Web Client ID** (`*.apps.googleusercontent.com`) is stored in `GOOGLE_WEB_CLIENT_ID`
+3. For Android: Add the SHA-1 certificate fingerprint to the OAuth client
+   - Debug: `keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android`
+   - Release: Use your release keystore
+
+**Supabase Dashboard** (supabase.com/dashboard):
+1. Authentication → Providers → Google → Enable
+2. Enter:
+   - **Client ID**: Your Web Client ID from Google Cloud
+   - **Client Secret**: Your Web Client Secret from Google Cloud
+   
+**Note**: Android OAuth clients do NOT have a client secret. Only Web OAuth clients have secrets. Android only requires the SHA-1 fingerprint.
 
 ### Alternatives Considered
-- Supabase Auth only (lacks Firebase services: Crashlytics, Analytics, Messaging)
-- Dual authentication with both Firebase and Supabase Auth
+- Firebase Auth + Supabase data (requires JWT bridge, adds complexity)
+- Dual authentication with both Firebase and Supabase Auth (unnecessary complexity)
+- Browser-based OAuth via `signInWithOAuth()` (poorer UX on mobile)
+
+### Impact
+- Native Google Sign-In dialog (better UX)
+- No custom Edge Functions required
+- Direct Supabase session management
+- Firebase retained only for Analytics, Crashlytics, FCM
+- Google Web Client ID required in `.env`
 
 ### Status
 Active

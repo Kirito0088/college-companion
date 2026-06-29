@@ -15,7 +15,7 @@ class AppUser {
     this.photoUrl,
   });
 
-  /// The unique user identifier (Firebase UID).
+  /// The unique user identifier.
   final String uid;
 
   /// The user's display name from their Google account.

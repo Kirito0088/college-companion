@@ -28,7 +28,7 @@ final userRepositoryProvider = Provider<UserRepository>((ref) {
 
 /// Manages authentication state across the application.
 ///
-/// On initialization: checks Firebase for an existing session.
+/// On initialization: checks Supabase Auth for an existing session.
 /// Exposes [signIn] and [signOut] methods.
 final authStateProvider = NotifierProvider<AuthStateNotifier, AuthState>(
   AuthStateNotifier.new,
@@ -40,12 +40,12 @@ class AuthStateNotifier extends Notifier<AuthState> {
 
   @override
   AuthState build() {
-    // Check for an existing Firebase session on initialization.
+    // Check for an existing Supabase Auth session on initialization.
     unawaited(Future<void>.microtask(_restoreSession));
     return const AuthInitial();
   }
 
-  /// Attempts to restore an existing Firebase session.
+  /// Attempts to restore an existing Supabase Auth session.
   Future<void> _restoreSession() async {
     state = const AuthLoading();
 
@@ -120,7 +120,16 @@ class AuthStateNotifier extends Notifier<AuthState> {
   ///
   /// Failure is non-blocking — the app is offline-first.
   Future<void> _syncUserProfile(AppUser user) async {
-    final userRepository = ref.read(userRepositoryProvider);
-    await userRepository.upsertUser(user);
+    try {
+      final userRepository = ref.read(userRepositoryProvider);
+      await userRepository.upsertUser(user);
+    } on Exception catch (error) {
+      // Non-blocking: the app is offline-first.
+      // Sync will be retried on next app launch or state change.
+      AppLogger.error(
+        'User profile sync to Supabase failed (non-blocking)',
+        error: error,
+      );
+    }
   }
 }

@@ -57,6 +57,14 @@ abstract final class EnvConfig {
   static String get supabasePublishableKey =>
       _require('SUPABASE_PUBLISHABLE_KEY');
 
+  // ── Google OAuth ────────────────────────────────────────────────────────
+
+  /// Google Web Client ID for native Google Sign-In.
+  ///
+  /// Required for Android Google Sign-In (per Supabase documentation).
+  /// Created in Google Cloud Console as an "Web application" OAuth client.
+  static String get googleWebClientId => _require('GOOGLE_WEB_CLIENT_ID');
+
   // ── Firebase ──────────────────────────────────────────────────────────
 
   /// Whether Firebase is enabled for Android.
@@ -88,6 +96,7 @@ abstract final class EnvConfig {
   static const List<String> _requiredKeys = [
     'SUPABASE_URL',
     'SUPABASE_PUBLISHABLE_KEY',
+    'GOOGLE_WEB_CLIENT_ID',
   ];
 
   /// Returns the value for [key] or throws if missing/empty.

@@ -1,11 +1,18 @@
 /// App Database (Drift / SQLite)
 ///
 /// SQLite is the local source of truth (per backend/database.md).
-/// Database tables will be added as features are implemented.
 library;
 
 import 'dart:io';
 
+import 'package:college_companion/database/tables/assignments.dart';
+import 'package:college_companion/database/tables/attendance.dart';
+import 'package:college_companion/database/tables/internal_marks.dart';
+import 'package:college_companion/database/tables/semesters.dart';
+import 'package:college_companion/database/tables/subjects.dart';
+import 'package:college_companion/database/tables/sync_queue.dart';
+import 'package:college_companion/database/tables/timetable.dart';
+import 'package:college_companion/database/tables/user_settings.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
@@ -14,9 +21,19 @@ part 'app_database.g.dart';
 
 /// The application's local SQLite database.
 ///
-/// Drift is used as the ORM. Tables will be added incrementally
-/// as features are implemented.
-@DriftDatabase(tables: [])
+/// Drift is the ORM. All tables are registered directly here.
+@DriftDatabase(
+  tables: [
+    Semesters,
+    Subjects,
+    Timetable,
+    Attendance,
+    Assignments,
+    InternalMarks,
+    UserSettings,
+    SyncQueueItems,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   /// Creates an [AppDatabase] with the default native connection.
   AppDatabase() : super(_openConnection());

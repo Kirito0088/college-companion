@@ -4,17 +4,17 @@
 
 Persistent engineering guide for Claude Code.
 
-This file defines the project's engineering principles, architecture, workflow, and coding standards.
+This file defines permanent project rules that apply in every coding session.
 
-Detailed documentation belongs in `/docs`. This file contains only information that should be loaded in every coding session.
+Detailed architecture, implementation plans, and feature documentation belong in `/docs`.
 
 ---
 
 # Project Vision
 
-College Companion is a production-quality Android application built specifically for Mumbai University engineering students.
+College Companion is a production-quality Android application for Mumbai University engineering students.
 
-The application is designed to be:
+The application must be:
 
 - Offline-first
 - Local-first
@@ -23,13 +23,13 @@ The application is designed to be:
 - Maintainable
 - Production-ready
 
-The goal is to build a polished product, not a prototype or demo.
+Build a polished product, not a prototype.
 
 ---
 
 # Core Philosophy
 
-Engineering decisions should prioritize:
+Engineering decisions prioritize:
 
 1. Reliability
 2. Simplicity
@@ -37,18 +37,86 @@ Engineering decisions should prioritize:
 4. User Experience
 5. Performance
 
-Implementation speed is never more important than code quality.
+Implementation speed never outweighs code quality.
 
 ---
 
-# Non-Goals
+# Architecture Guard
 
-These features are intentionally excluded from the MVP.
+Never introduce new architectural layers unless explicitly requested.
 
-- AI Assistant
-- Placement Tracker
+Do not add:
 
-Do not implement them unless explicitly requested.
+- DAOs
+- Managers
+- Services
+- Interfaces
+- Generic abstractions
+- Design patterns "for cleanliness"
+
+Follow the existing architecture.
+
+Consistency is more valuable than theoretical purity.
+
+---
+
+# Scope Discipline
+
+Implement only the requested milestone.
+
+Do not continue into future milestones.
+
+Do not implement "helpful extras."
+
+When the requested milestone is complete:
+
+- Validate
+- Produce the Execution Report
+- Stop
+
+If requirements are unclear:
+
+- Investigate
+- Ask
+- Do not invent architecture.
+
+---
+
+# File Safety
+
+Never delete project files unless explicitly instructed.
+
+If a file appears incorrect:
+
+- Stop
+- Explain why
+- Wait for approval
+
+Prefer modifying existing files over deleting and recreating them.
+
+---
+
+# Git Safety
+
+Never:
+
+- Commit
+- Amend commits
+- Push
+- Force-push
+- Rebase
+- Reset
+- Delete branches
+
+unless explicitly instructed by the user.
+
+After each milestone:
+
+- Validate
+- Produce the Execution Report
+- Present the Git diff
+
+Wait for user approval before any Git operation.
 
 ---
 
@@ -67,7 +135,7 @@ Routing
 
 - go_router
 
-Local Database
+Database
 
 - Drift (SQLite)
 
@@ -88,9 +156,7 @@ Platform
 
 ---
 
-# Architecture
-
-The application is Local-First.
+# Application Architecture
 
 Source of Truth
 
@@ -112,13 +178,12 @@ Background Sync
 
 Supabase
 
-Never bypass Drift.
+Rules
 
-The UI must never communicate directly with Supabase.
-
-Repositories own business logic.
-
-Widgets never contain business logic.
+- Never bypass Drift.
+- UI never communicates directly with Supabase.
+- Repositories own business logic.
+- Widgets remain presentation-only.
 
 ---
 
@@ -126,10 +191,30 @@ Widgets never contain business logic.
 
 - Every write occurs locally first.
 - UI updates immediately.
-- Sync happens in the background.
-- Sync failures never block the UI.
-- Drift is always authoritative.
+- Background sync never blocks the UI.
+- Drift is authoritative.
 - Supabase exists for synchronization and backup.
+
+---
+
+# Repository Rules
+
+Repositories are the only layer allowed to communicate directly with AppDatabase.
+
+Repositories own:
+
+- CRUD operations
+- Transactions
+- Stream queries
+- Business rules
+- Soft-delete filtering on all public read queries unless explicitly documented otherwise.
+
+Repositories must not contain:
+
+- UI logic
+- Sync implementation
+- Analytics
+- Presentation logic
 
 ---
 
@@ -141,7 +226,7 @@ Widgets never contain business logic.
 - Preserve user data
 - Never recreate production tables
 - Never remove migrations
-- Keep SQLite schema aligned with PostgreSQL where practical
+- Keep SQLite aligned with PostgreSQL where practical
 
 ---
 
@@ -150,8 +235,8 @@ Widgets never contain business logic.
 - Google Sign-In only
 - No email/password authentication
 - Firebase authenticates users
-- Supabase verifies identity for database access
-- RLS must remain enabled
+- Supabase verifies identity
+- RLS remains enabled
 
 ---
 
@@ -182,18 +267,21 @@ Widgets remain presentation-only.
 - Dark mode only
 - Portrait only
 - Design tokens only
-- No hardcoded colors
-- No hardcoded spacing
-- No hardcoded typography
-- No glassmorphism
-- No neon effects
-- No nested cards
+
+Never use:
+
+- Hardcoded colors
+- Hardcoded spacing
+- Hardcoded typography
+- Glassmorphism
+- Neon effects
+- Nested cards
 
 ---
 
 # Documentation
 
-Always consult documentation before making architectural changes.
+Consult documentation before architectural changes.
 
 Priority
 
@@ -201,17 +289,43 @@ Priority
 2. docs/00-project-vision.md
 3. docs/backend/database.md
 4. docs/backend/sync-engine.md
-5. Remaining documentation
 
-When architecture changes, update the relevant documentation.
+Update documentation whenever architecture changes.
 
-Do not duplicate documentation in this file.
+Do not duplicate documentation inside CLAUDE.md.
+
+---
+
+# Framework Rules
+
+Never guess framework APIs.
+
+For Flutter, Drift, Riverpod, GoRouter and Supabase:
+
+- Verify installed versions.
+- Follow official documentation.
+- Treat compiler errors as specifications.
+
+---
+
+# Validation
+
+Every milestone must end with:
+
+- dart format
+- dart run build_runner build
+- flutter analyze
+- flutter test (when applicable)
+
+Fix all relevant issues before continuing.
+
+Warnings deserve investigation.
+
+Do not dismiss warnings as false positives without identifying the exact source of the diagnostic.
 
 ---
 
 # Engineering Workflow
-
-Every task follows this sequence.
 
 Plan
 
@@ -233,41 +347,15 @@ Execution Report
 
 ↓
 
-Review
+Code Review
 
 ↓
 
-Commit
+Review Fixes (if required)
 
-Never skip validation.
+↓
 
----
-
-# Framework Rules
-
-Never guess framework APIs.
-
-For Drift, Riverpod, GoRouter, Supabase, and Flutter:
-
-- Verify the installed version.
-- Follow official documentation.
-- Do not rely on memory.
-- The compiler is the specification.
-
----
-
-# Validation
-
-Before considering a milestone complete:
-
-- dart format
-- dart run build_runner build
-- flutter analyze
-- flutter test (when applicable)
-
-Fix all relevant errors before continuing.
-
-Never continue development on a broken build.
+Ready For Review
 
 ---
 
@@ -277,11 +365,11 @@ A milestone is complete only when:
 
 - Implementation finished
 - Formatting complete
-- Validation passes
+- Validation passed
 - Documentation updated (if required)
 - Execution Report produced
-- Changes reviewed
-- Ready to commit
+- Code reviewed
+- Ready for user approval
 
 ---
 
@@ -291,7 +379,7 @@ Do not expose internal reasoning.
 
 Provide concise progress updates.
 
-At the end of every milestone produce an Execution Report containing:
+Execution Reports must include:
 
 - Objective
 - Files Modified
@@ -304,19 +392,13 @@ At the end of every milestone produce an Execution Report containing:
 
 # General Rules
 
-- Do not redesign architecture unless explicitly requested.
-- Do not create unnecessary abstractions.
+- Do not redesign architecture unless requested.
 - Prefer incremental changes.
-- Keep commits focused on a single milestone.
+- Keep commits focused on one milestone.
+- Preserve naming consistency.
+- Do not mix singular/plural conventions.
+- Establish one proven implementation before repeating a pattern.
 - Treat compiler errors as specifications.
-- Separate Facts from Recommendations.
-- When uncertain, investigate before editing.
+- Separate facts from recommendations.
 - Preserve consistency across the codebase.
-
----
-
-# Remember
-
-The objective is not to generate code.
-
-The objective is to engineer a production-quality application.
+- When implementing repeated patterns, establish one reviewed implementation before replicating it across the project.

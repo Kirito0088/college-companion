@@ -95,7 +95,7 @@ class SemesterRepository {
       // Unset all current semesters for this user (only non-deleted ones).
       await (_database.update(_database.semesters)
             ..where((t) => t.userId.equals(userId) & t.deletedAt.isNull()))
-          .write(SemestersCompanion(isCurrent: const Value(false)));
+          .write(const SemestersCompanion(isCurrent: Value(false)));
 
       // Set the specified semester as current.
       await (_database.update(_database.semesters)..where(
@@ -104,7 +104,7 @@ class SemesterRepository {
                 t.id.equals(id) &
                 t.deletedAt.isNull(),
           ))
-          .write(SemestersCompanion(isCurrent: const Value(true)));
+          .write(const SemestersCompanion(isCurrent: Value(true)));
     });
   }
 }

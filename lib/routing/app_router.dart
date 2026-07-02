@@ -15,6 +15,7 @@ import 'package:college_companion/features/authentication/models/auth_state.dart
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/features/authentication/screens/login_screen.dart';
 import 'package:college_companion/features/authentication/screens/splash_screen.dart';
+import 'package:college_companion/features/dashboard/screens/dashboard_screen.dart';
 import 'package:college_companion/routing/scaffold_with_nav_bar.dart';
 import 'package:college_companion/shared/widgets/placeholder_screen.dart';
 import 'package:flutter/material.dart';
@@ -140,8 +141,7 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
               GoRoute(
                 path: RoutePaths.home,
                 name: RouteNames.home,
-                builder: (context, state) =>
-                    const PlaceholderScreen(title: 'Dashboard'),
+                builder: (context, state) => const DashboardScreen(),
               ),
             ],
           ),

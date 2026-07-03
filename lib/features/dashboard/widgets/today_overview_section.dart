@@ -126,7 +126,9 @@ class TodayOverviewSection extends StatelessWidget {
                     border: Border.all(color: ColorTokens.surfaceVariant),
                     borderRadius: RadiusTokens.borderRadiusMd,
                   )
-                : const BoxDecoration(borderRadius: RadiusTokens.borderRadiusMd),
+                : const BoxDecoration(
+                    borderRadius: RadiusTokens.borderRadiusMd,
+                  ),
             child: ClipRRect(
               borderRadius: RadiusTokens.borderRadiusMd,
               child: Stack(

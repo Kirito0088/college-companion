@@ -11,11 +11,14 @@
 /// UI widgets do not perform navigation for authentication state changes.
 library;
 
+import 'package:college_companion/features/attendance/screens/attendance_screen.dart';
+import 'package:college_companion/features/attendance/screens/safe_bunk_screen.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/features/authentication/screens/login_screen.dart';
 import 'package:college_companion/features/authentication/screens/splash_screen.dart';
 import 'package:college_companion/features/dashboard/screens/dashboard_screen.dart';
+import 'package:college_companion/features/subjects/screens/subject_overview_screen.dart';
 import 'package:college_companion/routing/scaffold_with_nav_bar.dart';
 import 'package:college_companion/shared/widgets/placeholder_screen.dart';
 import 'package:flutter/material.dart';
@@ -40,6 +43,8 @@ abstract final class RoutePaths {
   static const String internalMarks = '/internal-marks';
   static const String semester = '/semester';
   static const String settings = '/settings';
+  static const String subjectOverview = '/subject-overview';
+  static const String safeBunk = '/bunk-calculator';
 
   /// Routes that do not require authentication.
   static const List<String> publicRoutes = [splash, login];
@@ -58,6 +63,8 @@ abstract final class RouteNames {
   static const String internalMarks = 'internal-marks';
   static const String semester = 'semester';
   static const String settings = 'settings';
+  static const String subjectOverview = 'subject-overview';
+  static const String safeBunk = 'bunk-calculator';
 }
 
 /// Navigator keys for each bottom navigation branch.
@@ -153,8 +160,7 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
               GoRoute(
                 path: RoutePaths.attendance,
                 name: RouteNames.attendance,
-                builder: (context, state) =>
-                    const PlaceholderScreen(title: 'Attendance'),
+                builder: (context, state) => const AttendanceScreen(),
               ),
             ],
           ),
@@ -227,6 +233,18 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
         name: RouteNames.settings,
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const PlaceholderScreen(title: 'Settings'),
+      ),
+      GoRoute(
+        path: RoutePaths.subjectOverview,
+        name: RouteNames.subjectOverview,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const SubjectOverviewScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.safeBunk,
+        name: RouteNames.safeBunk,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const SafeBunkScreen(),
       ),
     ],
   );

@@ -1,21 +1,25 @@
 /// Current Semester Card Widget
 ///
-/// Displays the current active semester information.
+/// Displays the active semester for the authenticated user (per
+/// DESIGN.md §8 — Current Semester). Watches the semester repository
+/// and shows an honest empty state when no semester is set up yet.
 library;
 
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/features/semester/providers/semester_provider.dart';
-import 'package:college_companion/theme/radius_tokens.dart';
+import 'package:college_companion/shared/widgets/cc_card.dart';
+import 'package:college_companion/shared/widgets/cc_empty_state.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 /// A card displaying the current semester information.
 ///
-/// Watches the current semester via Riverpod's [semesterRepositoryProvider]
-/// and displays relevant information. Shows a placeholder
-/// if no semester exists yet.
+/// Watches the current semester via [semesterRepositoryProvider] and
+/// displays its name. Shows an empty state if the user is unauthenticated
+/// or has no current semester.
 class CurrentSemesterCard extends ConsumerWidget {
   /// Creates a [CurrentSemesterCard].
   const CurrentSemesterCard({super.key});
@@ -26,97 +30,46 @@ class CurrentSemesterCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    // Get the current semester if user is authenticated
+    // Watch the current semester only when the user is authenticated.
     final semesterStream = authState is AuthAuthenticated
         ? ref.watch(semesterRepositoryProvider).watchCurrent(authState.user.uid)
         : null;
 
-    return Container(
-      padding: const EdgeInsets.all(SpacingTokens.xl),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHigh,
-        borderRadius: RadiusTokens.borderRadiusMd,
-      ),
-      child: semesterStream != null
-          ? StreamBuilder(
-              stream: semesterStream,
-              builder: (context, snapshot) {
-                if (snapshot.hasData && snapshot.data != null) {
-                  final semester = snapshot.data!;
-                  return _buildSemesterContent(context, semester.name);
-                }
-                return _buildPlaceholder(context);
-              },
-            )
-          : _buildPlaceholder(context),
-    );
-  }
+    return StreamBuilder(
+      stream: semesterStream,
+      builder: (context, snapshot) {
+        final semester = snapshot.data;
+        final hasSemester = semester != null;
 
-  /// Builds the semester content when data is available.
-  Widget _buildSemesterContent(BuildContext context, String name) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Current Semester',
-          style: theme.textTheme.titleSmall?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: SpacingTokens.sm),
-        Text(
-          name,
-          style: theme.textTheme.headlineSmall?.copyWith(
-            color: colorScheme.onSurface,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Builds the placeholder UI when no semester exists.
-  Widget _buildPlaceholder(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Current Semester',
-          style: theme.textTheme.titleSmall?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: SpacingTokens.md),
-        Row(
-          children: [
-            Icon(
-              Icons.school_rounded,
-              color: colorScheme.onSurfaceVariant,
-              size: 24,
-            ),
-            const SizedBox(width: SpacingTokens.sm),
-            Expanded(
-              child: Text(
-                'No semester set up yet',
-                style: theme.textTheme.bodyMedium?.copyWith(
+        return CCCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Current Semester',
+                style: theme.textTheme.titleMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios_rounded,
-              color: colorScheme.onSurfaceVariant,
-              size: 16,
-            ),
-          ],
-        ),
-      ],
+              const SizedBox(height: SpacingTokens.sm),
+              if (hasSemester)
+                Text(
+                  semester.name,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.w600,
+                  ),
+                )
+              else
+                const CCEmptyState(
+                  icon: Symbols.school_rounded,
+                  title: 'No semester set up yet',
+                  subtitle: 'Create your first semester to get started.',
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

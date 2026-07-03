@@ -1,171 +1,135 @@
 /// Quick Stats Section Widget
 ///
-/// Displays a grid of statistical summary cards.
-/// Placeholder for future attendance, assignment, and grade integration.
+/// Displays a row of statistical summaries.
 library;
 
-import 'package:college_companion/shared/widgets/section_header.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
-/// A section displaying quick statistical summaries.
-///
-/// This widget is designed to be populated with actual data once
-/// the attendance, assignments, and internal marks features are
-/// implemented. The structure supports:
-/// - Attendance percentage
-/// - Pending assignments
-/// - Average internal marks
-/// - Total lectures attended
+/// A section displaying quick statistical summaries in a row of 4 cards.
 class QuickStatsSection extends StatelessWidget {
   /// Creates a [QuickStatsSection].
   const QuickStatsSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    final theme = Theme.of(context);
+
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SectionHeader(title: 'Quick Stats'),
-        SizedBox(height: SpacingTokens.md),
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(
-              child: _StatCard(
-                icon: Icons.fact_check_rounded,
-                title: 'Attendance',
-                value: '--%',
-                subtitle: 'Not available',
-                color: ColorTokens.primary,
+            Text(
+              'Today at a glance',
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: ColorTokens.onSurface,
+                fontWeight: FontWeight.w600,
               ),
             ),
-            SizedBox(width: SpacingTokens.md),
-            Expanded(
-              child: _StatCard(
-                icon: Icons.assignment_rounded,
-                title: 'Assignments',
-                value: '--',
-                subtitle: 'Pending tasks',
-                color: ColorTokens.tertiary,
+            Text(
+              'View All',
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: ColorTokens.primary,
               ),
             ),
           ],
         ),
-        SizedBox(height: SpacingTokens.md),
-        Row(
-          children: [
-            Expanded(
-              child: _StatCard(
-                icon: Icons.star_rounded,
-                title: 'Average Marks',
-                value: '--',
-                subtitle: 'Internal assessment',
-                color: ColorTokens.secondary,
+        const SizedBox(height: SpacingTokens.md),
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildStatCard(
+                context: context,
+                icon: Symbols.school_rounded,
+                iconColor: ColorTokens.primary,
+                value: '3',
+                label: 'Lectures',
               ),
-            ),
-            SizedBox(width: SpacingTokens.md),
-            Expanded(
-              child: _StatCard(
-                icon: Icons.school_rounded,
-                title: 'Lectures',
-                value: '--',
-                subtitle: 'Attended this term',
-                color: ColorTokens.primary,
+              const SizedBox(width: SpacingTokens.xs),
+              _buildStatCard(
+                context: context,
+                icon: Symbols.assignment_rounded,
+                iconColor: ColorTokens.warning,
+                value: '1',
+                label: 'Assignment\nDue',
               ),
-            ),
-          ],
+              const SizedBox(width: SpacingTokens.xs),
+              _buildStatCard(
+                context: context,
+                icon: Symbols.fact_check_rounded,
+                iconColor: ColorTokens.success,
+                value: '82%',
+                label: 'Attendance\n(Target: 75%)',
+                valueColor: ColorTokens.success,
+              ),
+              const SizedBox(width: SpacingTokens.xs),
+              _buildStatCard(
+                context: context,
+                icon: Symbols.timer_rounded,
+                iconColor: ColorTokens.primary,
+                value: '8',
+                label: 'Hours\nFocus Goal',
+              ),
+            ],
+          ),
         ),
       ],
     );
   }
-}
 
-/// A single statistics card widget.
-class _StatCard extends StatelessWidget {
-  /// Creates a [_StatCard].
-  const _StatCard({
-    required this.icon,
-    required this.title,
-    required this.value,
-    required this.subtitle,
-    required this.color,
-  });
-
-  /// The icon to display.
-  final IconData icon;
-
-  /// The card title.
-  final String title;
-
-  /// The main value to display.
-  final String value;
-
-  /// The subtitle text.
-  final String subtitle;
-
-  /// The accent color for this card.
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildStatCard({
+    required BuildContext context,
+    required IconData icon,
+    required Color iconColor,
+    required String value,
+    required String label,
+    Color? valueColor,
+  }) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
-    return Container(
-      padding: const EdgeInsets.all(SpacingTokens.base),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainer,
-        borderRadius: RadiusTokens.borderRadiusMd,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Icon(icon, color: color, size: 24),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: SpacingTokens.sm,
-                  vertical: SpacingTokens.xxs,
-                ),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: RadiusTokens.borderRadiusSm,
-                ),
-                child: Text(
-                  value,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          vertical: SpacingTokens.sm,
+          horizontal: SpacingTokens.xxs,
+        ),
+        decoration: BoxDecoration(
+          color: ColorTokens.surface,
+          borderRadius: RadiusTokens.borderRadiusMd,
+          border: Border.all(color: ColorTokens.surfaceVariant),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: iconColor, size: 24, fill: 1.0),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: valueColor ?? ColorTokens.onSurface,
               ),
-            ],
-          ),
-          const SizedBox(height: SpacingTokens.sm),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w500,
-                ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: ColorTokens.onSurfaceVariant,
+                height: 1.2,
               ),
-              Text(
-                subtitle,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ],
+              textAlign: TextAlign.center,
+              maxLines: 3,
+              overflow: TextOverflow.visible,
+            ),
+          ],
+        ),
       ),
     );
   }

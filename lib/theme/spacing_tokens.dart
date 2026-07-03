@@ -22,7 +22,7 @@ abstract final class SpacingTokens {
 /// Layout tokens for consistent screen-level spacing.
 abstract final class LayoutTokens {
   /// Horizontal padding for screen content.
-  static const double screenPadding = SpacingTokens.base;
+  static const double screenPadding = SpacingTokens.lg;
 
   /// Vertical gap between sections.
   static const double sectionGap = SpacingTokens.xl;

@@ -32,6 +32,7 @@ abstract final class ColorTokens {
   static const Color background = Color(0xFF0A0A0F);
   static const Color surface = Color(0xFF0F0F17);
   static const Color surfaceVariant = Color(0xFF1A1A28);
+  static const Color surfaceContainerLow = Color(0xFF12121A);
   static const Color surfaceContainer = Color(0xFF141420);
   static const Color surfaceContainerHigh = Color(0xFF1E1E2E);
   static const Color surfaceContainerHighest = Color(0xFF262636);

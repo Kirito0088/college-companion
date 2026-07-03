@@ -7,6 +7,7 @@ import 'package:college_companion/shared/widgets/section_header.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 /// A section displaying quick action buttons.
 ///
@@ -56,25 +57,25 @@ class QuickActionsSection extends StatelessWidget {
           childAspectRatio: 1.2,
           children: [
             _QuickActionTile(
-              icon: Icons.schedule_rounded,
+              icon: Symbols.schedule_rounded,
               label: 'Timetable',
               color: colorScheme.primary,
               onPressed: onTimetablePressed,
             ),
             _QuickActionTile(
-              icon: Icons.fact_check_rounded,
+              icon: Symbols.fact_check_rounded,
               label: 'Attendance',
               color: colorScheme.tertiary,
               onPressed: onAttendancePressed,
             ),
             _QuickActionTile(
-              icon: Icons.assignment_rounded,
+              icon: Symbols.assignment_rounded,
               label: 'Assignments',
               color: colorScheme.secondary,
               onPressed: onAssignmentsPressed,
             ),
             _QuickActionTile(
-              icon: Icons.star_rounded,
+              icon: Symbols.star_rounded,
               label: 'Internal Marks',
               color: colorScheme.primary,
               onPressed: onMarksPressed,

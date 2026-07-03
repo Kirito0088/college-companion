@@ -2,6 +2,7 @@ import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class QuickActionsGrid extends StatelessWidget {
@@ -49,8 +50,8 @@ class QuickActionsGrid extends StatelessWidget {
               child: _QuickActionCard(
                 icon: Symbols.description,
                 iconColor: ColorTokens.tertiary,
-                label: 'Past Papers',
-                onTap: () {},
+                label: 'Internal Marks',
+                onTap: () => context.push('/semester'),
               ),
             ),
             const SizedBox(width: SpacingTokens.md),

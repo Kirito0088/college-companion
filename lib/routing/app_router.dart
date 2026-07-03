@@ -21,6 +21,7 @@ import 'package:college_companion/features/authentication/screens/splash_screen.
 import 'package:college_companion/features/calendar/screens/calendar_screen.dart';
 import 'package:college_companion/features/dashboard/screens/dashboard_screen.dart';
 import 'package:college_companion/features/profile/screens/profile_screen.dart';
+import 'package:college_companion/features/semester/screens/semester_details_screen.dart';
 import 'package:college_companion/features/subjects/screens/subject_overview_screen.dart';
 import 'package:college_companion/routing/scaffold_with_nav_bar.dart';
 import 'package:college_companion/shared/widgets/placeholder_screen.dart';
@@ -218,15 +219,13 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
         path: RoutePaths.internalMarks,
         name: RouteNames.internalMarks,
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) =>
-            const PlaceholderScreen(title: 'Internal Marks'),
+        builder: (context, state) => const SemesterDetailsScreen(),
       ),
       GoRoute(
         path: RoutePaths.semester,
         name: RouteNames.semester,
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) =>
-            const PlaceholderScreen(title: 'Semester Management'),
+        builder: (context, state) => const SemesterDetailsScreen(),
       ),
       GoRoute(
         path: RoutePaths.settings,

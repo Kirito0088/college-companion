@@ -11,13 +11,16 @@
 /// UI widgets do not perform navigation for authentication state changes.
 library;
 
+import 'package:college_companion/features/assignments/screens/assignments_screen.dart';
 import 'package:college_companion/features/attendance/screens/attendance_screen.dart';
 import 'package:college_companion/features/attendance/screens/safe_bunk_screen.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/features/authentication/screens/login_screen.dart';
 import 'package:college_companion/features/authentication/screens/splash_screen.dart';
+import 'package:college_companion/features/calendar/screens/calendar_screen.dart';
 import 'package:college_companion/features/dashboard/screens/dashboard_screen.dart';
+import 'package:college_companion/features/profile/screens/profile_screen.dart';
 import 'package:college_companion/features/subjects/screens/subject_overview_screen.dart';
 import 'package:college_companion/routing/scaffold_with_nav_bar.dart';
 import 'package:college_companion/shared/widgets/placeholder_screen.dart';
@@ -172,8 +175,7 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
               GoRoute(
                 path: RoutePaths.calendar,
                 name: RouteNames.calendar,
-                builder: (context, state) =>
-                    const PlaceholderScreen(title: 'Calendar'),
+                builder: (context, state) => const CalendarScreen(),
               ),
             ],
           ),
@@ -185,8 +187,7 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
               GoRoute(
                 path: RoutePaths.assignments,
                 name: RouteNames.assignments,
-                builder: (context, state) =>
-                    const PlaceholderScreen(title: 'Assignments'),
+                builder: (context, state) => const AssignmentsScreen(),
               ),
             ],
           ),
@@ -198,8 +199,7 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
               GoRoute(
                 path: RoutePaths.profile,
                 name: RouteNames.profile,
-                builder: (context, state) =>
-                    const PlaceholderScreen(title: 'Profile'),
+                builder: (context, state) => const ProfileScreen(),
               ),
             ],
           ),

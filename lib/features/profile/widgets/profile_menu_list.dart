@@ -24,10 +24,11 @@ class ProfileMenuList extends StatelessWidget {
       clipBehavior: Clip.antiAlias, // ensure ripple respects border radius
       child: Column(
         children: [
-          const _MenuItem(
+          _MenuItem(
             icon: Symbols.layers,
             label: 'Semesters',
             showBorder: true,
+            onTap: () => context.push(RoutePaths.semester),
           ),
           _MenuItem(
             icon: Symbols.view_module,

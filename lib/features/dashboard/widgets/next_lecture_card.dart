@@ -21,9 +21,7 @@ class NextLectureCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return InkWell(
-      onTap: () {
-        context.push(RoutePaths.subjectOverview);
-      },
+      onTap: () => context.push(RoutePaths.subjectDetails),
       borderRadius: RadiusTokens.borderRadiusMd,
       child: Container(
         width: double.infinity,

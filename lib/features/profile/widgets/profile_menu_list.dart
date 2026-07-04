@@ -1,7 +1,9 @@
+import 'package:college_companion/routing/app_router.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class ProfileMenuList extends StatelessWidget {
@@ -20,18 +22,24 @@ class ProfileMenuList extends StatelessWidget {
         ),
       ),
       clipBehavior: Clip.antiAlias, // ensure ripple respects border radius
-      child: const Column(
+      child: Column(
         children: [
-          _MenuItem(icon: Symbols.layers, label: 'Semesters', showBorder: true),
+          const _MenuItem(
+            icon: Symbols.layers,
+            label: 'Semesters',
+            showBorder: true,
+          ),
           _MenuItem(
             icon: Symbols.view_module,
             label: 'Modules',
             showBorder: true,
+            onTap: () => context.push(RoutePaths.manageModules),
           ),
           _MenuItem(
             icon: Symbols.settings,
             label: 'Settings',
             showBorder: true,
+            onTap: () => context.push(RoutePaths.settings),
           ),
           _MenuItem(
             icon: Symbols.sync,
@@ -41,16 +49,19 @@ class ProfileMenuList extends StatelessWidget {
             trailingIconColor: ColorTokens.success,
             trailingIconFilled: true,
             showBorder: true,
+            onTap: () => context.push(RoutePaths.dataSync),
           ),
           _MenuItem(
             icon: Symbols.help,
             label: 'Help & Support',
             showBorder: true,
+            onTap: () => context.push(RoutePaths.helpSupport),
           ),
           _MenuItem(
             icon: Symbols.info,
             label: 'About College Companion',
             showBorder: false,
+            onTap: () => context.push(RoutePaths.about),
           ),
         ],
       ),
@@ -67,6 +78,7 @@ class _MenuItem extends StatelessWidget {
     this.trailingIconColor,
     this.trailingIconFilled = false,
     required this.showBorder,
+    this.onTap,
   });
 
   final IconData icon;
@@ -76,6 +88,7 @@ class _MenuItem extends StatelessWidget {
   final Color? trailingIconColor;
   final bool trailingIconFilled;
   final bool showBorder;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +97,7 @@ class _MenuItem extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {}, // TODO: Navigate
+        onTap: onTap ?? () {}, // TODO: Navigate
         hoverColor: ColorTokens.surfaceContainerHigh,
         child: Container(
           padding: const EdgeInsets.all(

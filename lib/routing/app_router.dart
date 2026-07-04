@@ -20,8 +20,15 @@ import 'package:college_companion/features/authentication/screens/login_screen.d
 import 'package:college_companion/features/authentication/screens/splash_screen.dart';
 import 'package:college_companion/features/calendar/screens/calendar_screen.dart';
 import 'package:college_companion/features/dashboard/screens/dashboard_screen.dart';
+import 'package:college_companion/features/focus/screens/focus_screen.dart';
+import 'package:college_companion/features/profile/screens/about_screen.dart';
+import 'package:college_companion/features/profile/screens/account_information_screen.dart';
+import 'package:college_companion/features/profile/screens/help_support_screen.dart';
 import 'package:college_companion/features/profile/screens/profile_screen.dart';
 import 'package:college_companion/features/semester/screens/semester_details_screen.dart';
+import 'package:college_companion/features/settings/screens/data_sync_screen.dart';
+import 'package:college_companion/features/settings/screens/manage_modules_screen.dart';
+import 'package:college_companion/features/settings/screens/settings_screen.dart';
 import 'package:college_companion/features/subjects/screens/subject_overview_screen.dart';
 import 'package:college_companion/routing/scaffold_with_nav_bar.dart';
 import 'package:college_companion/shared/widgets/placeholder_screen.dart';
@@ -47,6 +54,12 @@ abstract final class RoutePaths {
   static const String internalMarks = '/internal-marks';
   static const String semester = '/semester';
   static const String settings = '/settings';
+  static const String manageModules = '/manage-modules';
+  static const String dataSync = '/data-sync';
+  static const String helpSupport = '/help-support';
+  static const String about = '/about';
+  static const String accountInformation = '/account-information';
+  static const String focusMode = '/focus-mode';
   static const String subjectOverview = '/subject-overview';
   static const String safeBunk = '/bunk-calculator';
 
@@ -67,6 +80,12 @@ abstract final class RouteNames {
   static const String internalMarks = 'internal-marks';
   static const String semester = 'semester';
   static const String settings = 'settings';
+  static const String manageModules = 'manage-modules';
+  static const String dataSync = 'data-sync';
+  static const String helpSupport = 'help-support';
+  static const String about = 'about';
+  static const String accountInformation = 'account-information';
+  static const String focusMode = 'focus-mode';
   static const String subjectOverview = 'subject-overview';
   static const String safeBunk = 'bunk-calculator';
 }
@@ -231,7 +250,43 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
         path: RoutePaths.settings,
         name: RouteNames.settings,
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const PlaceholderScreen(title: 'Settings'),
+        builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.manageModules,
+        name: RouteNames.manageModules,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ManageModulesScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.dataSync,
+        name: RouteNames.dataSync,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const DataSyncScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.helpSupport,
+        name: RouteNames.helpSupport,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const HelpSupportScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.about,
+        name: RouteNames.about,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const AboutScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.accountInformation,
+        name: RouteNames.accountInformation,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const AccountInformationScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.focusMode,
+        name: RouteNames.focusMode,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const FocusScreen(),
       ),
       GoRoute(
         path: RoutePaths.subjectOverview,

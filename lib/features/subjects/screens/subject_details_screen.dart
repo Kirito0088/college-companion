@@ -260,7 +260,12 @@ class SubjectDetailsScreen extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: _buildActionCard(context, 'Resources', Symbols.menu_book),
+              child: _buildActionCard(
+                context,
+                'Resources',
+                Symbols.menu_book,
+                onTap: () => context.push('/resources'),
+              ),
             ),
             const SizedBox(width: SpacingTokens.md),
             Expanded(
@@ -272,7 +277,12 @@ class SubjectDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildActionCard(BuildContext context, String title, IconData icon) {
+  Widget _buildActionCard(
+    BuildContext context,
+    String title,
+    IconData icon, {
+    VoidCallback? onTap,
+  }) {
     final theme = Theme.of(context);
     return Material(
       color: ColorTokens.surfaceContainer,
@@ -280,7 +290,7 @@ class SubjectDetailsScreen extends StatelessWidget {
       elevation: 0,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () {}, // TODO: Navigate
+        onTap: onTap ?? () {}, // TODO: Navigate
         child: Padding(
           padding: const EdgeInsets.symmetric(
             vertical: SpacingTokens.lg,

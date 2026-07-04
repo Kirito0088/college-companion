@@ -11,6 +11,7 @@
 /// UI widgets do not perform navigation for authentication state changes.
 library;
 
+import 'package:college_companion/features/assignments/screens/assignment_details_screen.dart';
 import 'package:college_companion/features/assignments/screens/assignments_screen.dart';
 import 'package:college_companion/features/attendance/screens/attendance_screen.dart';
 import 'package:college_companion/features/attendance/screens/safe_bunk_screen.dart';
@@ -18,13 +19,17 @@ import 'package:college_companion/features/authentication/models/auth_state.dart
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/features/authentication/screens/login_screen.dart';
 import 'package:college_companion/features/authentication/screens/splash_screen.dart';
+import 'package:college_companion/features/calendar/screens/add_edit_event_screen.dart';
 import 'package:college_companion/features/calendar/screens/calendar_screen.dart';
+import 'package:college_companion/features/calendar/screens/event_details_screen.dart';
 import 'package:college_companion/features/dashboard/screens/dashboard_screen.dart';
 import 'package:college_companion/features/focus/screens/focus_screen.dart';
 import 'package:college_companion/features/profile/screens/about_screen.dart';
 import 'package:college_companion/features/profile/screens/account_information_screen.dart';
 import 'package:college_companion/features/profile/screens/help_support_screen.dart';
 import 'package:college_companion/features/profile/screens/profile_screen.dart';
+import 'package:college_companion/features/resources/screens/resource_details_screen.dart';
+import 'package:college_companion/features/resources/screens/resources_screen.dart';
 import 'package:college_companion/features/semester/screens/semester_details_screen.dart';
 import 'package:college_companion/features/semester/screens/semesters_list_screen.dart';
 import 'package:college_companion/features/settings/screens/data_sync_screen.dart';
@@ -64,6 +69,11 @@ abstract final class RoutePaths {
   static const String accountInformation = '/account-information';
   static const String focusMode = '/focus-mode';
   static const String subjectDetails = '/subject-details';
+  static const String resources = '/resources';
+  static const String resourceDetails = '/resource-details';
+  static const String assignmentDetails = '/assignment-details';
+  static const String addEditEvent = '/calendar/add-edit';
+  static const String eventDetails = '/calendar/event-details';
 
   /// Routes that do not require authentication.
   static const List<String> publicRoutes = [splash, login];
@@ -91,6 +101,11 @@ abstract final class RouteNames {
   static const String focusMode = 'focus-mode';
   static const String subjectDetails = 'subject-details';
   static const String safeBunk = 'bunk-calculator';
+  static const String resources = 'resources';
+  static const String resourceDetails = 'resource-details';
+  static const String assignmentDetails = 'assignment-details';
+  static const String addEditEvent = 'add-edit-event';
+  static const String eventDetails = 'event-details';
 }
 
 /// Navigator keys for each bottom navigation branch.
@@ -308,6 +323,36 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
         name: RouteNames.safeBunk,
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const SafeBunkScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.resources,
+        name: RouteNames.resources,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ResourcesScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.resourceDetails,
+        name: RouteNames.resourceDetails,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ResourceDetailsScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.assignmentDetails,
+        name: RouteNames.assignmentDetails,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const AssignmentDetailsScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.addEditEvent,
+        name: RouteNames.addEditEvent,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const AddEditEventScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.eventDetails,
+        name: RouteNames.eventDetails,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const EventDetailsScreen(),
       ),
     ],
   );

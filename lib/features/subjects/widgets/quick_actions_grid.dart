@@ -60,9 +60,24 @@ class QuickActionsGrid extends StatelessWidget {
                 icon: Symbols.folder,
                 iconColor: ColorTokens.secondary,
                 label: 'Resources',
-                onTap: () {},
+                onTap: () => context.push('/resources'),
               ),
             ),
+          ],
+        ),
+        const SizedBox(height: SpacingTokens.md),
+        Row(
+          children: [
+            Expanded(
+              child: _QuickActionCard(
+                icon: Symbols.calendar_month,
+                iconColor: ColorTokens.primary,
+                label: 'Calendar (Test)',
+                onTap: () => context.push('/calendar'),
+              ),
+            ),
+            const SizedBox(width: SpacingTokens.md),
+            const Spacer(),
           ],
         ),
       ],

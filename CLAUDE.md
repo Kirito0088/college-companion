@@ -1,404 +1,255 @@
 # CLAUDE.md
 
-# College Companion
+> **College Companion v1.0**
+>
+> **Status:** Active Project Instructions
+>
+> This document defines the permanent engineering rules, architectural
+> principles, and implementation constraints for College Companion.
+> Treat this file as the primary implementation guide after consulting
+> the project roadmap and feature specifications.
 
-Persistent engineering guide for Claude Code.
+------------------------------------------------------------------------
 
-This file defines permanent project rules that apply in every coding session.
+# Project Mission
 
-Detailed architecture, implementation plans, and feature documentation belong in `/docs`.
+College Companion is an **offline-first academic companion** for
+engineering students.
 
----
+The objective is **not** to build the largest feature set. The objective
+is to build a polished, reliable, fast, and maintainable application
+that students can confidently use throughout their academic journey.
 
-# Project Vision
+------------------------------------------------------------------------
 
-College Companion is a production-quality Android application for Mumbai University engineering students.
+# Source of Truth Priority
 
-The application must be:
+When implementing features, consult documents in this order:
 
-- Offline-first
-- Local-first
-- Fast
-- Reliable
-- Maintainable
-- Production-ready
+1.  ROADMAP.md
+2.  Locked Feature Specification (if available)
+3.  DESIGN.md
+4.  Development Workflow v2.0
+5.  This file
+6.  Existing codebase
 
-Build a polished product, not a prototype.
+If a feature specification exists, do **not** invent or change
+behaviour.
 
----
+------------------------------------------------------------------------
 
-# Core Philosophy
+# Product Principles
 
-Engineering decisions prioritize:
+Every implementation must follow these principles:
 
-1. Reliability
-2. Simplicity
-3. Maintainability
-4. User Experience
-5. Performance
+-   Offline-first
+-   Local-first
+-   Student-first
+-   Production quality over speed
+-   Material Design 3
+-   Consistency over novelty
+-   Minimal cognitive load
+-   Accessibility by default
 
-Implementation speed never outweighs code quality.
+Every feature should solve a real student problem.
 
----
+------------------------------------------------------------------------
 
-# Architecture Guard
+# Architecture Principles
 
-Never introduce new architectural layers unless explicitly requested.
+## Local Database
 
-Do not add:
+-   Drift is the local source of truth.
+-   UI reads from local repositories.
+-   Never couple UI directly to Supabase.
 
-- DAOs
-- Managers
-- Services
-- Interfaces
-- Generic abstractions
-- Design patterns "for cleanliness"
+## Cloud
 
-Follow the existing architecture.
+-   Supabase exists for:
+    -   Authentication
+    -   Synchronization
+    -   Backup
+    -   Verification
 
-Consistency is more valuable than theoretical purity.
+Cloud should enhance the experience, never replace local functionality.
 
----
+------------------------------------------------------------------------
 
-# Scope Discipline
+# UI Principles
 
-Implement only the requested milestone.
+Every new screen must:
 
-Do not continue into future milestones.
+-   Match the existing design language.
+-   Use design tokens exclusively.
+-   Preserve existing navigation unless explicitly instructed.
+-   Make additive changes whenever possible.
+-   Avoid unnecessary redesigns.
 
-Do not implement "helpful extras."
+Always ask:
 
-When the requested milestone is complete:
+-   Does this fit College Companion?
+-   Does it reduce friction?
+-   Does it improve student workflow?
 
-- Validate
-- Produce the Execution Report
-- Stop
+Never create generic application UI.
 
-If requirements are unclear:
+------------------------------------------------------------------------
 
-- Investigate
-- Ask
-- Do not invent architecture.
+# Feature Specifications
 
----
+When a feature has a locked specification:
 
-# File Safety
+-   Follow it exactly.
+-   Do not reinterpret requirements.
+-   Do not introduce additional behaviour without approval.
 
-Never delete project files unless explicitly instructed.
+Current locked specifications include:
 
-If a file appears incorrect:
+-   Lecture Record
+-   Roadmap milestones
 
-- Stop
-- Explain why
-- Wait for approval
+Future specifications should be added here.
 
-Prefer modifying existing files over deleting and recreating them.
+------------------------------------------------------------------------
 
----
+# Coding Standards
 
-# Git Safety
+Prefer:
 
-Never:
+-   Small focused widgets
+-   Feature-first architecture
+-   Clear naming
+-   Reusable components
+-   Composition over duplication
 
-- Commit
-- Amend commits
-- Push
-- Force-push
-- Rebase
-- Reset
-- Delete branches
+Avoid:
 
-unless explicitly instructed by the user.
+-   Magic numbers
+-   Hardcoded colors
+-   Hardcoded spacing
+-   Premature abstraction
+-   Unrelated refactors
 
-After each milestone:
+------------------------------------------------------------------------
 
-- Validate
-- Produce the Execution Report
-- Present the Git diff
+# Backend Principles
 
-Wait for user approval before any Git operation.
+Repositories own business logic.
 
----
+UI should remain presentation-focused.
 
-# Technology Stack
+Synchronization must never block local usage.
 
-Frontend
+Authentication must remain Google Sign-In only unless the roadmap
+changes.
 
-- Flutter (Material 3)
-- Dart
+------------------------------------------------------------------------
 
-State Management
+# Quality Gates
 
-- flutter_riverpod
+No implementation is complete until:
 
-Routing
+-   Code formatted
+-   flutter analyze passes
+-   Relevant tests pass
+-   Physical device validation completed (UI)
+-   Documentation updated (if needed)
 
-- go_router
+------------------------------------------------------------------------
 
-Database
+# Git Policy
 
-- Drift (SQLite)
+Each milestone should end with:
 
-Backend
+-   git status review
+-   Clean commit
+-   Push to GitHub
+-   Tag significant milestones
 
-- Supabase
+Keep commits focused on a single milestone.
 
-Authentication
+------------------------------------------------------------------------
 
-- Firebase Google Sign-In
-- Supabase Third-Party Auth
+# Documentation Policy
 
-Platform
+Whenever architecture or product behaviour changes:
 
-- Android only
-- Portrait only
-- Dark mode only
+Update the relevant documentation before considering the milestone
+complete.
 
----
+Documentation is part of the implementation.
 
-# Application Architecture
+------------------------------------------------------------------------
 
-Source of Truth
+# AI Collaboration
 
-UI
+## Antigravity 2.0
 
-↓
+Responsible for:
 
-Repositories
+-   Flutter UI
+-   UX
+-   Material 3
+-   Motion
+-   Accessibility
+-   Device QA
 
-↓
+## Claude Code
 
-Drift (SQLite)
+Responsible for:
 
-↓
+-   Drift
+-   Supabase
+-   Repositories
+-   Business logic
+-   Synchronization
+-   Performance
+-   Security
 
-Background Sync
+## ChatGPT
 
-↓
+Responsible for:
 
-Supabase
+-   Architecture
+-   Planning
+-   Specifications
+-   Technical review
+-   Roadmap
+-   Prompt engineering
 
-Rules
+------------------------------------------------------------------------
 
-- Never bypass Drift.
-- UI never communicates directly with Supabase.
-- Repositories own business logic.
-- Widgets remain presentation-only.
+# Stop Rules
 
----
+Do not:
 
-# Offline-First Rules
+-   Implement future roadmap items.
+-   Redesign unrelated screens.
+-   Remove existing functionality without approval.
+-   Change architecture without discussion.
 
-- Every write occurs locally first.
-- UI updates immediately.
-- Background sync never blocks the UI.
-- Drift is authoritative.
-- Supabase exists for synchronization and backup.
+Complete only the requested milestone, then stop and report.
 
----
+------------------------------------------------------------------------
 
-# Repository Rules
+# Definition of Success
 
-Repositories are the only layer allowed to communicate directly with AppDatabase.
+A successful implementation:
 
-Repositories own:
+-   Solves the intended student problem.
+-   Matches the roadmap.
+-   Matches the feature specification.
+-   Matches the design language.
+-   Preserves architectural consistency.
+-   Is maintainable.
+-   Is production-ready.
 
-- CRUD operations
-- Transactions
-- Stream queries
-- Business rules
-- Soft-delete filtering on all public read queries unless explicitly documented otherwise.
+------------------------------------------------------------------------
 
-Repositories must not contain:
+# Final Principle
 
-- UI logic
-- Sync implementation
-- Analytics
-- Presentation logic
+> Build deliberately.
 
----
-
-# Database Principles
-
-- UUID primary keys
-- Soft deletes
-- Forward-only migrations
-- Preserve user data
-- Never recreate production tables
-- Never remove migrations
-- Keep SQLite aligned with PostgreSQL where practical
-
----
-
-# Authentication
-
-- Google Sign-In only
-- No email/password authentication
-- Firebase authenticates users
-- Supabase verifies identity
-- RLS remains enabled
-
----
-
-# Project Structure
-
-Feature-first architecture.
-
-lib/
-
-- core/
-- database/
-- features/
-- routing/
-- services/
-- shared/
-- theme/
-
-Business logic belongs in repositories and services.
-
-Widgets remain presentation-only.
-
----
-
-# UI Rules
-
-- Material Design 3
-- Material Symbols Rounded
-- Dark mode only
-- Portrait only
-- Design tokens only
-
-Never use:
-
-- Hardcoded colors
-- Hardcoded spacing
-- Hardcoded typography
-- Glassmorphism
-- Neon effects
-- Nested cards
-
----
-
-# Documentation
-
-Consult documentation before architectural changes.
-
-Priority
-
-1. docs/10-rules.md
-2. docs/00-project-vision.md
-3. docs/backend/database.md
-4. docs/backend/sync-engine.md
-
-Update documentation whenever architecture changes.
-
-Do not duplicate documentation inside CLAUDE.md.
-
----
-
-# Framework Rules
-
-Never guess framework APIs.
-
-For Flutter, Drift, Riverpod, GoRouter and Supabase:
-
-- Verify installed versions.
-- Follow official documentation.
-- Treat compiler errors as specifications.
-
----
-
-# Validation
-
-Every milestone must end with:
-
-- dart format
-- dart run build_runner build
-- flutter analyze
-- flutter test (when applicable)
-
-Fix all relevant issues before continuing.
-
-Warnings deserve investigation.
-
-Do not dismiss warnings as false positives without identifying the exact source of the diagnostic.
-
----
-
-# Engineering Workflow
-
-Plan
-
-↓
-
-Review
-
-↓
-
-Build
-
-↓
-
-Validate
-
-↓
-
-Execution Report
-
-↓
-
-Code Review
-
-↓
-
-Review Fixes (if required)
-
-↓
-
-Ready For Review
-
----
-
-# Definition of Done
-
-A milestone is complete only when:
-
-- Implementation finished
-- Formatting complete
-- Validation passed
-- Documentation updated (if required)
-- Execution Report produced
-- Code reviewed
-- Ready for user approval
-
----
-
-# Communication Style
-
-Do not expose internal reasoning.
-
-Provide concise progress updates.
-
-Execution Reports must include:
-
-- Objective
-- Files Modified
-- Key Decisions
-- Validation Results
-- Remaining Issues
-- Ready For Review
-
----
-
-# General Rules
-
-- Do not redesign architecture unless requested.
-- Prefer incremental changes.
-- Keep commits focused on one milestone.
-- Preserve naming consistency.
-- Do not mix singular/plural conventions.
-- Establish one proven implementation before repeating a pattern.
-- Treat compiler errors as specifications.
-- Separate facts from recommendations.
-- Preserve consistency across the codebase.
-- When implementing repeated patterns, establish one reviewed implementation before replicating it across the project.
+Every feature should feel like it belongs to one cohesive product.
+Prefer long-term maintainability, consistency, and student value over
+short-term convenience or unnecessary complexity.

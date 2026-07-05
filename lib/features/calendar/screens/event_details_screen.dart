@@ -1,4 +1,5 @@
 import 'package:college_companion/routing/app_router.dart';
+import 'package:college_companion/shared/widgets/dialogs/cc_dialogs.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
@@ -159,7 +160,18 @@ class EventDetailsScreen extends StatelessWidget {
               ),
               const SizedBox(height: SpacingTokens.md),
               OutlinedButton.icon(
-                onPressed: () {},
+                onPressed: () async {
+                  final confirm = await CCDialogs.showDeleteConfirmation(
+                    context,
+                    title: 'Delete Event',
+                    message: 'Are you sure you want to delete this event?',
+                  );
+                  if (confirm == true) {
+                    if (context.mounted) {
+                      context.pop();
+                    }
+                  }
+                },
                 style: OutlinedButton.styleFrom(
                   foregroundColor: ColorTokens.error,
                   side: const BorderSide(color: ColorTokens.error),

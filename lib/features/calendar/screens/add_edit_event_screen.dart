@@ -1,4 +1,5 @@
 import 'package:college_companion/features/calendar/widgets/event_type_chip.dart';
+import 'package:college_companion/shared/widgets/dialogs/cc_dialogs.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
@@ -42,7 +43,14 @@ class _AddEditEventScreenState extends State<AddEditEventScreen> {
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Symbols.close),
-          onPressed: () => context.pop(),
+          onPressed: () async {
+            final discard = await CCDialogs.showDiscardChanges(context);
+            if (discard == true) {
+              if (context.mounted) {
+                context.pop();
+              }
+            }
+          },
         ),
         title: Text(
           'New Event', // Or 'Edit Event' based on param in real app

@@ -1,3 +1,4 @@
+import 'package:college_companion/shared/widgets/dialogs/cc_dialogs.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
@@ -367,8 +368,18 @@ class AssignmentDetailsScreen extends StatelessWidget {
             const SizedBox(width: SpacingTokens.md),
             Expanded(
               child: OutlinedButton.icon(
-                onPressed: () {
-                  // TODO: Delete
+                onPressed: () async {
+                  final confirm = await CCDialogs.showDeleteConfirmation(
+                    context,
+                    title: 'Delete Assignment',
+                    message:
+                        'Are you sure you want to delete this assignment? This action cannot be undone.',
+                  );
+                  if (confirm == true) {
+                    if (context.mounted) {
+                      context.pop();
+                    }
+                  }
                 },
                 icon: const Icon(Symbols.delete),
                 label: const Text('Delete'),

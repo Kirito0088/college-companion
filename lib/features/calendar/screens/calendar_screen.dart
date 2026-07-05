@@ -1,8 +1,11 @@
 import 'package:college_companion/features/calendar/models/mock_event.dart';
 import 'package:college_companion/features/calendar/widgets/agenda_card.dart';
 import 'package:college_companion/features/calendar/widgets/calendar_month_view.dart';
-import 'package:college_companion/features/calendar/widgets/empty_agenda.dart';
 import 'package:college_companion/routing/app_router.dart';
+import 'package:college_companion/shared/models/mock_ui_state.dart';
+import 'package:college_companion/shared/widgets/empty_states/cc_empty_states.dart';
+import 'package:college_companion/shared/widgets/errors/cc_errors.dart';
+import 'package:college_companion/shared/widgets/loading/cc_skeletons.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
@@ -19,6 +22,7 @@ class CalendarScreen extends StatefulWidget {
 
 class _CalendarScreenState extends State<CalendarScreen> {
   int _selectedDate = 13; // Mock today
+  MockUiState _uiState = MockUiState.success;
 
   // Mock events
   final List<MockEvent> _allEvents = [
@@ -220,6 +224,48 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Widget _buildAgendaSection(ThemeData theme) {
     final eventsForSelected = _events[_selectedDate] ?? [];
 
+    Widget content;
+    switch (_uiState) {
+      case MockUiState.loading:
+        content = const SkeletonList();
+        break;
+      case MockUiState.empty:
+        content = const EmptyCalendar();
+        break;
+      case MockUiState.error:
+        content = NetworkErrorWidget(
+          onRetry: () {
+            setState(() {
+              _uiState = MockUiState.loading;
+              Future.delayed(
+                const Duration(seconds: 1),
+                () => setState(() => _uiState = MockUiState.success),
+              );
+            });
+          },
+        );
+        break;
+      case MockUiState.success:
+        if (eventsForSelected.isEmpty) {
+          content = const EmptyCalendar();
+        } else {
+          content = Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: eventsForSelected
+                .map(
+                  (event) => AgendaCard(
+                    event: event,
+                    onTap: () {
+                      context.push(RoutePaths.eventDetails);
+                    },
+                  ),
+                )
+                .toList(),
+          );
+        }
+        break;
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -235,7 +281,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 letterSpacing: 0.5,
               ),
             ),
-            if (eventsForSelected.isNotEmpty)
+            if (eventsForSelected.isNotEmpty && _uiState == MockUiState.success)
               Text(
                 '${eventsForSelected.length} event${eventsForSelected.length == 1 ? '' : 's'}',
                 style: theme.textTheme.labelMedium?.copyWith(
@@ -249,21 +295,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
           duration: const Duration(milliseconds: 300),
           switchInCurve: Curves.easeOut,
           switchOutCurve: Curves.easeIn,
-          child: Column(
-            key: ValueKey<int>(_selectedDate),
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: eventsForSelected.isEmpty
-                ? const [EmptyAgenda()]
-                : eventsForSelected
-                      .map(
-                        (event) => AgendaCard(
-                          event: event,
-                          onTap: () {
-                            context.push(RoutePaths.eventDetails);
-                          },
-                        ),
-                      )
-                      .toList(),
+          child: KeyedSubtree(
+            key: ValueKey<String>('$_selectedDate-${_uiState.name}'),
+            child: content,
           ),
         ),
       ],

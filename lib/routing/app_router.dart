@@ -25,6 +25,7 @@ import 'package:college_companion/features/calendar/screens/event_details_screen
 import 'package:college_companion/features/dashboard/screens/dashboard_screen.dart';
 import 'package:college_companion/features/focus/screens/focus_screen.dart';
 import 'package:college_companion/features/notifications/screens/notifications_screen.dart';
+import 'package:college_companion/features/onboarding/screens/onboarding_screen.dart';
 import 'package:college_companion/features/profile/screens/about_screen.dart';
 import 'package:college_companion/features/profile/screens/account_information_screen.dart';
 import 'package:college_companion/features/profile/screens/help_support_screen.dart';
@@ -51,6 +52,7 @@ abstract final class RoutePaths {
   // ── Auth ────────────────────────────────────────────────────────────────
   static const String splash = '/splash';
   static const String login = '/login';
+  static const String onboarding = '/onboarding';
 
   // ── Root tabs ──────────────────────────────────────────────────────────
   static const String home = '/';
@@ -84,13 +86,14 @@ abstract final class RoutePaths {
   static const String eventDetails = '/calendar/event-details';
 
   /// Routes that do not require authentication.
-  static const List<String> publicRoutes = [splash, login];
+  static const List<String> publicRoutes = [splash, login, onboarding];
 }
 
 /// Route name constants for named navigation.
 abstract final class RouteNames {
   static const String splash = 'splash';
   static const String login = 'login';
+  static const String onboarding = 'onboarding';
   static const String home = 'home';
   static const String attendance = 'attendance';
   static const String calendar = 'calendar';
@@ -188,6 +191,13 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
         path: RoutePaths.login,
         name: RouteNames.login,
         builder: (context, state) => const LoginScreen(),
+      ),
+
+      // ── Onboarding (outside shell) ─────────────────────────────────────
+      GoRoute(
+        path: RoutePaths.onboarding,
+        name: RouteNames.onboarding,
+        builder: (context, state) => const OnboardingScreen(),
       ),
 
       // ── Main shell with bottom navigation ──────────────────────────────

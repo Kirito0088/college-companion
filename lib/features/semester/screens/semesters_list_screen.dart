@@ -1,4 +1,8 @@
 import 'package:college_companion/routing/app_router.dart';
+import 'package:college_companion/shared/models/mock_ui_state.dart';
+import 'package:college_companion/shared/widgets/empty_states/cc_empty_states.dart';
+import 'package:college_companion/shared/widgets/errors/cc_errors.dart';
+import 'package:college_companion/shared/widgets/loading/cc_skeletons.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
@@ -6,8 +10,15 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
-class SemestersListScreen extends StatelessWidget {
+class SemestersListScreen extends StatefulWidget {
   const SemestersListScreen({super.key});
+
+  @override
+  State<SemestersListScreen> createState() => _SemestersListScreenState();
+}
+
+class _SemestersListScreenState extends State<SemestersListScreen> {
+  MockUiState _uiState = MockUiState.success;
 
   @override
   Widget build(BuildContext context) {
@@ -51,59 +62,95 @@ class SemestersListScreen extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: LayoutTokens.screenPadding,
-          vertical: SpacingTokens.md,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildHeader(context),
-            const SizedBox(height: LayoutTokens.sectionGap),
-            const _CurrentSemesterBanner(currentSemester: currentSemester),
-            const SizedBox(height: LayoutTokens.sectionGap),
+      body: _buildBody(
+        context,
+        currentSemester,
+        currentYearSemesters,
+        previousSemesters,
+      ),
+    );
+  }
 
-            // Current Academic Year
-            Text(
-              'Current Academic Year',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: ColorTokens.onSurface,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: SpacingTokens.md),
-            ...currentYearSemesters.map(
-              (s) => Padding(
-                padding: const EdgeInsets.only(bottom: SpacingTokens.md),
-                child: _SemesterCard(data: s),
-              ),
-            ),
+  Widget _buildBody(
+    BuildContext context,
+    int currentSemester,
+    List<Map<String, dynamic>> currentYearSemesters,
+    List<Map<String, dynamic>> previousSemesters,
+  ) {
+    switch (_uiState) {
+      case MockUiState.loading:
+        return const Padding(
+          padding: EdgeInsets.symmetric(horizontal: LayoutTokens.screenPadding),
+          child: SkeletonList(),
+        );
+      case MockUiState.empty:
+        return const EmptySubjects();
+      case MockUiState.error:
+        return NetworkErrorWidget(
+          onRetry: () {
+            setState(() {
+              _uiState = MockUiState.loading;
+              Future.delayed(
+                const Duration(seconds: 1),
+                () => setState(() => _uiState = MockUiState.success),
+              );
+            });
+          },
+        );
+      case MockUiState.success:
+        return SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(
+            horizontal: LayoutTokens.screenPadding,
+            vertical: SpacingTokens.md,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildHeader(context),
+              const SizedBox(height: LayoutTokens.sectionGap),
+              _CurrentSemesterBanner(currentSemester: currentSemester),
+              const SizedBox(height: LayoutTokens.sectionGap),
 
-            // Previous Semesters
-            if (previousSemesters.isNotEmpty) ...[
-              const SizedBox(height: SpacingTokens.md),
+              // Current Academic Year
               Text(
-                'Previous Semesters',
-                style: theme.textTheme.titleMedium?.copyWith(
+                'Current Academic Year',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: ColorTokens.onSurface,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: SpacingTokens.md),
-              ...previousSemesters.map(
+              ...currentYearSemesters.map(
                 (s) => Padding(
                   padding: const EdgeInsets.only(bottom: SpacingTokens.md),
                   child: _SemesterCard(data: s),
                 ),
               ),
-            ],
 
-            const SizedBox(height: SpacingTokens.xxl),
-          ],
-        ),
-      ),
-    );
+              // Previous Semesters
+              if (previousSemesters.isNotEmpty) ...[
+                const SizedBox(height: SpacingTokens.md),
+                Text(
+                  'Previous Semesters',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: ColorTokens.onSurface,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: SpacingTokens.md),
+                ...previousSemesters.map(
+                  (s) => Padding(
+                    padding: const EdgeInsets.only(bottom: SpacingTokens.md),
+                    child: _SemesterCard(data: s),
+                  ),
+                ),
+              ],
+
+              const SizedBox(height: SpacingTokens.xxl),
+            ],
+          ),
+        );
+    }
   }
 
   Map<String, dynamic> _generateSemesterData(

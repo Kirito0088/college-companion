@@ -1,6 +1,10 @@
 import 'package:college_companion/features/assignments/widgets/assignment_card.dart';
 import 'package:college_companion/features/assignments/widgets/assignments_fab.dart';
 import 'package:college_companion/routing/app_router.dart';
+import 'package:college_companion/shared/models/mock_ui_state.dart';
+import 'package:college_companion/shared/widgets/empty_states/cc_empty_states.dart';
+import 'package:college_companion/shared/widgets/errors/cc_errors.dart';
+import 'package:college_companion/shared/widgets/loading/cc_skeletons.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
@@ -20,6 +24,7 @@ class _AssignmentsScreenState extends State<AssignmentsScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _isFabExtended = true;
   int _selectedFilterIndex = 0;
+  MockUiState _uiState = MockUiState.success;
   final List<String> _filters = [
     'All',
     'Pending',
@@ -262,104 +267,80 @@ class _AssignmentsScreenState extends State<AssignmentsScreen> {
   }
 
   Widget _buildAssignmentList(BuildContext context) {
-    if (_selectedFilterIndex == 3) {
-      return _buildEmptyState(Theme.of(context));
-    }
-
-    final assignments = [
-      AssignmentCard(
-        title: 'Operating Systems Assignment 3',
-        subject: 'Operating Systems',
-        subjectColor: Colors.blue,
-        dueDate: 'Tomorrow',
-        status: 'Pending',
-        statusColor: ColorTokens.warning,
-        priority: 'High Priority',
-        onTap: () => context.push(RoutePaths.assignmentDetails),
-      ),
-      AssignmentCard(
-        title: 'Database Lab Report',
-        subject: 'DBMS',
-        subjectColor: Colors.green,
-        dueDate: 'Aug 5',
-        status: 'Due Today',
-        statusColor: ColorTokens.primary,
-        onTap: () => context.push(RoutePaths.assignmentDetails),
-      ),
-      AssignmentCard(
-        title: 'WT Mini Project',
-        subject: 'Web Technology',
-        subjectColor: Colors.amber,
-        dueDate: 'Completed',
-        status: 'Completed',
-        statusColor: ColorTokens.success,
-        onTap: () => context.push(RoutePaths.assignmentDetails),
-      ),
-    ];
-
-    return Column(
-      children: List.generate(assignments.length, (index) {
-        return TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0.0, end: 1.0),
-          duration: Duration(milliseconds: 300 + (index * 100)),
-          curve: Curves.easeOutCubic,
-          builder: (context, value, child) {
-            return Opacity(
-              opacity: value,
-              child: Transform.translate(
-                offset: Offset(0, 20 * (1 - value)),
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: SpacingTokens.lg),
-                  child: child,
-                ),
-              ),
-            );
+    switch (_uiState) {
+      case MockUiState.loading:
+        return const SkeletonList();
+      case MockUiState.empty:
+        return const EmptyAssignments();
+      case MockUiState.error:
+        return NetworkErrorWidget(
+          onRetry: () {
+            setState(() {
+              _uiState = MockUiState.loading;
+              Future.delayed(
+                const Duration(seconds: 1),
+                () => setState(() => _uiState = MockUiState.success),
+              );
+            });
           },
-          child: assignments[index],
         );
-      }),
-    );
-  }
+      case MockUiState.success:
+        if (_selectedFilterIndex == 3) {
+          return const EmptyAssignments();
+        }
+        final assignments = [
+          AssignmentCard(
+            title: 'Operating Systems Assignment 3',
+            subject: 'Operating Systems',
+            subjectColor: Colors.blue,
+            dueDate: 'Tomorrow',
+            status: 'Pending',
+            statusColor: ColorTokens.warning,
+            priority: 'High Priority',
+            onTap: () => context.push(RoutePaths.assignmentDetails),
+          ),
+          AssignmentCard(
+            title: 'Database Lab Report',
+            subject: 'DBMS',
+            subjectColor: Colors.green,
+            dueDate: 'Aug 5',
+            status: 'Due Today',
+            statusColor: ColorTokens.primary,
+            onTap: () => context.push(RoutePaths.assignmentDetails),
+          ),
+          AssignmentCard(
+            title: 'WT Mini Project',
+            subject: 'Web Technology',
+            subjectColor: Colors.amber,
+            dueDate: 'Completed',
+            status: 'Completed',
+            statusColor: ColorTokens.success,
+            onTap: () => context.push(RoutePaths.assignmentDetails),
+          ),
+        ];
 
-  Widget _buildEmptyState(ThemeData theme) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xxl),
-        child: Column(
-          children: [
-            Container(
-              width: 120,
-              height: 120,
-              decoration: const BoxDecoration(
-                color: ColorTokens.surfaceContainerHighest,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Symbols.assignment_turned_in,
-                size: 64,
-                color: ColorTokens.primary,
-              ),
-            ),
-            const SizedBox(height: SpacingTokens.xl),
-            Text(
-              'No Assignments',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: ColorTokens.onSurface,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: SpacingTokens.sm),
-            Text(
-              "You're all caught up.",
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: ColorTokens.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
+        return Column(
+          children: List.generate(assignments.length, (index) {
+            return TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.0, end: 1.0),
+              duration: Duration(milliseconds: 300 + (index * 100)),
+              curve: Curves.easeOutCubic,
+              builder: (context, value, child) {
+                return Opacity(
+                  opacity: value,
+                  child: Transform.translate(
+                    offset: Offset(0, 20 * (1 - value)),
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: SpacingTokens.lg),
+                      child: child,
+                    ),
+                  ),
+                );
+              },
+              child: assignments[index],
+            );
+          }),
+        );
+    }
   }
 }

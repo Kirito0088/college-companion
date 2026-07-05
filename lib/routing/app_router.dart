@@ -14,6 +14,7 @@ library;
 import 'package:college_companion/features/assignments/screens/assignment_details_screen.dart';
 import 'package:college_companion/features/assignments/screens/assignments_screen.dart';
 import 'package:college_companion/features/attendance/screens/attendance_screen.dart';
+import 'package:college_companion/features/attendance/screens/lecture_record_screen.dart';
 import 'package:college_companion/features/attendance/screens/safe_bunk_screen.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
@@ -58,6 +59,7 @@ abstract final class RoutePaths {
   static const String home = '/';
   static const String attendance = '/attendance';
   static const String safeBunk = '/safe-bunk';
+  static const String lectureRecord = '/lecture-record';
   static const String calendar = '/calendar';
   static const String assignments = '/assignments';
   static const String profile = '/profile';
@@ -118,6 +120,7 @@ abstract final class RouteNames {
   static const String focusMode = 'focus-mode';
   static const String subjectDetails = 'subject-details';
   static const String safeBunk = 'bunk-calculator';
+  static const String lectureRecord = 'lecture-record';
   static const String resources = 'resources';
   static const String resourceDetails = 'resource-details';
   static const String assignmentDetails = 'assignment-details';
@@ -342,6 +345,12 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
         name: RouteNames.safeBunk,
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const SafeBunkScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.lectureRecord,
+        name: RouteNames.lectureRecord,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const LectureRecordScreen(),
       ),
       GoRoute(
         path: RoutePaths.resources,

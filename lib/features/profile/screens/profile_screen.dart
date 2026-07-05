@@ -1,6 +1,7 @@
 import 'package:college_companion/features/profile/widgets/profile_app_bar.dart';
 import 'package:college_companion/features/profile/widgets/profile_header_card.dart';
 import 'package:college_companion/features/profile/widgets/profile_menu_list.dart';
+import 'package:college_companion/shared/widgets/dialogs/cc_dialogs.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
@@ -64,7 +65,12 @@ class _LogoutButton extends StatelessWidget {
       color: ColorTokens.surfaceContainer,
       borderRadius: RadiusTokens.borderRadiusXl,
       child: InkWell(
-        onTap: () {}, // TODO: Logout logic
+        onTap: () async {
+          final confirm = await CCDialogs.showLogoutConfirmation(context);
+          if (confirm == true) {
+            // TODO: Implement actual logout logic here
+          }
+        },
         borderRadius: RadiusTokens.borderRadiusXl,
         hoverColor: ColorTokens.surfaceContainerHigh,
         child: Container(

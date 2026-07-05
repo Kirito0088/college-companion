@@ -24,6 +24,7 @@ import 'package:college_companion/features/calendar/screens/calendar_screen.dart
 import 'package:college_companion/features/calendar/screens/event_details_screen.dart';
 import 'package:college_companion/features/dashboard/screens/dashboard_screen.dart';
 import 'package:college_companion/features/focus/screens/focus_screen.dart';
+import 'package:college_companion/features/notifications/screens/notifications_screen.dart';
 import 'package:college_companion/features/profile/screens/about_screen.dart';
 import 'package:college_companion/features/profile/screens/account_information_screen.dart';
 import 'package:college_companion/features/profile/screens/help_support_screen.dart';
@@ -33,8 +34,11 @@ import 'package:college_companion/features/resources/screens/resources_screen.da
 import 'package:college_companion/features/semester/screens/semester_details_screen.dart';
 import 'package:college_companion/features/semester/screens/semesters_list_screen.dart';
 import 'package:college_companion/features/settings/screens/data_sync_screen.dart';
-import 'package:college_companion/features/settings/screens/manage_modules_screen.dart';
+
+import 'package:college_companion/features/settings/screens/open_source_licenses_screen.dart';
+import 'package:college_companion/features/settings/screens/privacy_policy_screen.dart';
 import 'package:college_companion/features/settings/screens/settings_screen.dart';
+import 'package:college_companion/features/settings/screens/terms_conditions_screen.dart';
 import 'package:college_companion/features/subjects/screens/subject_details_screen.dart';
 import 'package:college_companion/routing/scaffold_with_nav_bar.dart';
 import 'package:college_companion/shared/widgets/placeholder_screen.dart';
@@ -57,12 +61,16 @@ abstract final class RoutePaths {
   static const String profile = '/profile';
 
   // ── Secondary routes ───────────────────────────────────────────────────
+  static const String notifications = '/notifications';
+  static const String privacyPolicy = '/privacy-policy';
+  static const String termsConditions = '/terms-conditions';
+  static const String openSourceLicenses = '/open-source-licenses';
   static const String timetable = '/timetable';
   static const String internalMarks = '/internal-marks';
   static const String semester = '/semesters';
   static const String semesterDetails = '/semester-details';
   static const String settings = '/settings';
-  static const String manageModules = '/manage-modules';
+
   static const String dataSync = '/data-sync';
   static const String helpSupport = '/help-support';
   static const String about = '/about';
@@ -86,14 +94,20 @@ abstract final class RouteNames {
   static const String home = 'home';
   static const String attendance = 'attendance';
   static const String calendar = 'calendar';
-  static const String assignments = 'assignments';
-  static const String profile = 'profile';
-  static const String timetable = 'timetable';
+  static const notifications = 'notifications';
+
+  // Settings & Legal
+  static const privacyPolicy = 'privacy-policy';
+  static const termsConditions = 'terms-conditions';
+  static const openSourceLicenses = 'open-source-licenses';
   static const String internalMarks = 'internal-marks';
   static const String semester = 'semesters';
   static const String semesterDetails = 'semester-details';
   static const String settings = 'settings';
-  static const String manageModules = 'manage-modules';
+
+  static const String assignments = 'assignments';
+  static const String profile = 'profile';
+  static const String timetable = 'timetable';
   static const String dataSync = 'data-sync';
   static const String helpSupport = 'help-support';
   static const String about = 'about';
@@ -276,12 +290,7 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const SettingsScreen(),
       ),
-      GoRoute(
-        path: RoutePaths.manageModules,
-        name: RouteNames.manageModules,
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const ManageModulesScreen(),
-      ),
+
       GoRoute(
         path: RoutePaths.dataSync,
         name: RouteNames.dataSync,
@@ -353,6 +362,30 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
         name: RouteNames.eventDetails,
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const EventDetailsScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.notifications,
+        name: RouteNames.notifications,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.privacyPolicy,
+        name: RouteNames.privacyPolicy,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const PrivacyPolicyScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.termsConditions,
+        name: RouteNames.termsConditions,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const TermsConditionsScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.openSourceLicenses,
+        name: RouteNames.openSourceLicenses,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const OpenSourceLicensesScreen(),
       ),
     ],
   );

@@ -1,3 +1,4 @@
+import 'package:college_companion/routing/app_router.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
@@ -70,21 +71,24 @@ class AboutScreen extends StatelessWidget {
             _buildSectionCard(
               context,
               title: 'Legal',
-              children: const [
+              children: [
                 _ActionRow(
                   icon: Symbols.gavel,
                   label: 'Open Source Licenses',
                   showBorder: true,
+                  onTap: () => context.push(RoutePaths.openSourceLicenses),
                 ),
                 _ActionRow(
                   icon: Symbols.policy,
                   label: 'Privacy Policy',
                   showBorder: true,
+                  onTap: () => context.push(RoutePaths.privacyPolicy),
                 ),
                 _ActionRow(
                   icon: Symbols.description,
                   label: 'Terms of Service',
                   showBorder: false,
+                  onTap: () => context.push(RoutePaths.termsConditions),
                 ),
               ],
             ),
@@ -252,12 +256,14 @@ class _ActionRow extends StatelessWidget {
     required this.label,
     required this.showBorder,
     this.trailingIcon = Symbols.chevron_right,
+    this.onTap,
   });
 
   final IconData icon;
   final String label;
   final bool showBorder;
   final IconData trailingIcon;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -266,7 +272,7 @@ class _ActionRow extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {},
+        onTap: onTap ?? () {},
         hoverColor: ColorTokens.surfaceContainerHigh,
         child: Container(
           padding: const EdgeInsets.all(LayoutTokens.cardPadding),

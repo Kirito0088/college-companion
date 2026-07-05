@@ -67,8 +67,8 @@ class ProfileHeaderCard extends StatelessWidget {
                 const SizedBox(height: SpacingTokens.sm), // mt-2 approx
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 10, // px-2.5
-                    vertical: SpacingTokens.xs, // py-1
+                    horizontal: 12, // slightly increased for pill shape
+                    vertical: 6, // better breathing room
                   ),
                   decoration: BoxDecoration(
                     color: ColorTokens.surfaceVariant,

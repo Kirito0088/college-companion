@@ -1,4 +1,5 @@
 import 'package:college_companion/routing/app_router.dart';
+import 'package:college_companion/shared/widgets/dialogs/cc_dialogs.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
@@ -6,8 +7,16 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  bool _pushNotifications = true;
+  bool _lectureReminders = true;
 
   @override
   Widget build(BuildContext context) {
@@ -50,10 +59,11 @@ class SettingsScreen extends StatelessWidget {
                   showBorder: true,
                   onTap: () => context.push(RoutePaths.accountInformation),
                 ),
-                const _SettingsRow(
+                _SettingsRow(
                   icon: Symbols.lock,
                   label: 'Privacy & Security',
                   showBorder: false,
+                  onTap: () => context.push(RoutePaths.privacyPolicy),
                 ),
               ],
             ),
@@ -65,15 +75,23 @@ class SettingsScreen extends StatelessWidget {
                 _SettingsSwitchRow(
                   icon: Symbols.notifications,
                   label: 'Push Notifications',
-                  value: true,
-                  onChanged: (val) {},
+                  value: _pushNotifications,
+                  onChanged: (val) {
+                    setState(() {
+                      _pushNotifications = val;
+                    });
+                  },
                   showBorder: true,
                 ),
                 _SettingsSwitchRow(
                   icon: Symbols.schedule,
                   label: 'Lecture Reminders',
-                  value: true,
-                  onChanged: (val) {},
+                  value: _lectureReminders,
+                  onChanged: (val) {
+                    setState(() {
+                      _lectureReminders = val;
+                    });
+                  },
                   showBorder: false,
                 ),
               ],
@@ -91,19 +109,7 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: LayoutTokens.sectionGap),
-            _buildSection(
-              context: context,
-              title: 'Modules',
-              children: [
-                _SettingsRow(
-                  icon: Symbols.view_module,
-                  label: 'Manage Modules',
-                  showBorder: false,
-                  onTap: () => context.push(RoutePaths.manageModules),
-                ),
-              ],
-            ),
+
             const SizedBox(height: LayoutTokens.sectionGap),
             _buildSection(
               context: context,
@@ -115,13 +121,21 @@ class SettingsScreen extends StatelessWidget {
                   showBorder: true,
                   onTap: () => context.push(RoutePaths.dataSync),
                 ),
-                const _SettingsRow(
+                _SettingsRow(
                   icon: Symbols.delete,
                   label: 'Clear Cache',
                   textColor: ColorTokens.error,
                   iconColor: ColorTokens.error,
                   showBorder: false,
                   hideChevron: true,
+                  onTap: () {
+                    CCDialogs.showDeleteConfirmation(
+                      context,
+                      title: 'Clear Cache',
+                      message:
+                          'Are you sure you want to clear the local cache? This will not delete your account data.',
+                    );
+                  },
                 ),
               ],
             ),
@@ -137,15 +151,17 @@ class SettingsScreen extends StatelessWidget {
                   hideChevron: true,
                   showBorder: true,
                 ),
-                const _SettingsRow(
+                _SettingsRow(
                   icon: Symbols.description,
                   label: 'Terms of Service',
                   showBorder: true,
+                  onTap: () => context.push(RoutePaths.termsConditions),
                 ),
-                const _SettingsRow(
+                _SettingsRow(
                   icon: Symbols.policy,
                   label: 'Privacy Policy',
                   showBorder: false,
+                  onTap: () => context.push(RoutePaths.privacyPolicy),
                 ),
               ],
             ),

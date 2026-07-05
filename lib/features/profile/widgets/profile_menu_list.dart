@@ -30,11 +30,12 @@ class ProfileMenuList extends StatelessWidget {
             showBorder: true,
             onTap: () => context.push(RoutePaths.semester),
           ),
+
           _MenuItem(
-            icon: Symbols.view_module,
-            label: 'Modules',
+            icon: Symbols.notifications,
+            label: 'Notifications',
             showBorder: true,
-            onTap: () => context.push(RoutePaths.manageModules),
+            onTap: () => context.push(RoutePaths.notifications),
           ),
           _MenuItem(
             icon: Symbols.settings,
@@ -98,7 +99,7 @@ class _MenuItem extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap ?? () {}, // TODO: Navigate
+        onTap: onTap ?? () {},
         hoverColor: ColorTokens.surfaceContainerHigh,
         child: Container(
           padding: const EdgeInsets.all(

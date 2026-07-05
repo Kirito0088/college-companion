@@ -1,4 +1,8 @@
 import 'package:college_companion/routing/app_router.dart';
+import 'package:college_companion/shared/models/mock_ui_state.dart';
+import 'package:college_companion/shared/widgets/empty_states/cc_empty_states.dart';
+import 'package:college_companion/shared/widgets/errors/cc_errors.dart';
+import 'package:college_companion/shared/widgets/loading/cc_skeletons.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
@@ -23,6 +27,7 @@ class ResourcesScreen extends StatefulWidget {
 }
 
 class _ResourcesScreenState extends State<ResourcesScreen> {
+  MockUiState _uiState = MockUiState.success;
   String _selectedCategory = 'All';
 
   final List<String> _categories = [
@@ -214,158 +219,190 @@ class _ResourcesScreenState extends State<ResourcesScreen> {
   }
 
   Widget _buildResourcesList(BuildContext context) {
-    // Determine which list to show based on category or empty state
-    // For this UI implementation, we show placeholder data if "All" is selected,
-    // and empty state otherwise to demonstrate both views.
-    if (_selectedCategory != 'All') {
-      return SliverFillRemaining(
-        hasScrollBody: false,
-        child: _buildEmptyState(context),
-      );
-    }
+    switch (_uiState) {
+      case MockUiState.loading:
+        return const SliverFillRemaining(
+          hasScrollBody: false,
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: LayoutTokens.screenPadding,
+            ),
+            child: SkeletonList(),
+          ),
+        );
+      case MockUiState.empty:
+        return const SliverFillRemaining(
+          hasScrollBody: false,
+          child: EmptyResources(),
+        );
+      case MockUiState.error:
+        return SliverFillRemaining(
+          hasScrollBody: false,
+          child: NetworkErrorWidget(
+            onRetry: () {
+              setState(() {
+                _uiState = MockUiState.loading;
+                Future.delayed(
+                  const Duration(seconds: 1),
+                  () => setState(() => _uiState = MockUiState.success),
+                );
+              });
+            },
+          ),
+        );
+      case MockUiState.success:
+        if (_selectedCategory != 'All') {
+          return const SliverFillRemaining(
+            hasScrollBody: false,
+            child: EmptyResources(),
+          );
+        }
 
-    return SliverPadding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: LayoutTokens.screenPadding,
-      ),
-      sliver: SliverList(
-        delegate: SliverChildListDelegate([
-          _buildResourceCard(
-            context,
-            icon: Symbols.picture_as_pdf,
-            title: 'Operating Systems Unit 3 Notes',
-            subject: 'Operating Systems',
-            fileType: 'PDF',
-            fileSize: '2.4 MB',
-            lastModified: 'Yesterday',
-            iconColor: Colors.redAccent,
-            isFavorite: true,
+        return SliverPadding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: LayoutTokens.screenPadding,
           ),
-          const SizedBox(height: SpacingTokens.md),
-          _buildResourceCard(
-            context,
-            icon: Symbols.picture_as_pdf,
-            title: 'DBMS Lab Manual',
-            subject: 'Database Management',
-            fileType: 'PDF',
-            fileSize: '5.1 MB',
-            lastModified: 'Monday',
-            iconColor: Colors.redAccent,
-            isFavorite: false,
+          sliver: SliverList(
+            delegate: SliverChildListDelegate([
+              _buildResourceCard(
+                context,
+                icon: Symbols.picture_as_pdf,
+                title: 'Operating Systems Unit 3 Notes',
+                subject: 'Operating Systems',
+                fileType: 'PDF',
+                fileSize: '2.4 MB',
+                lastModified: 'Yesterday',
+                iconColor: Colors.redAccent,
+                isFavorite: true,
+              ),
+              const SizedBox(height: SpacingTokens.md),
+              _buildResourceCard(
+                context,
+                icon: Symbols.picture_as_pdf,
+                title: 'DBMS Lab Manual',
+                subject: 'Database Management',
+                fileType: 'PDF',
+                fileSize: '5.1 MB',
+                lastModified: 'Monday',
+                iconColor: Colors.redAccent,
+                isFavorite: false,
+              ),
+              const SizedBox(height: SpacingTokens.md),
+              _buildResourceCard(
+                context,
+                icon: Symbols.description,
+                title: 'Question Paper 2025',
+                subject: 'Computer Networks',
+                fileType: 'PDF',
+                fileSize: '1.2 MB',
+                lastModified: '2 weeks ago',
+                iconColor: Colors.blueAccent,
+                isFavorite: true,
+              ),
+            ]),
           ),
-          const SizedBox(height: SpacingTokens.md),
-          _buildResourceCard(
-            context,
-            icon: Symbols.description,
-            title: 'Question Paper 2025',
-            subject: 'Computer Networks',
-            fileType: 'PDF',
-            fileSize: '1.2 MB',
-            lastModified: '2 weeks ago',
-            iconColor: Colors.blueAccent,
-            isFavorite: true,
-          ),
-        ]),
-      ),
-    );
+        );
+    }
   }
 
   Widget _buildRecentResources(BuildContext context) {
-    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(
-            left: SpacingTokens.sm,
-            bottom: SpacingTokens.md,
-          ),
-          child: Text(
-            'Recent Resources',
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: ColorTokens.onSurface,
-              fontWeight: FontWeight.bold,
-            ),
+        Text(
+          'Recently Viewed',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: ColorTokens.onSurface,
           ),
         ),
-        _buildCompactResourceCard(
-          context,
-          icon: Symbols.picture_as_pdf,
-          title: 'Operating Systems Unit 3 Notes',
-          time: 'Yesterday',
-          iconColor: Colors.redAccent,
-        ),
-        const SizedBox(height: SpacingTokens.sm),
-        _buildCompactResourceCard(
-          context,
-          icon: Symbols.picture_as_pdf,
-          title: 'DBMS Lab Manual',
-          time: 'Monday',
-          iconColor: Colors.redAccent,
-        ),
-        const SizedBox(height: SpacingTokens.sm),
-        _buildCompactResourceCard(
-          context,
-          icon: Symbols.description,
-          title: 'WT Question Paper',
-          time: '2 days ago',
-          iconColor: Colors.blueAccent,
+        const SizedBox(height: SpacingTokens.md),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          clipBehavior: Clip.none,
+          child: Row(
+            children: [
+              _buildRecentResourceCard(
+                context,
+                icon: Symbols.picture_as_pdf,
+                title: 'Data Structures...',
+                subject: 'Computer Science',
+                timeAgo: '2 hours ago',
+                color: Colors.redAccent,
+              ),
+              const SizedBox(width: SpacingTokens.md),
+              _buildRecentResourceCard(
+                context,
+                icon: Symbols.description,
+                title: 'Math Assignment',
+                subject: 'Mathematics',
+                timeAgo: 'Yesterday',
+                color: Colors.blueAccent,
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: SpacingTokens.xl),
       ],
     );
   }
 
-  Widget _buildCompactResourceCard(
+  Widget _buildRecentResourceCard(
     BuildContext context, {
     required IconData icon,
     required String title,
-    required String time,
-    required Color iconColor,
+    required String subject,
+    required String timeAgo,
+    required Color color,
   }) {
-    final theme = Theme.of(context);
-    return Material(
-      color: ColorTokens.surfaceContainer,
-      borderRadius: RadiusTokens.borderRadiusLg,
-      elevation: 0,
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () {
-          context.push(RoutePaths.resourceDetails);
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(SpacingTokens.md),
-          child: Row(
-            children: [
-              Icon(icon, color: iconColor, size: 24),
-              const SizedBox(width: SpacingTokens.md),
-              Expanded(
-                child: Text(
-                  title,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    color: ColorTokens.onSurface,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(width: SpacingTokens.sm),
-              Text(
-                time,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: ColorTokens.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(width: SpacingTokens.xs),
-              const Icon(
-                Symbols.chevron_right,
-                size: 20,
-                color: ColorTokens.onSurfaceVariant,
-              ),
-            ],
-          ),
+    return Container(
+      width: 160,
+      padding: const EdgeInsets.all(SpacingTokens.md),
+      decoration: BoxDecoration(
+        color: ColorTokens.surfaceContainer,
+        borderRadius: RadiusTokens.borderRadiusLg,
+        border: Border.all(
+          color: ColorTokens.outlineVariant.withValues(alpha: 0.2),
         ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(SpacingTokens.sm),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: RadiusTokens.borderRadiusMd,
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(height: SpacingTokens.md),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: ColorTokens.onSurface,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: SpacingTokens.xs),
+          Text(
+            subject,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: ColorTokens.primary),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: SpacingTokens.xs),
+          Text(
+            timeAgo,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: ColorTokens.onSurfaceVariant,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -490,65 +527,6 @@ class _ResourcesScreenState extends State<ResourcesScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: LayoutTokens.screenPadding,
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(SpacingTokens.xxl),
-            decoration: const BoxDecoration(
-              color: ColorTokens.surfaceContainer,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Symbols.folder_open,
-              size: 64,
-              color: ColorTokens.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: SpacingTokens.xl),
-          Text(
-            'No Resources Yet',
-            style: theme.textTheme.titleLarge?.copyWith(
-              color: ColorTokens.onSurface,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: SpacingTokens.sm),
-          Text(
-            'Import your study materials to access them offline.',
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: ColorTokens.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: SpacingTokens.xl),
-          FilledButton.icon(
-            onPressed: () {
-              // TODO: Future file picker integration
-            },
-            icon: const Icon(Symbols.upload_file),
-            label: const Text('Import Resources'),
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(
-                horizontal: SpacingTokens.xl,
-                vertical: SpacingTokens.md,
-              ),
-              shape: const RoundedRectangleBorder(
-                borderRadius: RadiusTokens.borderRadiusXl,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

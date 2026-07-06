@@ -16,11 +16,9 @@ class AttendanceTrendCard extends StatelessWidget {
         color: ColorTokens.surfaceContainer,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: ColorTokens.outlineVariant.withValues(alpha: 0.1),
+          color: ColorTokens.outlineVariant.withValues(alpha: 0.15),
+          width: 1,
         ),
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 1)),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -139,7 +137,8 @@ class AttendanceTrendCard extends StatelessWidget {
     return Text(
       text,
       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-        color: ColorTokens.onSurfaceVariant.withValues(alpha: 0.6),
+        color: ColorTokens.onSurfaceVariant,
+        fontWeight: FontWeight.w500,
       ),
     );
   }
@@ -148,7 +147,8 @@ class AttendanceTrendCard extends StatelessWidget {
     return Text(
       text,
       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-        color: ColorTokens.onSurfaceVariant.withValues(alpha: 0.6),
+        color: ColorTokens.onSurfaceVariant,
+        fontWeight: FontWeight.w500,
       ),
     );
   }
@@ -170,7 +170,9 @@ class _TrendChartPainter extends CustomPainter {
     final paint = Paint()
       ..color = ColorTokens.primary
       ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
 
     final path = Path();
     for (var i = 0; i < points.length; i++) {

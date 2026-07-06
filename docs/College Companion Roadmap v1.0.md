@@ -656,14 +656,6 @@ Potential future additions include:
 
 ---
 
-## Firebase
-
-- Analytics
-- Crashlytics
-- Cloud Messaging
-
----
-
 ## Productivity
 
 - Study Notes

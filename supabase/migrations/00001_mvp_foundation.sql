@@ -30,7 +30,7 @@
 --
 -- RLS timing decision:
 --   RLS is enabled immediately with production policies, even before the
---   Firebase→Supabase JWT bridge exists. This is intentional:
+--   Supabase JWT is available. This is intentional:
 --   1. The anon key is public (embedded in the app binary). Without RLS,
 --      anyone who extracts it has full database access.
 --   2. The app is offline-first — sync failures are already handled

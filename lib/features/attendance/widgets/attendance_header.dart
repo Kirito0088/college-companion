@@ -53,8 +53,8 @@ class AttendanceHeader extends StatelessWidget {
             ),
             Container(
               padding: const EdgeInsets.symmetric(
-                horizontal: SpacingTokens.md,
-                vertical: 6,
+                horizontal: SpacingTokens.lg,
+                vertical: 8,
               ),
               decoration: BoxDecoration(
                 color: ColorTokens.surface,

@@ -232,7 +232,6 @@ Firebase is retained only for Analytics, Crashlytics, and FCM — not for authen
 - Native Google Sign-In dialog (better UX)
 - No custom Edge Functions required
 - Direct Supabase session management
-- Firebase retained only for Analytics, Crashlytics, FCM
 - Google Web Client ID required in `.env`
 
 ### Status
@@ -270,3 +269,28 @@ Added CC-0007 (Firebase/Supabase auth split) and CC-0008 (auth state management)
 
 ### v1.0
 Initial decision log created.
+
+---
+
+## CC-0009
+
+### Date
+2026-07-06
+
+### Category
+Architecture
+
+### Decision
+Completely removed every Firebase-related artifact from the project. 
+Firebase is no longer used for Analytics, Crashlytics, or FCM.
+
+### Reason
+Firebase was not part of the current architecture. The application currently uses Drift (local source of truth) and Supabase for authentication and synchronization. This simplifies the tech stack and removes unnecessary dependencies.
+
+### Impact
+- Removes unused Firebase dependencies and plugins
+- Simplifies Android build configuration
+
+### Status
+Active
+

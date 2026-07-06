@@ -82,11 +82,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               SizedBox(height: SpacingTokens.md),
               // Welcome section with user greeting
               WelcomeSection(),
-              SizedBox(height: SpacingTokens.xl),
+              SizedBox(height: SpacingTokens.lg),
 
               // Next lecture card
               NextLectureCard(),
-              SizedBox(height: SpacingTokens.xl),
+              SizedBox(height: SpacingTokens.xxl),
 
               // Quick statistics grid
               QuickStatsSection(),
@@ -94,7 +94,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               // Today's schedule
               TodayOverviewSection(),
-              SizedBox(height: SpacingTokens.xl),
+              SizedBox(height: SpacingTokens.xxl),
             ],
           ),
         );

@@ -36,9 +36,9 @@ class WelcomeSection extends ConsumerWidget {
         Expanded(
           child: Text(
             '$greeting,\n$displayName 👋',
-            style: theme.textTheme.headlineMedium?.copyWith(
+            style: theme.textTheme.titleLarge?.copyWith(
               color: colorScheme.onSurface,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               height: 1.2,
             ),
           ),

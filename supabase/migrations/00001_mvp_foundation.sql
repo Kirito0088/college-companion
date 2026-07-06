@@ -29,8 +29,7 @@
 --   - auth.uid()::text cast — user_id columns are text, auth.uid() returns uuid
 --
 -- RLS timing decision:
---   RLS is enabled immediately with production policies, even before the
---   Supabase JWT is available. This is intentional:
+--   RLS is enabled immediately with production policies. This is intentional:
 --   1. The anon key is public (embedded in the app binary). Without RLS,
 --      anyone who extracts it has full database access.
 --   2. The app is offline-first — sync failures are already handled

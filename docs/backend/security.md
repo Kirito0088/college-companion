@@ -206,9 +206,7 @@ Synchronization should authenticate every request.
 Only approved services:
 
 * Supabase
-* Firebase Cloud Messaging
-* Firebase Crashlytics
-* Firebase Analytics
+
 
 Avoid unnecessary SDKs.
 

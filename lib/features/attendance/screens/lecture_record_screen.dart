@@ -467,10 +467,7 @@ class _LectureRecordScreenState extends State<LectureRecordScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: RadiusTokens.borderRadiusLg,
-              borderSide: BorderSide(
-                color: ColorTokens.primary,
-                width: 2,
-              ),
+              borderSide: BorderSide(color: ColorTokens.primary, width: 2),
             ),
             contentPadding: EdgeInsets.all(SpacingTokens.lg),
           ),

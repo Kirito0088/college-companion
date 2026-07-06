@@ -205,8 +205,6 @@ This eliminates the need for:
 - Firebase Authentication
 - Browser-based OAuth flow (`signInWithOAuth()`)
 
-Firebase is retained only for Analytics, Crashlytics, and FCM — not for authentication.
-
 ### OAuth Configuration
 **Google Cloud Console** (apis.cloud.google.com):
 1. Create OAuth 2.0 Client ID → Application type: **"Web application"**
@@ -232,7 +230,6 @@ Firebase is retained only for Analytics, Crashlytics, and FCM — not for authen
 - Native Google Sign-In dialog (better UX)
 - No custom Edge Functions required
 - Direct Supabase session management
-- Firebase retained only for Analytics, Crashlytics, FCM
 - Google Web Client ID required in `.env`
 
 ### Status
@@ -257,6 +254,33 @@ A sealed class provides exhaustive pattern matching in Dart, ensuring every auth
 ### Alternatives Considered
 - StreamProvider watching Firebase authStateChanges
 - AsyncNotifier with AsyncValue wrapping
+
+### Status
+Active
+
+---
+
+## CC-0009
+
+### Date
+2026-07-06
+
+### Category
+Architecture
+
+### Decision
+Completely remove Firebase from the project.
+
+### Reason
+The application relies fully on Supabase for Auth and Drift for local database. Firebase (Crashlytics, Analytics, FCM) was deemed unnecessary for the MVP phase, to reduce complexity and remove third-party dependencies that are not currently part of the core architecture.
+
+### Alternatives Considered
+- Retain Firebase just for Analytics and Crashlytics (adds complexity without immediate core product benefit)
+
+### Impact
+- Reduced build times and app size
+- Simplified Gradle configuration
+- Complete transition to a pure Supabase/Drift architecture
 
 ### Status
 Active

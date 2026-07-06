@@ -26,7 +26,7 @@ class UserRepository {
   /// Creates or updates the user record in Supabase.
   ///
   /// Stores only: uid, display name, email, profile photo URL.
-  /// Uses upsert with the Firebase UID as the conflict key.
+  /// Uses upsert with the Supabase UID as the conflict key.
   Future<void> upsertUser(AppUser user) async {
     try {
       await _client.from(_tableName).upsert({

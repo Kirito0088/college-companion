@@ -47,7 +47,7 @@ class TodayOverviewSection extends StatelessWidget {
           room: 'Room 305',
           isNow: true,
         ),
-        const SizedBox(height: SpacingTokens.sm),
+        const SizedBox(height: SpacingTokens.xs),
         _buildClassItem(
           context,
           timeText: '10:00',
@@ -56,7 +56,7 @@ class TodayOverviewSection extends StatelessWidget {
           room: 'Room 302',
           isNow: false,
         ),
-        const SizedBox(height: SpacingTokens.sm),
+        const SizedBox(height: SpacingTokens.xs),
         _buildClassItem(
           context,
           timeText: '12:00',
@@ -95,10 +95,11 @@ class TodayOverviewSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: 60,
+          width: 52,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
+              const SizedBox(height: 12), // Align time baseline with class name
               Text(
                 timeText,
                 style: theme.textTheme.labelLarge?.copyWith(
@@ -117,7 +118,7 @@ class TodayOverviewSection extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(width: SpacingTokens.md),
+        const SizedBox(width: SpacingTokens.sm),
         Expanded(
           child: Container(
             decoration: isNow
@@ -142,12 +143,10 @@ class TodayOverviewSection extends StatelessWidget {
                       child: Container(color: ColorTokens.primary),
                     ),
                   Padding(
-                    padding: isNow
-                        ? const EdgeInsets.fromLTRB(16, 12, 12, 12)
-                        : const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 4,
-                          ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,

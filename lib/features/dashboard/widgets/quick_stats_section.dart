@@ -40,10 +40,29 @@ class QuickStatsSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: SpacingTokens.md),
-        IntrinsicHeight(
+        Container(
+          padding: const EdgeInsets.symmetric(
+            vertical: SpacingTokens.md,
+            horizontal: SpacingTokens.sm,
+          ),
+          decoration: BoxDecoration(
+            color: ColorTokens.surfaceContainerLow,
+            borderRadius: RadiusTokens.borderRadiusLg,
+            border: Border.all(
+              color: ColorTokens.outlineVariant.withValues(alpha: 0.3),
+            ),
+          ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              _buildStatCard(
+                context: context,
+                icon: Symbols.fact_check_rounded,
+                iconColor: ColorTokens.success,
+                value: '82%',
+                label: 'Attendance',
+                valueColor: ColorTokens.success,
+              ),
               _buildStatCard(
                 context: context,
                 icon: Symbols.school_rounded,
@@ -51,30 +70,19 @@ class QuickStatsSection extends StatelessWidget {
                 value: '3',
                 label: 'Lectures',
               ),
-              const SizedBox(width: SpacingTokens.xs),
               _buildStatCard(
                 context: context,
                 icon: Symbols.assignment_rounded,
                 iconColor: ColorTokens.warning,
                 value: '1',
-                label: 'Assignment\nDue',
+                label: 'Due',
               ),
-              const SizedBox(width: SpacingTokens.xs),
-              _buildStatCard(
-                context: context,
-                icon: Symbols.fact_check_rounded,
-                iconColor: ColorTokens.success,
-                value: '82%',
-                label: 'Attendance\n(Target: 75%)',
-                valueColor: ColorTokens.success,
-              ),
-              const SizedBox(width: SpacingTokens.xs),
               _buildStatCard(
                 context: context,
                 icon: Symbols.timer_rounded,
                 iconColor: ColorTokens.primary,
-                value: '8',
-                label: 'Hours\nFocus Goal',
+                value: '8h',
+                label: 'Goal',
               ),
             ],
           ),
@@ -94,42 +102,31 @@ class QuickStatsSection extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          vertical: SpacingTokens.sm,
-          horizontal: SpacingTokens.xxs,
-        ),
-        decoration: BoxDecoration(
-          color: ColorTokens.surface,
-          borderRadius: RadiusTokens.borderRadiusMd,
-          border: Border.all(color: ColorTokens.surfaceVariant),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: iconColor, size: 24, fill: 1.0),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: valueColor ?? ColorTokens.onSurface,
-              ),
-              textAlign: TextAlign.center,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: iconColor, size: 24, fill: 1.0),
+          const SizedBox(height: SpacingTokens.xs),
+          Text(
+            value,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: valueColor ?? ColorTokens.onSurface,
             ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: ColorTokens.onSurfaceVariant,
-                height: 1.2,
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 3,
-              overflow: TextOverflow.visible,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: SpacingTokens.xxs),
+          Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: ColorTokens.onSurfaceVariant,
+              height: 1.2,
             ),
-          ],
-        ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.visible,
+          ),
+        ],
       ),
     );
   }

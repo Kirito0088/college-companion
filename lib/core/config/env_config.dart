@@ -65,12 +65,6 @@ abstract final class EnvConfig {
   /// Created in Google Cloud Console as an "Web application" OAuth client.
   static String get googleWebClientId => _require('GOOGLE_WEB_CLIENT_ID');
 
-  // ── Firebase ──────────────────────────────────────────────────────────
-
-  /// Whether Firebase is enabled for Android.
-  static bool get firebaseAndroidEnabled =>
-      _optional('FIREBASE_ANDROID_ENABLED', 'true').toLowerCase() == 'true';
-
   // ── Logging ───────────────────────────────────────────────────────────
 
   /// The minimum log level (`debug`, `info`, `error`, `none`).

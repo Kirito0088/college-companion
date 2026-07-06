@@ -205,7 +205,7 @@ This eliminates the need for:
 - Firebase Authentication
 - Browser-based OAuth flow (`signInWithOAuth()`)
 
-Firebase is retained only for Analytics, Crashlytics, and FCM — not for authentication.
+Firebase has been completely removed from the project.
 
 ### OAuth Configuration
 **Google Cloud Console** (apis.cloud.google.com):
@@ -232,7 +232,7 @@ Firebase is retained only for Analytics, Crashlytics, and FCM — not for authen
 - Native Google Sign-In dialog (better UX)
 - No custom Edge Functions required
 - Direct Supabase session management
-- Firebase retained only for Analytics, Crashlytics, FCM
+- Firebase completely removed from the project
 - Google Web Client ID required in `.env`
 
 ### Status

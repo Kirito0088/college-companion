@@ -163,6 +163,6 @@ Split when:
 | ML/AI features | Add `ai-engineer` skill |
 | CI/CD pipeline | Add `cd-engineer` skill for `.github/workflows/` |
 | Internationalization | Update `ui-engineer` rules for RTL/locale |
-| Firebase migration | Update `sync-engineer` rules |
+| Supabase migration | Update `sync-engineer` rules |
 
 **Golden rule:** Prefer updating an existing skill over adding a new one.

@@ -211,7 +211,6 @@ Only approved services:
 
 * Supabase
 
-
 Avoid unnecessary SDKs.
 
 ---

@@ -52,26 +52,27 @@ class StatsRow extends StatelessWidget {
         color: ColorTokens.surfaceContainer,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: ColorTokens.outlineVariant.withValues(alpha: 0.1),
+          color: ColorTokens.outlineVariant.withValues(alpha: 0.15),
+          width: 1,
         ),
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 1)),
-        ],
       ),
       child: Column(
         children: [
           Text(
             value,
-            style: theme.textTheme.headlineSmall?.copyWith(
+            style: theme.textTheme.headlineMedium?.copyWith(
               color: valueColor,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -1.0,
             ),
           ),
           const SizedBox(height: SpacingTokens.xs),
           Text(
             label,
-            style: theme.textTheme.labelLarge?.copyWith(
+            style: theme.textTheme.labelMedium?.copyWith(
               color: ColorTokens.onSurfaceVariant,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 0.5,
             ),
           ),
         ],

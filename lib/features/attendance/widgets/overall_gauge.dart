@@ -40,26 +40,36 @@ class OverallGauge extends StatelessWidget {
                     children: [
                       Text(
                         '82%',
-                        style: theme.textTheme.displaySmall?.copyWith(
+                        style: theme.textTheme.displayLarge?.copyWith(
                           color: ColorTokens.onSurface,
                           fontWeight: FontWeight.w700,
                           height: 1.0,
-                          letterSpacing: -1.0,
+                          letterSpacing: -2.0,
                         ),
                       ),
                       const SizedBox(height: SpacingTokens.xs),
                       Text(
                         'Overall Attendance',
-                        style: theme.textTheme.labelLarge?.copyWith(
+                        style: theme.textTheme.titleSmall?.copyWith(
                           color: ColorTokens.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Target: 75%',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: ColorTokens.onSurfaceVariant.withValues(
-                            alpha: 0.7,
+                      const SizedBox(height: SpacingTokens.xs),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: ColorTokens.success.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          'You can miss 12 lectures',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: ColorTokens.success,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),

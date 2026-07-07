@@ -118,14 +118,18 @@ Public application keys are acceptable where intended.
 
 # File Storage
 
-Attendance proof images are stored:
+Lecture evidence (classroom photos) is **local-only and never stored in
+the cloud** (spec §8/§16). Evidence:
 
-* Locally
-* Supabase Storage
+* Stays on the device (app documents directory, relative paths)
+* Carries no sync-metadata and has no Supabase Storage counterpart
+* Is re-verified (sha256) on open and before export
 
-Every uploaded image belongs to exactly one user.
+> Cloud Supabase Storage is **not** used for attendance evidence. (Earlier
+> drafts referenced proof-image URLs in Supabase Storage; superseded by
+> the locked Attendance Record spec — Phase 4 §7, D7.)
 
-Users cannot access another user's files.
+Each local evidence file belongs to exactly one user and is never shared.
 
 ---
 

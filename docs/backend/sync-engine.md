@@ -146,23 +146,29 @@ Prefer soft delete where practical.
 
 ---
 
-# Images
+# Images & Evidence
 
-Attendance proof images follow the same process.
+Lecture evidence (classroom photos) is **local-only and never synced**
+(spec §8/§16). There is no upload to Supabase Storage.
 
 ```text
 Capture Photo
       ↓
-Save Locally
+Save Locally (relative path)
       ↓
-Queue Upload
+Record sha256 + integrity metadata in lecture_evidence
       ↓
-Upload to Supabase Storage
-      ↓
-Store Cloud URL
+Re-verify on open / export only
 ```
 
-If upload fails, retry automatically.
+Evidence stays on the device: it is embedded into the Phase 8 export PDF
+directly from local storage, only when its integrity re-verifies. The
+sync pipeline carries `lecture_records` *metadata* — never the photo.
+
+> **Cloud Supabase Storage is not used for attendance evidence.**
+> (Earlier drafts referenced proof-image URLs in Supabase Storage; that
+> design was superseded by the locked Attendance Record spec's local-
+> only evidence model — Phase 4 §7, D7.)
 
 ---
 

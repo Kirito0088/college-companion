@@ -1,8 +1,11 @@
-/// Sync Queue Table
+/// Sync Queue Table (LOCAL-ONLY — never synced)
 ///
-/// Tracks pending synchronization operations.
-/// Sync state is kept entirely in this table —
-/// business tables contain only business data.
+/// Tracks pending synchronization operations. Per Phase 4 D3 (dual sync
+/// model), per-row sync metadata lives on business tables; **this** queue
+/// owns ordering / retry / batching / background sync.
+///
+/// Local-only tracking with its own lifecycle columns — not a business
+/// entity, so it carries **no** sync-metadata block (Phase 4 §2 exception).
 library;
 
 import 'package:drift/drift.dart';
@@ -10,13 +13,17 @@ import 'package:drift/drift.dart';
 /// Sync operation status.
 enum SyncOperationStatus { pending, syncing, failed }
 
-/// The sync queue table tracks all local changes
-/// that need to be synchronized to Supabase.
+/// The sync queue tracks local changes pending synchronization to Supabase.
 ///
-/// Key design decision:
-/// - No payload storage — read current row state from business tables
-/// - Merge duplicate operations for the same record
-/// - Queue survives app restarts
+/// Key design decisions:
+/// - No payload storage — read current row state from business tables.
+/// - Merge duplicate operations for the same record.
+/// - Queue survives app restarts.
+///
+/// The SQL table name is `sync_queue` (not `sync_queue_items`) via the
+/// explicit `tableName` override so queue entries reference business tables
+/// by their canonical names; `tableName` here refers to the *target* table
+/// of an operation.
 @TableIndex(name: 'idx_sync_queue_record_id', columns: {#recordId})
 @TableIndex(name: 'idx_sync_queue_operation', columns: {#operation})
 @TableIndex(name: 'idx_sync_queue_status', columns: {#isSynced})
@@ -28,10 +35,6 @@ class SyncQueueItems extends Table {
   /// Auto-incrementing primary key.
   IntColumn get id => integer().autoIncrement()();
 
-  /// The name of the business table (e.g., 'semesters', 'subjects').
-  @override
-  String get tableName => 'sync_queue';
-
   /// The UUID of the record in the business table.
   TextColumn get recordId => text()();
 
@@ -41,11 +44,11 @@ class SyncQueueItems extends Table {
   /// Number of sync attempts (starts at 0).
   IntColumn get retryCount => integer().withDefault(const Constant(0))();
 
-  /// ISO 8601 formatted timestamp.
-  TextColumn get createdAt => text()();
+  /// UTC creation timestamp.
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
-  /// ISO 8601 formatted timestamp, NULL if never attempted.
-  TextColumn get lastAttempt => text().nullable()();
+  /// UTC timestamp of the last attempt, or NULL if never attempted.
+  DateTimeColumn get lastAttempt => dateTime().nullable()();
 
   /// Error message if the last attempt failed.
   TextColumn get error => text().nullable()();
@@ -54,5 +57,5 @@ class SyncQueueItems extends Table {
   BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
 
   @override
-  Set<Column> get primaryKey => {id};
+  String get tableName => 'sync_queue';
 }

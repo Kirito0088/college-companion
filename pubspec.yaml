@@ -59,6 +59,10 @@ dev_dependencies:
   drift_dev: ^2.25.0
   build_runner: ^2.4.15
 
+  # Test-only: assert on SQLite-level exceptions (CHECK/UNIQUE/trigger aborts).
+  # Already present transitively via drift; pinned here so tests may import it.
+  sqlite3: ^3.3.3
+
 flutter:
   uses-material-design: true
   assets:

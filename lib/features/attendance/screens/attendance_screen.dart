@@ -3,12 +3,10 @@ import 'package:college_companion/features/attendance/widgets/attendance_trend_c
 import 'package:college_companion/features/attendance/widgets/overall_gauge.dart';
 import 'package:college_companion/features/attendance/widgets/segmented_control.dart';
 import 'package:college_companion/features/attendance/widgets/stats_row.dart';
-
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
-
 import 'package:material_symbols_icons/symbols.dart';
 
 class AttendanceScreen extends StatefulWidget {

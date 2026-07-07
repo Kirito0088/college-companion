@@ -81,7 +81,8 @@ class SubjectRepository {
       _database.subjects,
     )..where((t) => t.userId.equals(userId) & t.id.equals(id))).write(
       SubjectsCompanion(
-        deletedAt: Value(DateTime.now().toUtc().toIso8601String()),
+        deletedAt: Value(DateTime.now().toUtc()),
+        updatedAt: Value(DateTime.now().toUtc()),
       ),
     );
   }

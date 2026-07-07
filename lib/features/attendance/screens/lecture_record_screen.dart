@@ -1,7 +1,14 @@
+import 'package:college_companion/features/attendance/providers/attendance_provider.dart';
+import 'package:college_companion/features/attendance/repositories/lecture_record_repository.dart';
+import 'package:college_companion/features/authentication/models/auth_state.dart';
+import 'package:college_companion/features/authentication/providers/auth_provider.dart';
+import 'package:college_companion/shared/app_metadata.dart';
+import 'package:college_companion/shared/models/lecture_status.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -18,19 +25,52 @@ enum SecondaryStatus {
   final String label;
 }
 
-class LectureRecordScreen extends StatefulWidget {
-  const LectureRecordScreen({super.key});
+/// Context passed into [LectureRecordScreen] via `route.extra`.
+///
+/// The IDs (`timetableId`, `subjectId`, `semesterId`) are required to create
+/// an immutable [lecture_records] row; the display fields drive the lecture
+/// info card at the top of the screen.
+class LectureRecordArgs {
+  const LectureRecordArgs({
+    required this.timetableId,
+    required this.subjectId,
+    required this.semesterId,
+    required this.subjectName,
+    required this.typeLabel,
+    required this.timeRange,
+    required this.dateLabel,
+    this.room,
+    this.faculty,
+  });
 
-  @override
-  State<LectureRecordScreen> createState() => _LectureRecordScreenState();
+  final String timetableId;
+  final String subjectId;
+  final String semesterId;
+  final String subjectName;
+  final String typeLabel;
+  final String timeRange;
+  final String dateLabel;
+  final String? room;
+  final String? faculty;
 }
 
-class _LectureRecordScreenState extends State<LectureRecordScreen> {
+class LectureRecordScreen extends ConsumerStatefulWidget {
+  const LectureRecordScreen({super.key, this.args});
+
+  final LectureRecordArgs? args;
+
+  @override
+  ConsumerState<LectureRecordScreen> createState() =>
+      _LectureRecordScreenState();
+}
+
+class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
   PrimaryStatus? _primaryStatus;
   SecondaryStatus? _secondaryStatus;
   final TextEditingController _noteController = TextEditingController();
   final TextEditingController _otherReasonController = TextEditingController();
   final FocusNode _otherFocusNode = FocusNode();
+  bool _saving = false;
 
   @override
   void dispose() {
@@ -38,6 +78,103 @@ class _LectureRecordScreenState extends State<LectureRecordScreen> {
     _otherReasonController.dispose();
     _otherFocusNode.dispose();
     super.dispose();
+  }
+
+  /// Builds the immutable [LectureStatus] value object from the current
+  /// UI selections. `null` until a primary status is chosen.
+  LectureStatus? _buildLectureStatus() {
+    final otherText = _otherReasonController.text.trim();
+    switch (_primaryStatus) {
+      case PrimaryStatus.present:
+        return _secondaryStatus == SecondaryStatus.other
+            ? LectureStatus.presentWithOther(otherText)
+            : const LectureStatus.present();
+      case PrimaryStatus.absent:
+        switch (_secondaryStatus) {
+          case SecondaryStatus.holiday:
+            return const LectureStatus.absentWith('holiday');
+          case SecondaryStatus.facultyAbsent:
+            return const LectureStatus.absentWith('faculty_absent');
+          case SecondaryStatus.other:
+            return LectureStatus.absentWith('other', otherText);
+          case SecondaryStatus.practicalCancelled:
+          case SecondaryStatus.extraLecture:
+          case null:
+            return const LectureStatus.absent();
+        }
+      case PrimaryStatus.cancelled:
+        switch (_secondaryStatus) {
+          case SecondaryStatus.facultyAbsent:
+            return const LectureStatus.cancelledWith('faculty_absent');
+          case SecondaryStatus.practicalCancelled:
+            return const LectureStatus.cancelledWith('practical_cancelled');
+          case SecondaryStatus.extraLecture:
+            return const LectureStatus.cancelledWith('extra_lecture');
+          case SecondaryStatus.other:
+            return LectureStatus.cancelledWith('other', otherText);
+          case SecondaryStatus.holiday:
+          case null:
+            return const LectureStatus.cancelled();
+        }
+      case null:
+        return null;
+    }
+  }
+
+  /// Saves the immutable lecture record (Phase 4 wiring).
+  ///
+  /// Enforces 1:1 at the repository layer; surfaces a duplicate-slot
+  /// conflict as a friendly SnackBar rather than popping. Non-duplicate
+  /// failures are surfaced verbatim. Pops on success only.
+  Future<void> _saveLectureRecord() async {
+    final args = widget.args;
+    if (args == null) {
+      _showMessage('Lecture context unavailable. Open this from a lecture.');
+      return;
+    }
+
+    final status = _buildLectureStatus();
+    if (status == null) return; // Save button is disabled in this case.
+
+    final authState = ref.read(authStateProvider);
+    if (authState is! AuthAuthenticated) {
+      _showMessage('Sign in to save a lecture record.');
+      return;
+    }
+
+    final noteText = _noteController.text.trim();
+
+    setState(() => _saving = true);
+    try {
+      final repo = ref.read(lectureRecordRepositoryProvider);
+      await repo.create(
+        userId: authState.user.uid,
+        timetableId: args.timetableId,
+        subjectId: args.subjectId,
+        semesterId: args.semesterId,
+        status: status,
+        note: noteText.isEmpty ? null : noteText,
+        deviceTimezone: currentDeviceTimezone(),
+        appVersion: appVersion,
+      );
+      if (!mounted) return;
+      _showMessage('Lecture record saved.');
+      context.pop(true); // signal success to caller
+    } on LectureRecordExistsException {
+      if (!mounted) return;
+      _showMessage('This lecture already has a record.');
+    } on Exception catch (error) {
+      if (!mounted) return;
+      _showMessage('Could not save: $error');
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+    );
   }
 
   void _selectPrimaryStatus(PrimaryStatus status) {
@@ -173,6 +310,17 @@ class _LectureRecordScreenState extends State<LectureRecordScreen> {
   }
 
   Widget _buildLectureInformation(ThemeData theme) {
+    // Display values sourced from route args when available; the existing
+    // mock strings remain as fallbacks so the screen still renders when
+    // opened without args (e.g. during isolated development).
+    final args = widget.args;
+    final subjectName = args?.subjectName ?? 'Advanced Mathematics II';
+    final typeLabel = args?.typeLabel ?? 'Theory';
+    final timeRange = args?.timeRange ?? '09:00 AM - 10:00 AM';
+    final room = args?.room ?? 'Room 402';
+    final faculty = args?.faculty ?? 'Dr. A. Sharma';
+    final dateLabel = args?.dateLabel ?? 'Mon, Sep 15, 2025';
+
     return Container(
       padding: const EdgeInsets.all(SpacingTokens.lg),
       decoration: BoxDecoration(
@@ -184,7 +332,7 @@ class _LectureRecordScreenState extends State<LectureRecordScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Advanced Mathematics II',
+            subjectName,
             style: theme.textTheme.headlineSmall?.copyWith(
               color: ColorTokens.onSurface,
               fontWeight: FontWeight.bold,
@@ -203,7 +351,7 @@ class _LectureRecordScreenState extends State<LectureRecordScreen> {
                   borderRadius: RadiusTokens.borderRadiusSm,
                 ),
                 child: Text(
-                  'Theory',
+                  typeLabel,
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: ColorTokens.primary,
                     fontWeight: FontWeight.bold,
@@ -218,7 +366,7 @@ class _LectureRecordScreenState extends State<LectureRecordScreen> {
               ),
               const SizedBox(width: 4),
               Text(
-                '09:00 AM - 10:00 AM',
+                timeRange,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: ColorTokens.onSurfaceVariant,
                 ),
@@ -241,7 +389,7 @@ class _LectureRecordScreenState extends State<LectureRecordScreen> {
                   ),
                   const SizedBox(width: SpacingTokens.sm),
                   Text(
-                    'Room 402',
+                    room,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: ColorTokens.onSurface,
                     ),
@@ -257,7 +405,7 @@ class _LectureRecordScreenState extends State<LectureRecordScreen> {
                   ),
                   const SizedBox(width: SpacingTokens.sm),
                   Text(
-                    'Dr. A. Sharma',
+                    faculty,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: ColorTokens.onSurface,
                     ),
@@ -276,7 +424,7 @@ class _LectureRecordScreenState extends State<LectureRecordScreen> {
               ),
               const SizedBox(width: SpacingTokens.sm),
               Text(
-                'Mon, Sep 15, 2025',
+                dateLabel,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: ColorTokens.onSurface,
                 ),
@@ -467,10 +615,7 @@ class _LectureRecordScreenState extends State<LectureRecordScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: RadiusTokens.borderRadiusLg,
-              borderSide: BorderSide(
-                color: ColorTokens.primary,
-                width: 2,
-              ),
+              borderSide: BorderSide(color: ColorTokens.primary, width: 2),
             ),
             contentPadding: EdgeInsets.all(SpacingTokens.lg),
           ),
@@ -617,12 +762,9 @@ class _LectureRecordScreenState extends State<LectureRecordScreen> {
           SizedBox(
             width: double.infinity,
             child: FilledButton(
-              onPressed: _primaryStatus == null
+              onPressed: (_primaryStatus == null || _saving)
                   ? null
-                  : () {
-                      // Save logic goes here in the future
-                      context.pop();
-                    },
+                  : _saveLectureRecord,
               style: FilledButton.styleFrom(
                 backgroundColor: ColorTokens.primary,
                 foregroundColor: ColorTokens.onPrimary,
@@ -633,9 +775,12 @@ class _LectureRecordScreenState extends State<LectureRecordScreen> {
                   borderRadius: RadiusTokens.borderRadiusLg,
                 ),
               ),
-              child: const Text(
-                'Save Lecture Record',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              child: Text(
+                _saving ? 'Saving…' : 'Save Lecture Record',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
             ),
           ),

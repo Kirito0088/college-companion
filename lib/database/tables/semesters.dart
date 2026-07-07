@@ -2,15 +2,20 @@
 ///
 /// Stores academic semesters belonging to a user.
 /// Supports archiving and soft delete.
+///
+/// Carries the standard sync-metadata block (Phase 4 §2) via
+/// [SyncableColumns]; syncs in Phase 5.
 library;
 
+import 'package:college_companion/database/syncable_columns.dart';
 import 'package:drift/drift.dart';
 
 /// A semester record.
 ///
-/// Matches Supabase schema in supabase/migrations/00001_mvp_foundation.sql
+/// Mirrors the Supabase schema in `supabase/migrations/00001_mvp_foundation.sql`
+/// (business columns); local sync-metadata columns are local-only tracking.
 @DataClassName('SemesterEntity')
-class Semesters extends Table {
+class Semesters extends Table with SyncableColumns {
   /// UUID primary key.
   TextColumn get id => text()();
 
@@ -21,7 +26,7 @@ class Semesters extends Table {
   TextColumn get name => text()();
 
   /// Array of working days (0=Monday, 6=Sunday). Matches timetable.day_of_week.
-  /// Stored as JSON string since Drift does not have native array support.
+  /// Stored as JSON string since Drift has no native array support.
   TextColumn get workingDays => text()();
 
   /// Whether this is the active semester.
@@ -30,14 +35,8 @@ class Semesters extends Table {
   /// Whether this semester has been archived.
   BoolColumn get isArchived => boolean().withDefault(const Constant(false))();
 
-  /// ISO 8601 formatted UTC timestamp.
-  TextColumn get createdAt => text()();
-
-  /// ISO 8601 formatted UTC timestamp.
-  TextColumn get updatedAt => text()();
-
   /// Soft delete: NULL = active, timestamp = deleted.
-  TextColumn get deletedAt => text().nullable()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};

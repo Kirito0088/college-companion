@@ -1,9 +1,25 @@
 # Local Data Foundation (v0.3.0)
 
-> Status: Architecture Design  
-> Version: 0.3.0-draft  
-> Date: 2026-06-29  
-> Author: Kimi K2.6  
+> **⚠️ SUPERSEDED** — This document was Phase 4's original design draft. It
+> described a state ("Drift empty / 0 tables", mutable per-day
+> attendance) that has since evolved into the immutable lecture_records
+> ledger + local-only evidence architecture.
+>
+> The **current source of truth** is:
+> - The locked Attendance Record spec
+> - The Phase 4 Finalized Architecture Addendum
+>   (`C:\Users\jayes\.claude\plans\phase-4-follow-up-shimmering-planet.md`)
+> - `docs/backend/database.md` and `docs/backend/sync-engine.md`
+>   (both updated for the immutable `lecture_records` ledger +
+>   local-only evidence + the Syncable Entity Convention)
+>
+> This file is retained for historical context only. Do not implement
+> against it.
+
+> Status: Architecture Design (superseded)
+> Version: 0.3.0-draft
+> Date: 2026-06-29
+> Author: Kimi K2.6
 
 ---
 

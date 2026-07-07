@@ -122,7 +122,8 @@ class AssignmentRepository {
     )..where((t) => t.userId.equals(userId) & t.id.equals(id))).write(
       AssignmentsCompanion(
         status: Value(AssignmentStatus.completed.name),
-        completedAt: Value(DateTime.now().toUtc().toIso8601String()),
+        completedAt: Value(DateTime.now().toUtc()),
+        updatedAt: Value(DateTime.now().toUtc()),
       ),
     );
   }
@@ -133,7 +134,8 @@ class AssignmentRepository {
       _database.assignments,
     )..where((t) => t.userId.equals(userId) & t.id.equals(id))).write(
       AssignmentsCompanion(
-        deletedAt: Value(DateTime.now().toUtc().toIso8601String()),
+        deletedAt: Value(DateTime.now().toUtc()),
+        updatedAt: Value(DateTime.now().toUtc()),
       ),
     );
   }

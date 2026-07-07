@@ -263,6 +263,33 @@ Active
 
 ---
 
+## CC-0009
+
+### Date
+2026-07-06
+
+### Category
+Architecture
+
+### Decision
+Completely remove Firebase from the project.
+
+### Reason
+The application relies fully on Supabase for Auth and Drift for local database. Firebase (Crashlytics, Analytics, FCM) was deemed unnecessary for the MVP phase, to reduce complexity and remove third-party dependencies that are not currently part of the core architecture.
+
+### Alternatives Considered
+- Retain Firebase just for Analytics and Crashlytics (adds complexity without immediate core product benefit)
+
+### Impact
+- Reduced build times and app size
+- Simplified Gradle configuration
+- Complete transition to a pure Supabase/Drift architecture
+
+### Status
+Active
+
+---
+
 ## Revision History
 
 ### v1.1
@@ -270,3 +297,28 @@ Added CC-0007 (Firebase/Supabase auth split) and CC-0008 (auth state management)
 
 ### v1.0
 Initial decision log created.
+
+---
+
+## CC-0009
+
+### Date
+2026-07-06
+
+### Category
+Architecture
+
+### Decision
+Completely removed every Firebase-related artifact from the project. 
+Firebase is no longer used for Analytics, Crashlytics, or FCM.
+
+### Reason
+Firebase was not part of the current architecture. The application currently uses Drift (local source of truth) and Supabase for authentication and synchronization. This simplifies the tech stack and removes unnecessary dependencies.
+
+### Impact
+- Removes unused Firebase dependencies and plugins
+- Simplifies Android build configuration
+
+### Status
+Active
+

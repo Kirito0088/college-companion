@@ -35,6 +35,9 @@ class UserRepository {
   ///
   /// Step 2 (non-blocking): fire-and-forget Supabase upsert. Failure is
   /// logged; the app is offline-first.
+  ///
+  /// Stores only: uid, display name, email, profile photo URL. The
+  /// Supabase upsert uses the UID (`id`) as the conflict key.
   Future<void> upsertUser(AppUser user) async {
     final now = DateTime.now().toUtc();
 

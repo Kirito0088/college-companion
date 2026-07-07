@@ -48,8 +48,37 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                       },
                     ),
                     const SizedBox(height: LayoutTokens.sectionGap),
-                    if (_selectedIndex == 0) ..._buildOverviewTab(context),
-                    if (_selectedIndex == 1) ..._buildSubjectsTab(context),
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      transitionBuilder:
+                          (Widget child, Animation<double> animation) {
+                            return FadeTransition(
+                              opacity: animation,
+                              child: SlideTransition(
+                                position:
+                                    Tween<Offset>(
+                                      begin: const Offset(0.0, 0.05),
+                                      end: Offset.zero,
+                                    ).animate(
+                                      CurvedAnimation(
+                                        parent: animation,
+                                        curve: Curves.easeOutCubic,
+                                      ),
+                                    ),
+                                child: child,
+                              ),
+                            );
+                          },
+                      child: KeyedSubtree(
+                        key: ValueKey<int>(_selectedIndex),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: _selectedIndex == 0
+                              ? _buildOverviewTab(context)
+                              : _buildSubjectsTab(context),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -95,8 +124,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     return Container(
       padding: const EdgeInsets.all(LayoutTokens.cardPadding),
       decoration: BoxDecoration(
-        color: ColorTokens.success.withValues(alpha: 0.15),
+        color: ColorTokens.success.withValues(alpha: 0.1),
         borderRadius: RadiusTokens.borderRadiusLg,
+        border: Border.all(
+          color: ColorTokens.success.withValues(alpha: 0.2),
+          width: 1,
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -160,9 +193,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         ),
         Container(
           padding: const EdgeInsets.all(LayoutTokens.cardPadding),
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: ColorTokens.surfaceContainer,
             borderRadius: RadiusTokens.borderRadiusXl,
+            border: Border.all(
+              color: ColorTokens.outlineVariant.withValues(alpha: 0.15),
+              width: 1,
+            ),
           ),
           child: Column(
             children: [
@@ -257,9 +294,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         ),
         Container(
           padding: const EdgeInsets.all(LayoutTokens.cardPadding),
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: ColorTokens.surfaceContainer,
             borderRadius: RadiusTokens.borderRadiusXl,
+            border: Border.all(
+              color: ColorTokens.outlineVariant.withValues(alpha: 0.15),
+              width: 1,
+            ),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -347,9 +388,15 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     final theme = Theme.of(context);
     return Material(
       color: ColorTokens.surfaceContainer,
-      borderRadius: RadiusTokens.borderRadiusLg,
       elevation: 0,
       clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: RadiusTokens.borderRadiusLg,
+        side: BorderSide(
+          color: ColorTokens.outlineVariant.withValues(alpha: 0.15),
+          width: 1,
+        ),
+      ),
       child: InkWell(
         onTap: () {}, // TODO: Navigate
         child: Padding(
@@ -427,9 +474,15 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
     return Material(
       color: ColorTokens.surfaceContainer,
-      borderRadius: RadiusTokens.borderRadiusXl,
       elevation: 0,
       clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: RadiusTokens.borderRadiusXl,
+        side: BorderSide(
+          color: ColorTokens.outlineVariant.withValues(alpha: 0.15),
+          width: 1,
+        ),
+      ),
       child: InkWell(
         onTap: () {}, // TODO: Navigate to Subject Attendance screen
         child: Padding(

@@ -59,7 +59,10 @@ class SemesterRepository {
     return (_database.update(
       _database.semesters,
     )..where((t) => t.userId.equals(userId) & t.id.equals(id))).write(
-      SemestersCompanion(deletedAt: Value(DateTime.now().toIso8601String())),
+      SemestersCompanion(
+        deletedAt: Value(DateTime.now().toUtc()),
+        updatedAt: Value(DateTime.now().toUtc()),
+      ),
     );
   }
 

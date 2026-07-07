@@ -1,0 +1,15 @@
+# build.yaml — Drift code generation options.
+#
+# Per Phase 4 architecture §A5: adopt `store_date_time_values_as_text` from day
+# one so `DateTimeColumn` values are stored as ISO 8601 text instead of Unix
+# epoch integers. This is storage-compatible with the previous `TextColumn`
+# ISO-string approach (the v2 `createAll` baseline has no production data, so
+# no `migrateFromUnixTimestampsToText` step is needed) and avoids a painful
+# int<->text migration later. It also keeps local storage symmetric with the
+# Supabase `timestamptz` cloud mirror.
+targets:
+  $default:
+    builders:
+      drift_dev:
+        options:
+          store_date_time_values_as_text: true

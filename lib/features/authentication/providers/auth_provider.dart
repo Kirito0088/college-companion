@@ -22,8 +22,9 @@ final authServiceProvider = Provider<AuthService>((ref) {
 
 /// Provides the [UserRepository] instance.
 final userRepositoryProvider = Provider<UserRepository>((ref) {
+  final database = ref.watch(databaseProvider);
   final client = ref.watch(supabaseClientProvider);
-  return UserRepository(client);
+  return UserRepository(database, client);
 });
 
 /// Manages authentication state across the application.

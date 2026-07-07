@@ -205,6 +205,8 @@ This eliminates the need for:
 - Firebase Authentication
 - Browser-based OAuth flow (`signInWithOAuth()`)
 
+Firebase has been completely removed from the project.
+
 ### OAuth Configuration
 **Google Cloud Console** (apis.cloud.google.com):
 1. Create OAuth 2.0 Client ID → Application type: **"Web application"**
@@ -230,6 +232,7 @@ This eliminates the need for:
 - Native Google Sign-In dialog (better UX)
 - No custom Edge Functions required
 - Direct Supabase session management
+- Firebase completely removed from the project
 - Google Web Client ID required in `.env`
 
 ### Status

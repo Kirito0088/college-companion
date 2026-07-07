@@ -2,15 +2,20 @@
 ///
 /// Stores internal assessment scores (unit tests, quizzes, mid-terms, etc.).
 /// Free-form exam names to accommodate diverse college naming conventions.
+///
+/// Carries the standard sync-metadata block (Phase 4 §2) via
+/// [SyncableColumns]; syncs in Phase 5.
 library;
 
+import 'package:college_companion/database/syncable_columns.dart';
 import 'package:drift/drift.dart';
 
 /// An internal marks record.
 ///
-/// Matches Supabase schema in supabase/migrations/00001_mvp_foundation.sql
+/// Mirrors the Supabase schema in `supabase/migrations/00001_mvp_foundation.sql`
+/// (business columns); local sync-metadata columns are local-only tracking.
 @DataClassName('InternalMarkEntity')
-class InternalMarks extends Table {
+class InternalMarks extends Table with SyncableColumns {
   /// UUID primary key.
   TextColumn get id => text()();
 
@@ -24,22 +29,21 @@ class InternalMarks extends Table {
   TextColumn get examName => text()();
 
   /// Score achieved. Must be >= 0 and <= max_marks.
-  RealColumn get marksObtained =>
-      real().customConstraint('NOT NULL CHECK (marks_obtained >= 0)')();
+  RealColumn get marksObtained => real()();
 
   /// Maximum possible score. Must be > 0.
-  RealColumn get maxMarks =>
-      real().customConstraint('NOT NULL CHECK (max_marks > 0)')();
-
-  /// ISO 8601 formatted UTC timestamp.
-  TextColumn get createdAt => text()();
-
-  /// ISO 8601 formatted UTC timestamp.
-  TextColumn get updatedAt => text()();
+  RealColumn get maxMarks => real()();
 
   /// Soft delete: NULL = active, timestamp = deleted.
-  TextColumn get deletedAt => text().nullable()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
+
+  @override
+  List<String> get customConstraints => [
+    "CHECK (marks_obtained >= 0)",
+    "CHECK (max_marks > 0)",
+    "CHECK (marks_obtained <= max_marks)",
+  ];
 }

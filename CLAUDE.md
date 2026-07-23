@@ -151,9 +151,17 @@ No implementation is complete until:
 
 -   Code formatted
 -   flutter analyze passes
--   Relevant tests pass
--   Physical device validation completed (UI)
+-   Unit and widget tests pass (`flutter test`)
+-   Virtual Device automated testing completed (`emulator-5554`)
 -   Documentation updated (if needed)
+
+------------------------------------------------------------------------
+
+# Automated Testing & Virtual Device Policy
+
+-   **Virtual Device Target:** Testing is performed on the Android Virtual Device `Automated_Device` (`emulator-5554`).
+-   **Auth Bypassing for E2E Testing:** Integration tests in `integration_test/` use Riverpod `authStateProvider` overrides to bypass Google OAuth dialogs and test authenticated app features (Dashboard, Attendance, Timetable, Subjects, Settings).
+-   **Production Build Safety:** All test overrides live strictly inside `integration_test/`. Production entrypoints (`lib/main.dart`) remain 100% clean and use real Supabase/Google authentication.
 
 ------------------------------------------------------------------------
 

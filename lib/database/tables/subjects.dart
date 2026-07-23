@@ -12,6 +12,7 @@ enum SubjectType { theory, practical, tutorial }
 /// A subject record.
 ///
 /// Matches Supabase schema in supabase/migrations/00001_mvp_foundation.sql
+@TableIndex(name: 'idx_subjects_user_deleted', columns: {#userId, #deletedAt})
 @DataClassName('SubjectEntity')
 class Subjects extends Table {
   /// UUID primary key.

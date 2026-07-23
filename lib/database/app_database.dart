@@ -7,12 +7,15 @@ import 'dart:io';
 
 import 'package:college_companion/database/tables/assignments.dart';
 import 'package:college_companion/database/tables/attendance.dart';
+import 'package:college_companion/database/tables/calendar_events.dart';
 import 'package:college_companion/database/tables/internal_marks.dart';
+import 'package:college_companion/database/tables/resources.dart';
 import 'package:college_companion/database/tables/semesters.dart';
 import 'package:college_companion/database/tables/subjects.dart';
 import 'package:college_companion/database/tables/sync_queue.dart';
 import 'package:college_companion/database/tables/timetable.dart';
 import 'package:college_companion/database/tables/user_settings.dart';
+import 'package:college_companion/database/tables/users.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
@@ -24,6 +27,7 @@ part 'app_database.g.dart';
 /// Drift is the ORM. All tables are registered directly here.
 @DriftDatabase(
   tables: [
+    Users,
     Semesters,
     Subjects,
     Timetable,
@@ -32,6 +36,8 @@ part 'app_database.g.dart';
     InternalMarks,
     UserSettings,
     SyncQueueItems,
+    CalendarEvents,
+    Resources,
   ],
 )
 class AppDatabase extends _$AppDatabase {

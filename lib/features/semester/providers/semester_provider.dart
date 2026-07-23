@@ -10,5 +10,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Provides the [SemesterRepository] instance.
 final semesterRepositoryProvider = Provider<SemesterRepository>((ref) {
   final database = ref.watch(databaseProvider);
-  return SemesterRepository(database);
+  final syncQueueRepository = ref.watch(syncQueueRepositoryProvider);
+  return SemesterRepository(database, syncQueueRepository);
 });

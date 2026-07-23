@@ -9,6 +9,7 @@ import 'package:drift/drift.dart';
 /// An internal marks record.
 ///
 /// Matches Supabase schema in supabase/migrations/00001_mvp_foundation.sql
+@TableIndex(name: 'idx_internal_marks_subject', columns: {#subjectId, #deletedAt})
 @DataClassName('InternalMarkEntity')
 class InternalMarks extends Table {
   /// UUID primary key.

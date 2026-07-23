@@ -9,6 +9,7 @@ import 'package:drift/drift.dart';
 /// A user profile record.
 ///
 /// Matches Supabase schema in supabase/migrations/00001_mvp_foundation.sql
+@TableIndex(name: 'idx_users_id', columns: {#id})
 @DataClassName('UserEntity')
 class Users extends Table {
   /// Supabase user ID (text, not UUID).

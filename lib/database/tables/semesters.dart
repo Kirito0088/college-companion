@@ -9,6 +9,8 @@ import 'package:drift/drift.dart';
 /// A semester record.
 ///
 /// Matches Supabase schema in supabase/migrations/00001_mvp_foundation.sql
+@TableIndex(name: 'idx_semesters_user_deleted', columns: {#userId, #deletedAt})
+@TableIndex(name: 'idx_semesters_user_current', columns: {#userId, #isCurrent})
 @DataClassName('SemesterEntity')
 class Semesters extends Table {
   /// UUID primary key.

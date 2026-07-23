@@ -1,22 +1,26 @@
-/// Quick Stats Section Widget
+/// Academic Snapshot Section Widget
 ///
-/// Displays a row of statistical summaries.
+/// Displays a synthesized summary of macro-level academic status.
 library;
 
+import 'package:college_companion/features/dashboard/providers/dashboard_provider.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
-/// A section displaying quick statistical summaries in a row of 4 cards.
-class QuickStatsSection extends StatelessWidget {
-  /// Creates a [QuickStatsSection].
-  const QuickStatsSection({super.key});
+/// A section displaying interpreted academic states to provide reassurance.
+class AcademicSnapshotSection extends ConsumerWidget {
+  /// Creates a [AcademicSnapshotSection].
+  const AcademicSnapshotSection({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final snapshot = ref.watch(dashboardSnapshotProvider);
     final theme = Theme.of(context);
+    final stats = snapshot.academicSnapshot;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -25,16 +29,10 @@ class QuickStatsSection extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Today at a glance',
-              style: theme.textTheme.titleMedium?.copyWith(
+              'Academic Snapshot',
+              style: theme.textTheme.titleLarge?.copyWith(
                 color: ColorTokens.onSurface,
                 fontWeight: FontWeight.w600,
-              ),
-            ),
-            Text(
-              'View All',
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: ColorTokens.primary,
               ),
             ),
           ],
@@ -49,7 +47,7 @@ class QuickStatsSection extends StatelessWidget {
             color: ColorTokens.surfaceContainerLow,
             borderRadius: RadiusTokens.borderRadiusLg,
             border: Border.all(
-              color: ColorTokens.outlineVariant.withValues(alpha: 0.3),
+              color: ColorTokens.outlineVariant.withValues(alpha: 0.1),
             ),
           ),
           child: Row(
@@ -59,30 +57,32 @@ class QuickStatsSection extends StatelessWidget {
                 context: context,
                 icon: Symbols.fact_check_rounded,
                 iconColor: ColorTokens.success,
-                value: '82%',
+                value: stats.attendanceState,
                 label: 'Attendance',
                 valueColor: ColorTokens.success,
               ),
               _buildStatCard(
                 context: context,
                 icon: Symbols.school_rounded,
-                iconColor: ColorTokens.primary,
-                value: '3',
-                label: 'Lectures',
+                iconColor: ColorTokens.warning, // Indicating heavy workload
+                value: stats.workloadState,
+                label: 'Workload',
+                valueColor: ColorTokens.warning,
               ),
               _buildStatCard(
                 context: context,
                 icon: Symbols.assignment_rounded,
-                iconColor: ColorTokens.warning,
-                value: '1',
-                label: 'Due',
+                iconColor: ColorTokens.primary,
+                value: stats.deadlinesState,
+                label: 'Deadlines',
               ),
               _buildStatCard(
                 context: context,
-                icon: Symbols.timer_rounded,
+                icon: Symbols
+                    .coffee_rounded, // Replaced timer with coffee for break
                 iconColor: ColorTokens.primary,
-                value: '8h',
-                label: 'Goal',
+                value: stats.nextBreakState,
+                label: 'Next Break',
               ),
             ],
           ),
@@ -109,7 +109,8 @@ class QuickStatsSection extends StatelessWidget {
           const SizedBox(height: SpacingTokens.xs),
           Text(
             value,
-            style: theme.textTheme.titleLarge?.copyWith(
+            style: theme.textTheme.titleMedium?.copyWith(
+              // Reduced from titleLarge to fit text like '1 Due Tonight'
               fontWeight: FontWeight.w700,
               color: valueColor ?? ColorTokens.onSurface,
             ),
@@ -123,8 +124,7 @@ class QuickStatsSection extends StatelessWidget {
               height: 1.2,
             ),
             textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.visible,
+            maxLines: 1,
           ),
         ],
       ),

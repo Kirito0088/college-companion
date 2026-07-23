@@ -12,6 +12,7 @@ import 'package:drift/drift.dart';
 ///
 /// Hybrid approach: structured columns for stable, queryable settings;
 /// JSONB (stored as text) for extensible, evolving preferences.
+@TableIndex(name: 'idx_user_settings_user', columns: {#userId})
 @DataClassName('UserSettingsEntity')
 class UserSettings extends Table {
   /// UUID primary key.

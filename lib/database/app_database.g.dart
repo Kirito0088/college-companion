@@ -3191,6 +3191,970 @@ class AttendanceCompanion extends UpdateCompanion<AttendanceEntity> {
   }
 }
 
+class $LectureRecordsTable extends LectureRecords
+    with TableInfo<$LectureRecordsTable, LectureRecordEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LectureRecordsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('pending'),
+  );
+  static const VerificationMeta _syncVersionMeta = const VerificationMeta(
+    'syncVersion',
+  );
+  @override
+  late final GeneratedColumn<int> syncVersion = GeneratedColumn<int>(
+    'sync_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _createdOfflineMeta = const VerificationMeta(
+    'createdOffline',
+  );
+  @override
+  late final GeneratedColumn<bool> createdOffline = GeneratedColumn<bool>(
+    'created_offline',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("created_offline" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _lastSyncedAtMeta = const VerificationMeta(
+    'lastSyncedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastSyncedAt = GeneratedColumn<DateTime>(
+    'last_synced_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _timetableIdMeta = const VerificationMeta(
+    'timetableId',
+  );
+  @override
+  late final GeneratedColumn<String> timetableId = GeneratedColumn<String>(
+    'timetable_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _subjectIdMeta = const VerificationMeta(
+    'subjectId',
+  );
+  @override
+  late final GeneratedColumn<String> subjectId = GeneratedColumn<String>(
+    'subject_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _semesterIdMeta = const VerificationMeta(
+    'semesterId',
+  );
+  @override
+  late final GeneratedColumn<String> semesterId = GeneratedColumn<String>(
+    'semester_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusTextMeta = const VerificationMeta(
+    'statusText',
+  );
+  @override
+  late final GeneratedColumn<String> statusText = GeneratedColumn<String>(
+    'status_text',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _recordedAtMeta = const VerificationMeta(
+    'recordedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> recordedAt = GeneratedColumn<DateTime>(
+    'recorded_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deviceTimezoneMeta = const VerificationMeta(
+    'deviceTimezone',
+  );
+  @override
+  late final GeneratedColumn<String> deviceTimezone = GeneratedColumn<String>(
+    'device_timezone',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _appVersionMeta = const VerificationMeta(
+    'appVersion',
+  );
+  @override
+  late final GeneratedColumn<String> appVersion = GeneratedColumn<String>(
+    'app_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    createdAt,
+    updatedAt,
+    syncStatus,
+    syncVersion,
+    createdOffline,
+    lastSyncedAt,
+    id,
+    timetableId,
+    subjectId,
+    semesterId,
+    userId,
+    statusText,
+    note,
+    recordedAt,
+    deviceTimezone,
+    appVersion,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'lecture_records';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LectureRecordEntity> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    }
+    if (data.containsKey('sync_version')) {
+      context.handle(
+        _syncVersionMeta,
+        syncVersion.isAcceptableOrUnknown(
+          data['sync_version']!,
+          _syncVersionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_offline')) {
+      context.handle(
+        _createdOfflineMeta,
+        createdOffline.isAcceptableOrUnknown(
+          data['created_offline']!,
+          _createdOfflineMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_synced_at')) {
+      context.handle(
+        _lastSyncedAtMeta,
+        lastSyncedAt.isAcceptableOrUnknown(
+          data['last_synced_at']!,
+          _lastSyncedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('timetable_id')) {
+      context.handle(
+        _timetableIdMeta,
+        timetableId.isAcceptableOrUnknown(
+          data['timetable_id']!,
+          _timetableIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_timetableIdMeta);
+    }
+    if (data.containsKey('subject_id')) {
+      context.handle(
+        _subjectIdMeta,
+        subjectId.isAcceptableOrUnknown(data['subject_id']!, _subjectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_subjectIdMeta);
+    }
+    if (data.containsKey('semester_id')) {
+      context.handle(
+        _semesterIdMeta,
+        semesterId.isAcceptableOrUnknown(data['semester_id']!, _semesterIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_semesterIdMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('status_text')) {
+      context.handle(
+        _statusTextMeta,
+        statusText.isAcceptableOrUnknown(data['status_text']!, _statusTextMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusTextMeta);
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('recorded_at')) {
+      context.handle(
+        _recordedAtMeta,
+        recordedAt.isAcceptableOrUnknown(data['recorded_at']!, _recordedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_recordedAtMeta);
+    }
+    if (data.containsKey('device_timezone')) {
+      context.handle(
+        _deviceTimezoneMeta,
+        deviceTimezone.isAcceptableOrUnknown(
+          data['device_timezone']!,
+          _deviceTimezoneMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_deviceTimezoneMeta);
+    }
+    if (data.containsKey('app_version')) {
+      context.handle(
+        _appVersionMeta,
+        appVersion.isAcceptableOrUnknown(data['app_version']!, _appVersionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_appVersionMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {timetableId},
+  ];
+  @override
+  LectureRecordEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LectureRecordEntity(
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+      syncVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sync_version'],
+      )!,
+      createdOffline: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}created_offline'],
+      )!,
+      lastSyncedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_synced_at'],
+      ),
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      timetableId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}timetable_id'],
+      )!,
+      subjectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}subject_id'],
+      )!,
+      semesterId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}semester_id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      statusText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status_text'],
+      )!,
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      recordedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}recorded_at'],
+      )!,
+      deviceTimezone: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}device_timezone'],
+      )!,
+      appVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}app_version'],
+      )!,
+    );
+  }
+
+  @override
+  $LectureRecordsTable createAlias(String alias) {
+    return $LectureRecordsTable(attachedDatabase, alias);
+  }
+}
+
+class LectureRecordEntity extends DataClass
+    implements Insertable<LectureRecordEntity> {
+  /// UTC creation timestamp.
+  final DateTime createdAt;
+
+  /// UTC last-modified timestamp — sync bookkeeping; bumped on every local
+  /// write. Repositories set this explicitly (no local auto-touch trigger,
+  /// to keep DateTime text-format consistency with Drift's reader).
+  final DateTime updatedAt;
+
+  /// Per-row sync state: `pending`, `synced`, or `failed`.
+  final String syncStatus;
+
+  /// Bumped on each local change; aids conflict detection (Phase 5).
+  final int syncVersion;
+
+  /// Whether this row was created while offline (offline-first origin).
+  final bool createdOffline;
+
+  /// Timestamp of the last successful cloud push. NULL if never synced
+  /// (spec §11 "Sync timestamp").
+  final DateTime? lastSyncedAt;
+
+  /// UUID primary key.
+  final String id;
+
+  /// 1:1 link to the timetable entry; UNIQUE enforces one record per
+  /// lecture slot (spec §3).
+  final String timetableId;
+
+  /// Subject for this lecture (from the timetable slot).
+  final String subjectId;
+
+  /// Denormalized from `subjects` for per-semester export/verification.
+  final String semesterId;
+
+  /// Owner — RLS filter key.
+  final String userId;
+
+  /// Encoded primary + secondary status (spec §5). Format:
+  /// `"primary|secondary"` (e.g. `"present|"`, `"absent|holiday"`).
+  /// The "Other" secondary status carries its custom text after a second
+  /// pipe: `"absent|other|Family emergency"`.
+  final String statusText;
+
+  /// Optional immutable note (spec §7).
+  final String? note;
+
+  /// UTC instant the record was created (user-facing "recorded at").
+  final DateTime recordedAt;
+
+  /// Local timezone when the record was created (spec §11; drives the
+  /// ≤23:59-local-lecture-day evidence window, spec §9).
+  final String deviceTimezone;
+
+  /// App version that created this record (spec §11).
+  final String appVersion;
+  const LectureRecordEntity({
+    required this.createdAt,
+    required this.updatedAt,
+    required this.syncStatus,
+    required this.syncVersion,
+    required this.createdOffline,
+    this.lastSyncedAt,
+    required this.id,
+    required this.timetableId,
+    required this.subjectId,
+    required this.semesterId,
+    required this.userId,
+    required this.statusText,
+    this.note,
+    required this.recordedAt,
+    required this.deviceTimezone,
+    required this.appVersion,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['sync_status'] = Variable<String>(syncStatus);
+    map['sync_version'] = Variable<int>(syncVersion);
+    map['created_offline'] = Variable<bool>(createdOffline);
+    if (!nullToAbsent || lastSyncedAt != null) {
+      map['last_synced_at'] = Variable<DateTime>(lastSyncedAt);
+    }
+    map['id'] = Variable<String>(id);
+    map['timetable_id'] = Variable<String>(timetableId);
+    map['subject_id'] = Variable<String>(subjectId);
+    map['semester_id'] = Variable<String>(semesterId);
+    map['user_id'] = Variable<String>(userId);
+    map['status_text'] = Variable<String>(statusText);
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    map['recorded_at'] = Variable<DateTime>(recordedAt);
+    map['device_timezone'] = Variable<String>(deviceTimezone);
+    map['app_version'] = Variable<String>(appVersion);
+    return map;
+  }
+
+  LectureRecordsCompanion toCompanion(bool nullToAbsent) {
+    return LectureRecordsCompanion(
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      syncStatus: Value(syncStatus),
+      syncVersion: Value(syncVersion),
+      createdOffline: Value(createdOffline),
+      lastSyncedAt: lastSyncedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSyncedAt),
+      id: Value(id),
+      timetableId: Value(timetableId),
+      subjectId: Value(subjectId),
+      semesterId: Value(semesterId),
+      userId: Value(userId),
+      statusText: Value(statusText),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      recordedAt: Value(recordedAt),
+      deviceTimezone: Value(deviceTimezone),
+      appVersion: Value(appVersion),
+    );
+  }
+
+  factory LectureRecordEntity.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LectureRecordEntity(
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+      syncVersion: serializer.fromJson<int>(json['syncVersion']),
+      createdOffline: serializer.fromJson<bool>(json['createdOffline']),
+      lastSyncedAt: serializer.fromJson<DateTime?>(json['lastSyncedAt']),
+      id: serializer.fromJson<String>(json['id']),
+      timetableId: serializer.fromJson<String>(json['timetableId']),
+      subjectId: serializer.fromJson<String>(json['subjectId']),
+      semesterId: serializer.fromJson<String>(json['semesterId']),
+      userId: serializer.fromJson<String>(json['userId']),
+      statusText: serializer.fromJson<String>(json['statusText']),
+      note: serializer.fromJson<String?>(json['note']),
+      recordedAt: serializer.fromJson<DateTime>(json['recordedAt']),
+      deviceTimezone: serializer.fromJson<String>(json['deviceTimezone']),
+      appVersion: serializer.fromJson<String>(json['appVersion']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+      'syncVersion': serializer.toJson<int>(syncVersion),
+      'createdOffline': serializer.toJson<bool>(createdOffline),
+      'lastSyncedAt': serializer.toJson<DateTime?>(lastSyncedAt),
+      'id': serializer.toJson<String>(id),
+      'timetableId': serializer.toJson<String>(timetableId),
+      'subjectId': serializer.toJson<String>(subjectId),
+      'semesterId': serializer.toJson<String>(semesterId),
+      'userId': serializer.toJson<String>(userId),
+      'statusText': serializer.toJson<String>(statusText),
+      'note': serializer.toJson<String?>(note),
+      'recordedAt': serializer.toJson<DateTime>(recordedAt),
+      'deviceTimezone': serializer.toJson<String>(deviceTimezone),
+      'appVersion': serializer.toJson<String>(appVersion),
+    };
+  }
+
+  LectureRecordEntity copyWith({
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    String? syncStatus,
+    int? syncVersion,
+    bool? createdOffline,
+    Value<DateTime?> lastSyncedAt = const Value.absent(),
+    String? id,
+    String? timetableId,
+    String? subjectId,
+    String? semesterId,
+    String? userId,
+    String? statusText,
+    Value<String?> note = const Value.absent(),
+    DateTime? recordedAt,
+    String? deviceTimezone,
+    String? appVersion,
+  }) => LectureRecordEntity(
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    syncStatus: syncStatus ?? this.syncStatus,
+    syncVersion: syncVersion ?? this.syncVersion,
+    createdOffline: createdOffline ?? this.createdOffline,
+    lastSyncedAt: lastSyncedAt.present ? lastSyncedAt.value : this.lastSyncedAt,
+    id: id ?? this.id,
+    timetableId: timetableId ?? this.timetableId,
+    subjectId: subjectId ?? this.subjectId,
+    semesterId: semesterId ?? this.semesterId,
+    userId: userId ?? this.userId,
+    statusText: statusText ?? this.statusText,
+    note: note.present ? note.value : this.note,
+    recordedAt: recordedAt ?? this.recordedAt,
+    deviceTimezone: deviceTimezone ?? this.deviceTimezone,
+    appVersion: appVersion ?? this.appVersion,
+  );
+  LectureRecordEntity copyWithCompanion(LectureRecordsCompanion data) {
+    return LectureRecordEntity(
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+      syncVersion: data.syncVersion.present
+          ? data.syncVersion.value
+          : this.syncVersion,
+      createdOffline: data.createdOffline.present
+          ? data.createdOffline.value
+          : this.createdOffline,
+      lastSyncedAt: data.lastSyncedAt.present
+          ? data.lastSyncedAt.value
+          : this.lastSyncedAt,
+      id: data.id.present ? data.id.value : this.id,
+      timetableId: data.timetableId.present
+          ? data.timetableId.value
+          : this.timetableId,
+      subjectId: data.subjectId.present ? data.subjectId.value : this.subjectId,
+      semesterId: data.semesterId.present
+          ? data.semesterId.value
+          : this.semesterId,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      statusText: data.statusText.present
+          ? data.statusText.value
+          : this.statusText,
+      note: data.note.present ? data.note.value : this.note,
+      recordedAt: data.recordedAt.present
+          ? data.recordedAt.value
+          : this.recordedAt,
+      deviceTimezone: data.deviceTimezone.present
+          ? data.deviceTimezone.value
+          : this.deviceTimezone,
+      appVersion: data.appVersion.present
+          ? data.appVersion.value
+          : this.appVersion,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LectureRecordEntity(')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('syncVersion: $syncVersion, ')
+          ..write('createdOffline: $createdOffline, ')
+          ..write('lastSyncedAt: $lastSyncedAt, ')
+          ..write('id: $id, ')
+          ..write('timetableId: $timetableId, ')
+          ..write('subjectId: $subjectId, ')
+          ..write('semesterId: $semesterId, ')
+          ..write('userId: $userId, ')
+          ..write('statusText: $statusText, ')
+          ..write('note: $note, ')
+          ..write('recordedAt: $recordedAt, ')
+          ..write('deviceTimezone: $deviceTimezone, ')
+          ..write('appVersion: $appVersion')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    createdAt,
+    updatedAt,
+    syncStatus,
+    syncVersion,
+    createdOffline,
+    lastSyncedAt,
+    id,
+    timetableId,
+    subjectId,
+    semesterId,
+    userId,
+    statusText,
+    note,
+    recordedAt,
+    deviceTimezone,
+    appVersion,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LectureRecordEntity &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.syncStatus == this.syncStatus &&
+          other.syncVersion == this.syncVersion &&
+          other.createdOffline == this.createdOffline &&
+          other.lastSyncedAt == this.lastSyncedAt &&
+          other.id == this.id &&
+          other.timetableId == this.timetableId &&
+          other.subjectId == this.subjectId &&
+          other.semesterId == this.semesterId &&
+          other.userId == this.userId &&
+          other.statusText == this.statusText &&
+          other.note == this.note &&
+          other.recordedAt == this.recordedAt &&
+          other.deviceTimezone == this.deviceTimezone &&
+          other.appVersion == this.appVersion);
+}
+
+class LectureRecordsCompanion extends UpdateCompanion<LectureRecordEntity> {
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<String> syncStatus;
+  final Value<int> syncVersion;
+  final Value<bool> createdOffline;
+  final Value<DateTime?> lastSyncedAt;
+  final Value<String> id;
+  final Value<String> timetableId;
+  final Value<String> subjectId;
+  final Value<String> semesterId;
+  final Value<String> userId;
+  final Value<String> statusText;
+  final Value<String?> note;
+  final Value<DateTime> recordedAt;
+  final Value<String> deviceTimezone;
+  final Value<String> appVersion;
+  final Value<int> rowid;
+  const LectureRecordsCompanion({
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.syncVersion = const Value.absent(),
+    this.createdOffline = const Value.absent(),
+    this.lastSyncedAt = const Value.absent(),
+    this.id = const Value.absent(),
+    this.timetableId = const Value.absent(),
+    this.subjectId = const Value.absent(),
+    this.semesterId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.statusText = const Value.absent(),
+    this.note = const Value.absent(),
+    this.recordedAt = const Value.absent(),
+    this.deviceTimezone = const Value.absent(),
+    this.appVersion = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LectureRecordsCompanion.insert({
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.syncVersion = const Value.absent(),
+    this.createdOffline = const Value.absent(),
+    this.lastSyncedAt = const Value.absent(),
+    required String id,
+    required String timetableId,
+    required String subjectId,
+    required String semesterId,
+    required String userId,
+    required String statusText,
+    this.note = const Value.absent(),
+    required DateTime recordedAt,
+    required String deviceTimezone,
+    required String appVersion,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       timetableId = Value(timetableId),
+       subjectId = Value(subjectId),
+       semesterId = Value(semesterId),
+       userId = Value(userId),
+       statusText = Value(statusText),
+       recordedAt = Value(recordedAt),
+       deviceTimezone = Value(deviceTimezone),
+       appVersion = Value(appVersion);
+  static Insertable<LectureRecordEntity> custom({
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<String>? syncStatus,
+    Expression<int>? syncVersion,
+    Expression<bool>? createdOffline,
+    Expression<DateTime>? lastSyncedAt,
+    Expression<String>? id,
+    Expression<String>? timetableId,
+    Expression<String>? subjectId,
+    Expression<String>? semesterId,
+    Expression<String>? userId,
+    Expression<String>? statusText,
+    Expression<String>? note,
+    Expression<DateTime>? recordedAt,
+    Expression<String>? deviceTimezone,
+    Expression<String>? appVersion,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (syncVersion != null) 'sync_version': syncVersion,
+      if (createdOffline != null) 'created_offline': createdOffline,
+      if (lastSyncedAt != null) 'last_synced_at': lastSyncedAt,
+      if (id != null) 'id': id,
+      if (timetableId != null) 'timetable_id': timetableId,
+      if (subjectId != null) 'subject_id': subjectId,
+      if (semesterId != null) 'semester_id': semesterId,
+      if (userId != null) 'user_id': userId,
+      if (statusText != null) 'status_text': statusText,
+      if (note != null) 'note': note,
+      if (recordedAt != null) 'recorded_at': recordedAt,
+      if (deviceTimezone != null) 'device_timezone': deviceTimezone,
+      if (appVersion != null) 'app_version': appVersion,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LectureRecordsCompanion copyWith({
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<String>? syncStatus,
+    Value<int>? syncVersion,
+    Value<bool>? createdOffline,
+    Value<DateTime?>? lastSyncedAt,
+    Value<String>? id,
+    Value<String>? timetableId,
+    Value<String>? subjectId,
+    Value<String>? semesterId,
+    Value<String>? userId,
+    Value<String>? statusText,
+    Value<String?>? note,
+    Value<DateTime>? recordedAt,
+    Value<String>? deviceTimezone,
+    Value<String>? appVersion,
+    Value<int>? rowid,
+  }) {
+    return LectureRecordsCompanion(
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      syncStatus: syncStatus ?? this.syncStatus,
+      syncVersion: syncVersion ?? this.syncVersion,
+      createdOffline: createdOffline ?? this.createdOffline,
+      lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
+      id: id ?? this.id,
+      timetableId: timetableId ?? this.timetableId,
+      subjectId: subjectId ?? this.subjectId,
+      semesterId: semesterId ?? this.semesterId,
+      userId: userId ?? this.userId,
+      statusText: statusText ?? this.statusText,
+      note: note ?? this.note,
+      recordedAt: recordedAt ?? this.recordedAt,
+      deviceTimezone: deviceTimezone ?? this.deviceTimezone,
+      appVersion: appVersion ?? this.appVersion,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (syncVersion.present) {
+      map['sync_version'] = Variable<int>(syncVersion.value);
+    }
+    if (createdOffline.present) {
+      map['created_offline'] = Variable<bool>(createdOffline.value);
+    }
+    if (lastSyncedAt.present) {
+      map['last_synced_at'] = Variable<DateTime>(lastSyncedAt.value);
+    }
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (timetableId.present) {
+      map['timetable_id'] = Variable<String>(timetableId.value);
+    }
+    if (subjectId.present) {
+      map['subject_id'] = Variable<String>(subjectId.value);
+    }
+    if (semesterId.present) {
+      map['semester_id'] = Variable<String>(semesterId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (statusText.present) {
+      map['status_text'] = Variable<String>(statusText.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (recordedAt.present) {
+      map['recorded_at'] = Variable<DateTime>(recordedAt.value);
+    }
+    if (deviceTimezone.present) {
+      map['device_timezone'] = Variable<String>(deviceTimezone.value);
+    }
+    if (appVersion.present) {
+      map['app_version'] = Variable<String>(appVersion.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LectureRecordsCompanion(')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('syncVersion: $syncVersion, ')
+          ..write('createdOffline: $createdOffline, ')
+          ..write('lastSyncedAt: $lastSyncedAt, ')
+          ..write('id: $id, ')
+          ..write('timetableId: $timetableId, ')
+          ..write('subjectId: $subjectId, ')
+          ..write('semesterId: $semesterId, ')
+          ..write('userId: $userId, ')
+          ..write('statusText: $statusText, ')
+          ..write('note: $note, ')
+          ..write('recordedAt: $recordedAt, ')
+          ..write('deviceTimezone: $deviceTimezone, ')
+          ..write('appVersion: $appVersion, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $AssignmentsTable extends Assignments
     with TableInfo<$AssignmentsTable, AssignmentEntity> {
   @override
@@ -6858,6 +7822,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SubjectsTable subjects = $SubjectsTable(this);
   late final $TimetableTable timetable = $TimetableTable(this);
   late final $AttendanceTable attendance = $AttendanceTable(this);
+  late final $LectureRecordsTable lectureRecords = $LectureRecordsTable(this);
   late final $AssignmentsTable assignments = $AssignmentsTable(this);
   late final $InternalMarksTable internalMarks = $InternalMarksTable(this);
   late final $UserSettingsTable userSettings = $UserSettingsTable(this);
@@ -6950,6 +7915,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     subjects,
     timetable,
     attendance,
+    lectureRecords,
     assignments,
     internalMarks,
     userSettings,
@@ -6976,6 +7942,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     idxCalendarEventsUserDate,
     idxResourcesSubject,
   ];
+  @override
+  DriftDatabaseOptions get options =>
+      const DriftDatabaseOptions(storeDateTimeAsText: true);
 }
 
 typedef $$UsersTableCreateCompanionBuilder =
@@ -8470,6 +9439,445 @@ typedef $$AttendanceTableProcessedTableManager =
         BaseReferences<_$AppDatabase, $AttendanceTable, AttendanceEntity>,
       ),
       AttendanceEntity,
+      PrefetchHooks Function()
+    >;
+typedef $$LectureRecordsTableCreateCompanionBuilder =
+    LectureRecordsCompanion Function({
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<String> syncStatus,
+      Value<int> syncVersion,
+      Value<bool> createdOffline,
+      Value<DateTime?> lastSyncedAt,
+      required String id,
+      required String timetableId,
+      required String subjectId,
+      required String semesterId,
+      required String userId,
+      required String statusText,
+      Value<String?> note,
+      required DateTime recordedAt,
+      required String deviceTimezone,
+      required String appVersion,
+      Value<int> rowid,
+    });
+typedef $$LectureRecordsTableUpdateCompanionBuilder =
+    LectureRecordsCompanion Function({
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<String> syncStatus,
+      Value<int> syncVersion,
+      Value<bool> createdOffline,
+      Value<DateTime?> lastSyncedAt,
+      Value<String> id,
+      Value<String> timetableId,
+      Value<String> subjectId,
+      Value<String> semesterId,
+      Value<String> userId,
+      Value<String> statusText,
+      Value<String?> note,
+      Value<DateTime> recordedAt,
+      Value<String> deviceTimezone,
+      Value<String> appVersion,
+      Value<int> rowid,
+    });
+
+class $$LectureRecordsTableFilterComposer
+    extends Composer<_$AppDatabase, $LectureRecordsTable> {
+  $$LectureRecordsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get syncVersion => $composableBuilder(
+    column: $table.syncVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get createdOffline => $composableBuilder(
+    column: $table.createdOffline,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastSyncedAt => $composableBuilder(
+    column: $table.lastSyncedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get timetableId => $composableBuilder(
+    column: $table.timetableId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get subjectId => $composableBuilder(
+    column: $table.subjectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get semesterId => $composableBuilder(
+    column: $table.semesterId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get statusText => $composableBuilder(
+    column: $table.statusText,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get recordedAt => $composableBuilder(
+    column: $table.recordedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deviceTimezone => $composableBuilder(
+    column: $table.deviceTimezone,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get appVersion => $composableBuilder(
+    column: $table.appVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LectureRecordsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LectureRecordsTable> {
+  $$LectureRecordsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get syncVersion => $composableBuilder(
+    column: $table.syncVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get createdOffline => $composableBuilder(
+    column: $table.createdOffline,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastSyncedAt => $composableBuilder(
+    column: $table.lastSyncedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get timetableId => $composableBuilder(
+    column: $table.timetableId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get subjectId => $composableBuilder(
+    column: $table.subjectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get semesterId => $composableBuilder(
+    column: $table.semesterId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get statusText => $composableBuilder(
+    column: $table.statusText,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get recordedAt => $composableBuilder(
+    column: $table.recordedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deviceTimezone => $composableBuilder(
+    column: $table.deviceTimezone,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get appVersion => $composableBuilder(
+    column: $table.appVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LectureRecordsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LectureRecordsTable> {
+  $$LectureRecordsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get syncVersion => $composableBuilder(
+    column: $table.syncVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get createdOffline => $composableBuilder(
+    column: $table.createdOffline,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastSyncedAt => $composableBuilder(
+    column: $table.lastSyncedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get timetableId => $composableBuilder(
+    column: $table.timetableId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get subjectId =>
+      $composableBuilder(column: $table.subjectId, builder: (column) => column);
+
+  GeneratedColumn<String> get semesterId => $composableBuilder(
+    column: $table.semesterId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<String> get statusText => $composableBuilder(
+    column: $table.statusText,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get recordedAt => $composableBuilder(
+    column: $table.recordedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get deviceTimezone => $composableBuilder(
+    column: $table.deviceTimezone,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get appVersion => $composableBuilder(
+    column: $table.appVersion,
+    builder: (column) => column,
+  );
+}
+
+class $$LectureRecordsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LectureRecordsTable,
+          LectureRecordEntity,
+          $$LectureRecordsTableFilterComposer,
+          $$LectureRecordsTableOrderingComposer,
+          $$LectureRecordsTableAnnotationComposer,
+          $$LectureRecordsTableCreateCompanionBuilder,
+          $$LectureRecordsTableUpdateCompanionBuilder,
+          (
+            LectureRecordEntity,
+            BaseReferences<
+              _$AppDatabase,
+              $LectureRecordsTable,
+              LectureRecordEntity
+            >,
+          ),
+          LectureRecordEntity,
+          PrefetchHooks Function()
+        > {
+  $$LectureRecordsTableTableManager(
+    _$AppDatabase db,
+    $LectureRecordsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LectureRecordsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LectureRecordsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LectureRecordsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<int> syncVersion = const Value.absent(),
+                Value<bool> createdOffline = const Value.absent(),
+                Value<DateTime?> lastSyncedAt = const Value.absent(),
+                Value<String> id = const Value.absent(),
+                Value<String> timetableId = const Value.absent(),
+                Value<String> subjectId = const Value.absent(),
+                Value<String> semesterId = const Value.absent(),
+                Value<String> userId = const Value.absent(),
+                Value<String> statusText = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<DateTime> recordedAt = const Value.absent(),
+                Value<String> deviceTimezone = const Value.absent(),
+                Value<String> appVersion = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LectureRecordsCompanion(
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                syncStatus: syncStatus,
+                syncVersion: syncVersion,
+                createdOffline: createdOffline,
+                lastSyncedAt: lastSyncedAt,
+                id: id,
+                timetableId: timetableId,
+                subjectId: subjectId,
+                semesterId: semesterId,
+                userId: userId,
+                statusText: statusText,
+                note: note,
+                recordedAt: recordedAt,
+                deviceTimezone: deviceTimezone,
+                appVersion: appVersion,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<int> syncVersion = const Value.absent(),
+                Value<bool> createdOffline = const Value.absent(),
+                Value<DateTime?> lastSyncedAt = const Value.absent(),
+                required String id,
+                required String timetableId,
+                required String subjectId,
+                required String semesterId,
+                required String userId,
+                required String statusText,
+                Value<String?> note = const Value.absent(),
+                required DateTime recordedAt,
+                required String deviceTimezone,
+                required String appVersion,
+                Value<int> rowid = const Value.absent(),
+              }) => LectureRecordsCompanion.insert(
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                syncStatus: syncStatus,
+                syncVersion: syncVersion,
+                createdOffline: createdOffline,
+                lastSyncedAt: lastSyncedAt,
+                id: id,
+                timetableId: timetableId,
+                subjectId: subjectId,
+                semesterId: semesterId,
+                userId: userId,
+                statusText: statusText,
+                note: note,
+                recordedAt: recordedAt,
+                deviceTimezone: deviceTimezone,
+                appVersion: appVersion,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LectureRecordsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LectureRecordsTable,
+      LectureRecordEntity,
+      $$LectureRecordsTableFilterComposer,
+      $$LectureRecordsTableOrderingComposer,
+      $$LectureRecordsTableAnnotationComposer,
+      $$LectureRecordsTableCreateCompanionBuilder,
+      $$LectureRecordsTableUpdateCompanionBuilder,
+      (
+        LectureRecordEntity,
+        BaseReferences<
+          _$AppDatabase,
+          $LectureRecordsTable,
+          LectureRecordEntity
+        >,
+      ),
+      LectureRecordEntity,
       PrefetchHooks Function()
     >;
 typedef $$AssignmentsTableCreateCompanionBuilder =
@@ -10254,6 +11662,8 @@ class $AppDatabaseManager {
       $$TimetableTableTableManager(_db, _db.timetable);
   $$AttendanceTableTableManager get attendance =>
       $$AttendanceTableTableManager(_db, _db.attendance);
+  $$LectureRecordsTableTableManager get lectureRecords =>
+      $$LectureRecordsTableTableManager(_db, _db.lectureRecords);
   $$AssignmentsTableTableManager get assignments =>
       $$AssignmentsTableTableManager(_db, _db.assignments);
   $$InternalMarksTableTableManager get internalMarks =>

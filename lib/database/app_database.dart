@@ -9,6 +9,7 @@ import 'package:college_companion/database/tables/assignments.dart';
 import 'package:college_companion/database/tables/attendance.dart';
 import 'package:college_companion/database/tables/calendar_events.dart';
 import 'package:college_companion/database/tables/internal_marks.dart';
+import 'package:college_companion/database/tables/lecture_records.dart';
 import 'package:college_companion/database/tables/resources.dart';
 import 'package:college_companion/database/tables/semesters.dart';
 import 'package:college_companion/database/tables/subjects.dart';
@@ -32,6 +33,7 @@ part 'app_database.g.dart';
     Subjects,
     Timetable,
     Attendance,
+    LectureRecords,
     Assignments,
     InternalMarks,
     UserSettings,

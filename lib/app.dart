@@ -11,6 +11,7 @@ library;
 import 'package:college_companion/core/constants/app_constants.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
+import 'package:college_companion/providers/app_providers.dart';
 import 'package:college_companion/routing/app_router.dart';
 import 'package:college_companion/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -44,6 +45,7 @@ class _CollegeCompanionAppState extends ConsumerState<CollegeCompanionApp> {
   @override
   void initState() {
     super.initState();
+    ref.read(syncServiceProvider);
     _authStateSubscription = ref.listenManual<AuthState>(
       authStateProvider,
       (_, _) => _authRefreshNotifier.value++,

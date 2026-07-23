@@ -1,13 +1,9 @@
 /// Assignments Table
 ///
-/// Stores student assignments with due dates, status tracking, and
-/// completion timestamps.
-///
-/// Carries the standard sync-metadata block (Phase 4 §2) via
-/// [SyncableColumns]; syncs in Phase 5.
+/// Stores student assignments with due dates, status tracking,
+/// and completion timestamps.
 library;
 
-import 'package:college_companion/database/syncable_columns.dart';
 import 'package:drift/drift.dart';
 
 /// Assignment status.
@@ -15,10 +11,12 @@ enum AssignmentStatus { pending, completed }
 
 /// An assignment record.
 ///
-/// Mirrors the Supabase schema in `supabase/migrations/00001_mvp_foundation.sql`
-/// (business columns); local sync-metadata columns are local-only tracking.
+/// Matches Supabase schema in supabase/migrations/00001_mvp_foundation.sql
+@TableIndex(name: 'idx_assignments_user_status', columns: {#userId, #status, #deletedAt})
+@TableIndex(name: 'idx_assignments_subject', columns: {#subjectId})
+@TableIndex(name: 'idx_assignments_due_date', columns: {#dueDate})
 @DataClassName('AssignmentEntity')
-class Assignments extends Table with SyncableColumns {
+class Assignments extends Table {
   /// UUID primary key.
   TextColumn get id => text()();
 
@@ -34,24 +32,27 @@ class Assignments extends Table with SyncableColumns {
   /// Optional detailed description of the assignment.
   TextColumn get description => text().nullable()();
 
-  /// The date the assignment is due, as ISO 8601 `YYYY-MM-DD`.
-  /// Kept as text (date-only) so lexicographic order matches date order.
+  /// The date the assignment is due.
+  /// Stored as ISO 8601 date string (YYYY-MM-DD).
   TextColumn get dueDate => text()();
 
   /// Assignment status: pending or completed.
-  TextColumn get status => text().withDefault(const Constant('pending'))();
+  TextColumn get status => text()();
 
-  /// Timestamp when status changed to completed. NULL while pending.
-  DateTimeColumn get completedAt => dateTime().nullable()();
+  /// Timestamp when status changed to completed.
+  /// NULL while pending.
+  /// Stored as ISO 8601 datetime string.
+  TextColumn get completedAt => text().nullable()();
+
+  /// ISO 8601 formatted UTC timestamp.
+  TextColumn get createdAt => text()();
+
+  /// ISO 8601 formatted UTC timestamp.
+  TextColumn get updatedAt => text()();
 
   /// Soft delete: NULL = active, timestamp = deleted.
-  DateTimeColumn get deletedAt => dateTime().nullable()();
+  TextColumn get deletedAt => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
-
-  @override
-  List<String> get customConstraints => [
-    "CHECK (status IN ('pending', 'completed'))",
-  ];
 }

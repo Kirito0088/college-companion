@@ -1,22 +1,26 @@
 /// Today Schedule Section Widget
 ///
-/// Displays a summary of today's schedule and activities.
+/// Displays a chronological flow of today's events from the DashboardSnapshot.
 library;
 
+import 'package:college_companion/features/dashboard/providers/dashboard_provider.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
-/// A section displaying today's overview.
-class TodayOverviewSection extends StatelessWidget {
+/// A section displaying today's chronological flow.
+class TodayOverviewSection extends ConsumerWidget {
   /// Creates a [TodayOverviewSection].
   const TodayOverviewSection({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final snapshot = ref.watch(dashboardSnapshotProvider);
     final theme = Theme.of(context);
+    final events = snapshot.timelineEvents;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -25,8 +29,8 @@ class TodayOverviewSection extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "Today's Schedule",
-              style: theme.textTheme.titleMedium?.copyWith(
+              "Today's Flow",
+              style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: theme.colorScheme.onSurface,
               ),
@@ -39,41 +43,17 @@ class TodayOverviewSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: SpacingTokens.md),
-        _buildClassItem(
-          context,
-          timeText: '08:00',
-          meridiem: 'AM',
-          className: 'Statistics ML',
-          room: 'Room 305',
-          isNow: true,
-        ),
-        const SizedBox(height: SpacingTokens.sm),
-        _buildClassItem(
-          context,
-          timeText: '10:00',
-          meridiem: 'AM',
-          className: 'Artificial Intelligence',
-          room: 'Room 302',
-          isNow: false,
-        ),
-        const SizedBox(height: SpacingTokens.sm),
-        _buildClassItem(
-          context,
-          timeText: '12:00',
-          meridiem: 'PM',
-          className: 'DevOps',
-          room: 'Lab 1',
-          isNow: false,
-        ),
-        const SizedBox(height: SpacingTokens.md),
-        Center(
-          child: TextButton(
-            onPressed: () {},
-            child: Text(
-              '+1 more',
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: ColorTokens.onSurfaceVariant,
-              ),
+        ...events.map(
+          (event) => Padding(
+            padding: const EdgeInsets.only(bottom: SpacingTokens.xs),
+            child: _buildClassItem(
+              context,
+              timeText: event.timeString,
+              meridiem: event.meridiem,
+              className: event.title,
+              room: event.location,
+              isNow: event.isNow,
+              isPast: event.isPast,
             ),
           ),
         ),
@@ -88,125 +68,121 @@ class TodayOverviewSection extends StatelessWidget {
     required String className,
     required String room,
     required bool isNow,
+    required bool isPast,
   }) {
     final theme = Theme.of(context);
+    // Visual fading for past events (Cognitive Relief)
+    final opacity = isPast ? 0.4 : 1.0;
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 60,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                timeText,
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: isNow
-                      ? ColorTokens.onSurface
-                      : ColorTokens.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Text(
-                meridiem,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: ColorTokens.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: SpacingTokens.md),
-        Expanded(
-          child: Container(
-            decoration: isNow
-                ? BoxDecoration(
-                    color: ColorTokens.surface,
-                    border: Border.all(color: ColorTokens.surfaceVariant),
-                    borderRadius: RadiusTokens.borderRadiusMd,
-                  )
-                : const BoxDecoration(
-                    borderRadius: RadiusTokens.borderRadiusMd,
+    return Opacity(
+      opacity: opacity,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 52,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                const SizedBox(height: 12),
+                Text(
+                  timeText,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: isNow
+                        ? ColorTokens.onSurface
+                        : ColorTokens.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
                   ),
-            child: ClipRRect(
-              borderRadius: RadiusTokens.borderRadiusMd,
-              child: Stack(
-                children: [
-                  if (isNow)
-                    Positioned(
-                      left: 0,
-                      top: 0,
-                      bottom: 0,
-                      width: 4,
-                      child: Container(color: ColorTokens.primary),
+                ),
+                Text(
+                  meridiem,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: ColorTokens.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: SpacingTokens.sm),
+          Expanded(
+            child: Container(
+              decoration: isNow
+                  ? BoxDecoration(
+                      color: ColorTokens.surfaceContainer,
+                      borderRadius: RadiusTokens.borderRadiusMd,
+                      border: Border.all(
+                        color: ColorTokens.primary.withValues(alpha: 0.2),
+                        width: 1,
+                      ),
+                    )
+                  : const BoxDecoration(
+                      borderRadius: RadiusTokens.borderRadiusMd,
                     ),
-                  Padding(
-                    padding: isNow
-                        ? const EdgeInsets.fromLTRB(16, 12, 12, 12)
-                        : const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 4,
-                          ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                className,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  color: ColorTokens.onSurface,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                room,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: ColorTokens.onSurfaceVariant,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
-                        Row(
+              child: ClipRRect(
+                borderRadius: RadiusTokens.borderRadiusMd,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (isNow)
-                              Text(
-                                'NOW',
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: ColorTokens.success,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 1.0,
-                                ),
+                            Text(
+                              className,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: ColorTokens.onSurface,
+                                fontWeight: FontWeight.w600,
                               ),
-                            const SizedBox(width: SpacingTokens.xs),
-                            Icon(
-                              Symbols.chevron_right_rounded,
-                              color: isNow
-                                  ? ColorTokens.success
-                                  : ColorTokens.onSurfaceVariant,
-                              size: 20,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              room,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: ColorTokens.onSurfaceVariant,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),
-                      ],
-                    ),
+                      ),
+                      Row(
+                        children: [
+                          if (isNow)
+                            Text(
+                              'NOW',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: ColorTokens.success,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          const SizedBox(width: SpacingTokens.xs),
+                          Icon(
+                            Symbols.chevron_right_rounded,
+                            color: isNow
+                                ? ColorTokens.success
+                                : ColorTokens.onSurfaceVariant,
+                            size: 20,
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

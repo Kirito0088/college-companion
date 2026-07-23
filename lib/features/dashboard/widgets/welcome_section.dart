@@ -6,12 +6,13 @@ library;
 
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
+import 'package:college_companion/features/dashboard/providers/dashboard_provider.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
-/// A welcome header displaying the greeting, user name, and a notification bell.
+/// A welcome header displaying the synthesized greeting, user name, and a notification bell.
 class WelcomeSection extends ConsumerWidget {
   /// Creates a [WelcomeSection].
   const WelcomeSection({super.key});
@@ -19,6 +20,7 @@ class WelcomeSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateProvider);
+    final snapshot = ref.watch(dashboardSnapshotProvider);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -27,18 +29,16 @@ class WelcomeSection extends ConsumerWidget {
         ? extractDisplayName(authState.user.displayName)
         : 'Student';
 
-    final greeting = getGreeting();
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
           child: Text(
-            '$greeting,\n$displayName 👋',
-            style: theme.textTheme.headlineMedium?.copyWith(
+            '${snapshot.greetingContext},\n$displayName.',
+            style: theme.textTheme.titleLarge?.copyWith(
               color: colorScheme.onSurface,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               height: 1.2,
             ),
           ),
@@ -70,18 +70,5 @@ class WelcomeSection extends ConsumerWidget {
   static String extractDisplayName(String fullName) {
     final parts = fullName.trim().split(' ');
     return parts.first;
-  }
-
-  /// Returns an appropriate greeting based on current time of day.
-  static String getGreeting() {
-    final hour = DateTime.now().hour;
-
-    if (hour < 12) {
-      return 'Good Morning';
-    } else if (hour < 17) {
-      return 'Good Afternoon';
-    } else {
-      return 'Good Evening';
-    }
   }
 }

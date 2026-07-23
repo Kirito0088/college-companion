@@ -14,6 +14,7 @@ import 'package:college_companion/features/authentication/services/auth_service.
 import 'package:college_companion/providers/app_providers.dart';
 import 'package:college_companion/utilities/logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 /// Provides the [AuthService] instance.
 final authServiceProvider = Provider<AuthService>((ref) {
@@ -24,7 +25,8 @@ final authServiceProvider = Provider<AuthService>((ref) {
 final userRepositoryProvider = Provider<UserRepository>((ref) {
   final database = ref.watch(databaseProvider);
   final client = ref.watch(supabaseClientProvider);
-  return UserRepository(database, client);
+  final syncQueueRepository = ref.watch(syncQueueRepositoryProvider);
+  return UserRepository(database, client, syncQueueRepository);
 });
 
 /// Manages authentication state across the application.
@@ -38,12 +40,42 @@ final authStateProvider = NotifierProvider<AuthStateNotifier, AuthState>(
 /// Notifier that manages the [AuthState] lifecycle.
 class AuthStateNotifier extends Notifier<AuthState> {
   static const String _tag = 'AuthStateNotifier';
+  StreamSubscription<supabase.AuthState>? _authSubscription;
 
   @override
   AuthState build() {
+    final authService = ref.watch(authServiceProvider);
+
+    _authSubscription?.cancel();
+    _authSubscription = authService.authStateChanges.listen(_onAuthStateChanged);
+
+    ref.onDispose(() {
+      _authSubscription?.cancel();
+    });
+
     // Check for an existing Supabase Auth session on initialization.
     unawaited(Future<void>.microtask(_restoreSession));
     return const AuthInitial();
+  }
+
+  void _onAuthStateChanged(supabase.AuthState data) {
+    final event = data.event;
+    final session = data.session;
+
+    AppLogger.info('Supabase Auth Event: $event', tag: _tag);
+
+    if (session != null) {
+      final authService = ref.read(authServiceProvider);
+      final user = authService.getCurrentUser();
+      if (user != null && state is! AuthAuthenticated) {
+        state = AuthAuthenticated(user);
+        _syncUserProfile(user);
+      }
+    } else if (event == supabase.AuthChangeEvent.signedOut) {
+      if (state is! AuthUnauthenticated) {
+        state = const AuthUnauthenticated();
+      }
+    }
   }
 
   /// Attempts to restore an existing Supabase Auth session.

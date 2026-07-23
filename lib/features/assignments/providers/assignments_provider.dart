@@ -10,5 +10,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Provides the [AssignmentRepository] instance.
 final assignmentRepositoryProvider = Provider<AssignmentRepository>((ref) {
   final database = ref.watch(databaseProvider);
-  return AssignmentRepository(database);
+  final syncQueueRepository = ref.watch(syncQueueRepositoryProvider);
+  return AssignmentRepository(database, syncQueueRepository);
 });

@@ -1,19 +1,15 @@
 /// Users Table
 ///
-/// Stores user profile information synced from Supabase Auth. This table
-/// mirrors the Supabase users table for local (offline-first) access.
-///
-/// A download-only projection of Supabase Auth (Phase 4 §2 justified
-/// exception): `UserRepository` upserts directly and never pushes through
-/// the sync queue, so it carries only `createdAt`/`updatedAt` (no
-/// sync-status block).
+/// Stores user profile information synced from Supabase Auth.
+/// This table mirrors the Supabase users table for local access.
 library;
 
 import 'package:drift/drift.dart';
 
 /// A user profile record.
 ///
-/// Mirrors the Supabase schema in `supabase/migrations/00001_mvp_foundation.sql`.
+/// Matches Supabase schema in supabase/migrations/00001_mvp_foundation.sql
+@TableIndex(name: 'idx_users_id', columns: {#id})
 @DataClassName('UserEntity')
 class Users extends Table {
   /// Supabase user ID (text, not UUID).
@@ -28,11 +24,11 @@ class Users extends Table {
   /// Google profile photo URL. Nullable.
   TextColumn get profilePhoto => text().nullable()();
 
-  /// UTC creation timestamp.
-  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  /// ISO 8601 formatted UTC timestamp.
+  TextColumn get createdAt => text()();
 
-  /// UTC last-modified timestamp.
-  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+  /// ISO 8601 formatted UTC timestamp.
+  TextColumn get updatedAt => text()();
 
   @override
   Set<Column> get primaryKey => {id};

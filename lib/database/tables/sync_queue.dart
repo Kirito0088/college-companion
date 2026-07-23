@@ -32,6 +32,9 @@ class SyncQueueItems extends Table {
   @override
   String get tableName => 'sync_queue';
 
+  /// The name of the business table (e.g., 'semesters', 'subjects').
+  TextColumn get targetTable => text()();
+
   /// The UUID of the record in the business table.
   TextColumn get recordId => text()();
 
@@ -53,6 +56,5 @@ class SyncQueueItems extends Table {
   /// Whether the operation has been synced.
   BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
 
-  @override
-  Set<Column> get primaryKey => {id};
+
 }

@@ -1,9 +1,14 @@
+import 'package:college_companion/database/app_database.dart';
+import 'package:college_companion/features/attendance/providers/attendance_provider.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:uuid/uuid.dart';
 
 enum PrimaryStatus { present, absent, cancelled }
 
@@ -18,14 +23,14 @@ enum SecondaryStatus {
   final String label;
 }
 
-class LectureRecordScreen extends StatefulWidget {
+class LectureRecordScreen extends ConsumerStatefulWidget {
   const LectureRecordScreen({super.key});
 
   @override
-  State<LectureRecordScreen> createState() => _LectureRecordScreenState();
+  ConsumerState<LectureRecordScreen> createState() => _LectureRecordScreenState();
 }
 
-class _LectureRecordScreenState extends State<LectureRecordScreen> {
+class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
   PrimaryStatus? _primaryStatus;
   SecondaryStatus? _secondaryStatus;
   final TextEditingController _noteController = TextEditingController();
@@ -616,9 +621,29 @@ class _LectureRecordScreenState extends State<LectureRecordScreen> {
             child: FilledButton(
               onPressed: _primaryStatus == null
                   ? null
-                  : () {
-                      // Save logic goes here in the future
-                      context.pop();
+                  : () async {
+                      final repo = ref.read(attendanceRepositoryProvider);
+                      final now = DateTime.now().toUtc();
+                      
+                      await repo.create(AttendanceCompanion(
+                        id: drift.Value(const Uuid().v4()),
+                        userId: const drift.Value('mock_user_123'), // TODO: Real user
+                        subjectId: const drift.Value('mock_subject_123'), // TODO: Pass from route
+                        date: drift.Value(now.toIso8601String().split('T')[0]),
+                        primaryStatus: drift.Value(_primaryStatus!.name),
+                        secondaryStatus: drift.Value(_secondaryStatus?.name),
+                        lectureType: const drift.Value('theory'),
+                        notes: drift.Value(_noteController.text.isNotEmpty ? _noteController.text : null),
+                        createdAt: drift.Value(now.toIso8601String()),
+                        updatedAt: drift.Value(now.toIso8601String()),
+                      ));
+
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Lecture Record saved.')),
+                        );
+                        context.pop();
+                      }
                     },
               style: FilledButton.styleFrom(
                 backgroundColor: ColorTokens.primary,

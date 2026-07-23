@@ -12,6 +12,8 @@ enum LectureType { theory, practical, tutorial }
 /// A timetable entry.
 ///
 /// Matches Supabase schema in supabase/migrations/00001_mvp_foundation.sql
+@TableIndex(name: 'idx_timetable_user_day', columns: {#userId, #dayOfWeek, #deletedAt})
+@TableIndex(name: 'idx_timetable_subject', columns: {#subjectId})
 @DataClassName('TimetableEntryEntity')
 class Timetable extends Table {
   /// UUID primary key.

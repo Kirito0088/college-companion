@@ -10,5 +10,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Provides the [SubjectRepository] instance.
 final subjectRepositoryProvider = Provider<SubjectRepository>((ref) {
   final database = ref.watch(databaseProvider);
-  return SubjectRepository(database);
+  final syncQueueRepository = ref.watch(syncQueueRepositoryProvider);
+  return SubjectRepository(database, syncQueueRepository);
 });

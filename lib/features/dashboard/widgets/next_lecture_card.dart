@@ -1,40 +1,56 @@
 /// Next Lecture Card
 ///
-/// Displays the upcoming lecture for the authenticated user.
+/// Displays the upcoming lecture for the authenticated user based on the DashboardSnapshot.
 library;
 
+import 'package:college_companion/features/dashboard/providers/dashboard_provider.dart';
 import 'package:college_companion/routing/app_router.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
-/// A card highlighting the user's next lecture.
-class NextLectureCard extends StatelessWidget {
+/// A card highlighting the user's immediate next action.
+class NextLectureCard extends ConsumerWidget {
   /// Creates a [NextLectureCard].
   const NextLectureCard({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final snapshot = ref.watch(dashboardSnapshotProvider);
     final theme = Theme.of(context);
+    final nextAction = snapshot.nextAction;
+
+    if (nextAction == null) {
+      return const SizedBox.shrink();
+    }
 
     return Material(
       color: Colors.transparent,
       child: Ink(
         decoration: BoxDecoration(
-          color: ColorTokens.surfaceContainerLow,
-          borderRadius: RadiusTokens.borderRadiusLg,
-          border: Border.all(
-            color: ColorTokens.outlineVariant.withValues(alpha: 0.3),
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              ColorTokens.surfaceContainerHigh.withValues(alpha: 0.6),
+              ColorTokens.surfaceContainer,
+            ],
           ),
+          border: Border.all(
+            color: ColorTokens.onSurface.withValues(alpha: 0.04),
+            width: 1,
+          ),
+          borderRadius: RadiusTokens.borderRadiusLg,
         ),
         child: InkWell(
           onTap: () => context.push(RoutePaths.subjectDetails),
           borderRadius: RadiusTokens.borderRadiusLg,
           child: Padding(
-            padding: const EdgeInsets.all(SpacingTokens.lg),
+            padding: const EdgeInsets.all(SpacingTokens.xl),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -44,7 +60,7 @@ class NextLectureCard extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          'Next Lecture',
+                          'Next Action',
                           style: theme.textTheme.labelMedium?.copyWith(
                             color: ColorTokens.onSurfaceVariant,
                             letterSpacing: 0.5,
@@ -59,9 +75,9 @@ class NextLectureCard extends StatelessWidget {
                       ],
                     ),
                     Text(
-                      'Starts in 28m',
+                      nextAction.urgencyString,
                       style: theme.textTheme.labelMedium?.copyWith(
-                        color: ColorTokens.onSurfaceVariant,
+                        color: ColorTokens.primary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -69,11 +85,11 @@ class NextLectureCard extends StatelessWidget {
                 ),
                 const SizedBox(height: SpacingTokens.md),
                 Text(
-                  'Statistics ML',
-                  style: theme.textTheme.displaySmall?.copyWith(
+                  nextAction.title,
+                  style: theme.textTheme.headlineSmall?.copyWith(
                     color: ColorTokens.onSurface,
                     fontWeight: FontWeight.w700,
-                    letterSpacing: -1.0,
+                    letterSpacing: -0.5,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -88,10 +104,9 @@ class NextLectureCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '09:00 AM',
+                      nextAction.timeString,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: ColorTokens.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     const SizedBox(width: SpacingTokens.md),
@@ -102,10 +117,9 @@ class NextLectureCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      'Room 305',
+                      nextAction.location,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: ColorTokens.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],

@@ -10,5 +10,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Provides the [AttendanceRepository] instance.
 final attendanceRepositoryProvider = Provider<AttendanceRepository>((ref) {
   final database = ref.watch(databaseProvider);
-  return AttendanceRepository(database);
+  final syncQueueRepository = ref.watch(syncQueueRepositoryProvider);
+  return AttendanceRepository(database, syncQueueRepository);
 });

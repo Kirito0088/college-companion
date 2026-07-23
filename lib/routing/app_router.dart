@@ -350,8 +350,7 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
         path: RoutePaths.lectureRecord,
         name: RouteNames.lectureRecord,
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) =>
-            LectureRecordScreen(args: state.extra as LectureRecordArgs?),
+        builder: (context, state) => const LectureRecordScreen(),
       ),
       GoRoute(
         path: RoutePaths.resources,

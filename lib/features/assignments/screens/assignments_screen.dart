@@ -1,7 +1,9 @@
+import 'package:college_companion/database/app_database.dart';
+import 'package:college_companion/features/assignments/providers/assignments_provider.dart';
 import 'package:college_companion/features/assignments/widgets/assignment_card.dart';
 import 'package:college_companion/features/assignments/widgets/assignments_fab.dart';
-import 'package:college_companion/routing/app_router.dart';
-import 'package:college_companion/shared/models/mock_ui_state.dart';
+import 'package:college_companion/features/authentication/models/auth_state.dart';
+import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/shared/widgets/empty_states/cc_empty_states.dart';
 import 'package:college_companion/shared/widgets/errors/cc_errors.dart';
 import 'package:college_companion/shared/widgets/loading/cc_skeletons.dart';
@@ -10,21 +12,23 @@ import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
-class AssignmentsScreen extends StatefulWidget {
+class AssignmentsScreen extends ConsumerStatefulWidget {
   const AssignmentsScreen({super.key});
 
   @override
-  State<AssignmentsScreen> createState() => _AssignmentsScreenState();
+  ConsumerState<AssignmentsScreen> createState() => _AssignmentsScreenState();
 }
 
-class _AssignmentsScreenState extends State<AssignmentsScreen> {
+class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
   bool _isFabExtended = true;
   int _selectedFilterIndex = 0;
-  MockUiState _uiState = MockUiState.success;
+  String _searchQuery = '';
   final List<String> _filters = [
     'All',
     'Pending',
@@ -50,12 +54,19 @@ class _AssignmentsScreenState extends State<AssignmentsScreen> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final authState = ref.watch(authStateProvider);
+    final userId = authState is AuthAuthenticated && authState.user.uid.isNotEmpty
+        ? authState.user.uid
+        : 'default_user';
+
+    final assignmentsAsync = ref.watch(assignmentsStreamProvider(userId));
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -67,24 +78,86 @@ class _AssignmentsScreenState extends State<AssignmentsScreen> {
               children: [
                 _buildHeader(theme),
                 Expanded(
-                  child: SingleChildScrollView(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: LayoutTokens.screenPadding,
-                      vertical: SpacingTokens.md,
+                  child: assignmentsAsync.when(
+                    data: (allAssignments) {
+                      // Filter by search query
+                      final searchFiltered = allAssignments.where((a) {
+                        if (_searchQuery.isEmpty) return true;
+                        return a.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                            a.subjectId.toLowerCase().contains(_searchQuery.toLowerCase());
+                      }).toList();
+
+                      // Filter by chip category
+                      final filtered = searchFiltered.where((a) {
+                        final status = a.status.toLowerCase();
+                        switch (_selectedFilterIndex) {
+                          case 1:
+                            return status == 'pending';
+                          case 2:
+                            final due = DateTime.tryParse(a.dueDate);
+                            if (due != null) {
+                              final now = DateTime.now();
+                              return due.year == now.year &&
+                                  due.month == now.month &&
+                                  due.day == now.day;
+                            }
+                            return status == 'due today';
+                          case 3:
+                            return status == 'overdue';
+                          case 4:
+                            return status == 'completed';
+                          case 0:
+                          default:
+                            return true;
+                        }
+                      }).toList();
+
+                      // Overview progress metrics
+                      final totalCount = allAssignments.length;
+                      final completedCount = allAssignments
+                          .where((a) => a.status.toLowerCase() == 'completed')
+                          .length;
+                      final progress = totalCount > 0
+                          ? (completedCount / totalCount).clamp(0.0, 1.0)
+                          : 0.0;
+
+                      return SingleChildScrollView(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: LayoutTokens.screenPadding,
+                          vertical: SpacingTokens.md,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildSearchField(theme),
+                            const SizedBox(height: SpacingTokens.lg),
+                            _buildFilterChips(theme),
+                            const SizedBox(height: SpacingTokens.lg),
+                            _buildProgressSummaryCard(
+                              theme,
+                              progress: progress,
+                              completedCount: completedCount,
+                              totalCount: totalCount,
+                            ),
+                            const SizedBox(height: SpacingTokens.xl),
+                            _buildAssignmentList(context, filtered),
+                            const SizedBox(height: 120),
+                          ],
+                        ),
+                      );
+                    },
+                    loading: () => const Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: LayoutTokens.screenPadding,
+                        vertical: SpacingTokens.md,
+                      ),
+                      child: SkeletonList(),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildSearchField(theme),
-                        const SizedBox(height: SpacingTokens.lg),
-                        _buildFilterChips(theme),
-                        const SizedBox(height: SpacingTokens.lg),
-                        _buildProgressSummaryCard(theme),
-                        const SizedBox(height: SpacingTokens.xl),
-                        _buildAssignmentList(context),
-                        const SizedBox(height: 120), // Space for FAB
-                      ],
+                    error: (err, stack) => NetworkErrorWidget(
+                      onRetry: () {
+                        ref.invalidate(assignmentsStreamProvider(userId));
+                      },
                     ),
                   ),
                 ),
@@ -133,6 +206,12 @@ class _AssignmentsScreenState extends State<AssignmentsScreen> {
 
   Widget _buildSearchField(ThemeData theme) {
     return TextField(
+      controller: _searchController,
+      onChanged: (val) {
+        setState(() {
+          _searchQuery = val;
+        });
+      },
       decoration: InputDecoration(
         hintText: 'Search assignments...',
         hintStyle: theme.textTheme.bodyLarge?.copyWith(
@@ -156,7 +235,15 @@ class _AssignmentsScreenState extends State<AssignmentsScreen> {
     );
   }
 
-  Widget _buildProgressSummaryCard(ThemeData theme) {
+  Widget _buildProgressSummaryCard(
+    ThemeData theme, {
+    required double progress,
+    required int completedCount,
+    required int totalCount,
+  }) {
+    final pctString = '${(progress * 100).round()}%';
+    final doneString = '$completedCount of $totalCount done';
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: SpacingTokens.lg,
@@ -183,8 +270,8 @@ class _AssignmentsScreenState extends State<AssignmentsScreen> {
                 const SizedBox(height: SpacingTokens.xs),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(999),
-                  child: const LinearProgressIndicator(
-                    value: 0.75,
+                  child: LinearProgressIndicator(
+                    value: progress,
                     backgroundColor: ColorTokens.surfaceVariant,
                     color: ColorTokens.primary,
                     minHeight: 6,
@@ -198,14 +285,14 @@ class _AssignmentsScreenState extends State<AssignmentsScreen> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '75%',
+                pctString,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w900,
                   color: ColorTokens.primary,
                 ),
               ),
               Text(
-                '8 of 12 done',
+                doneString,
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: ColorTokens.onSurfaceVariant,
                 ),
@@ -266,81 +353,61 @@ class _AssignmentsScreenState extends State<AssignmentsScreen> {
     );
   }
 
-  Widget _buildAssignmentList(BuildContext context) {
-    switch (_uiState) {
-      case MockUiState.loading:
-        return const SkeletonList();
-      case MockUiState.empty:
-        return const EmptyAssignments();
-      case MockUiState.error:
-        return NetworkErrorWidget(
-          onRetry: () {
-            setState(() {
-              _uiState = MockUiState.loading;
-              Future.delayed(
-                const Duration(seconds: 1),
-                () => setState(() => _uiState = MockUiState.success),
-              );
-            });
-          },
-        );
-      case MockUiState.success:
-        if (_selectedFilterIndex == 3) {
-          return const EmptyAssignments();
-        }
-        final assignments = [
-          AssignmentCard(
-            title: 'Operating Systems Assignment 3',
-            subject: 'Operating Systems',
-            subjectColor: Colors.blue,
-            dueDate: 'Tomorrow',
-            status: 'Pending',
-            statusColor: ColorTokens.warning,
-            priority: 'High Priority',
-            onTap: () => context.push(RoutePaths.assignmentDetails),
-          ),
-          AssignmentCard(
-            title: 'Database Lab Report',
-            subject: 'DBMS',
-            subjectColor: Colors.green,
-            dueDate: 'Aug 5',
-            status: 'Due Today',
-            statusColor: ColorTokens.primary,
-            onTap: () => context.push(RoutePaths.assignmentDetails),
-          ),
-          AssignmentCard(
-            title: 'WT Mini Project',
-            subject: 'Web Technology',
-            subjectColor: Colors.amber,
-            dueDate: 'Completed',
-            status: 'Completed',
-            statusColor: ColorTokens.success,
-            onTap: () => context.push(RoutePaths.assignmentDetails),
-          ),
-        ];
-
-        return Column(
-          children: List.generate(assignments.length, (index) {
-            return TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0.0, end: 1.0),
-              duration: Duration(milliseconds: 300 + (index * 100)),
-              curve: Curves.easeOutCubic,
-              builder: (context, value, child) {
-                return Opacity(
-                  opacity: value,
-                  child: Transform.translate(
-                    offset: Offset(0, 20 * (1 - value)),
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: SpacingTokens.lg),
-                      child: child,
-                    ),
-                  ),
-                );
-              },
-              child: assignments[index],
-            );
-          }),
-        );
+  Widget _buildAssignmentList(
+    BuildContext context,
+    List<AssignmentEntity> filteredAssignments,
+  ) {
+    if (filteredAssignments.isEmpty) {
+      return const EmptyAssignments();
     }
+
+    final cards = filteredAssignments.map((entity) {
+      Color statusColor = ColorTokens.primary;
+      final st = entity.status.toLowerCase();
+      if (st == 'completed') {
+        statusColor = ColorTokens.success;
+      } else if (st == 'overdue') {
+        statusColor = ColorTokens.error;
+      } else if (st == 'pending') {
+        statusColor = ColorTokens.warning;
+      }
+
+      final dueDt = DateTime.tryParse(entity.dueDate);
+      final dueStr = dueDt != null ? '${dueDt.month}/${dueDt.day}' : entity.dueDate;
+
+      return AssignmentCard(
+        title: entity.title,
+        subject: entity.subjectId,
+        subjectColor: ColorTokens.primary,
+        dueDate: dueStr,
+        status: entity.status,
+        statusColor: statusColor,
+        onTap: () => context.push('/assignment-details/${entity.id}'),
+      );
+    }).toList();
+
+    return Column(
+      children: List.generate(cards.length, (index) {
+        return TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0.0, end: 1.0),
+          duration: Duration(milliseconds: 300 + (index * 100)),
+          curve: Curves.easeOutCubic,
+          builder: (context, value, child) {
+            return Opacity(
+              opacity: value,
+              child: Transform.translate(
+                offset: Offset(0, 20 * (1 - value)),
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: SpacingTokens.lg),
+                  child: child,
+                ),
+              ),
+            );
+          },
+          child: cards[index],
+        );
+      }),
+    );
   }
 }
+

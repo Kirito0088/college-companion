@@ -26,6 +26,7 @@ import 'package:college_companion/features/calendar/screens/event_details_screen
 import 'package:college_companion/features/dashboard/screens/dashboard_screen.dart';
 import 'package:college_companion/features/focus/screens/focus_screen.dart';
 import 'package:college_companion/features/notifications/screens/notifications_screen.dart';
+import 'package:college_companion/features/onboarding/providers/onboarding_provider.dart';
 import 'package:college_companion/features/onboarding/screens/onboarding_screen.dart';
 import 'package:college_companion/features/profile/screens/about_screen.dart';
 import 'package:college_companion/features/profile/screens/account_information_screen.dart';
@@ -72,20 +73,20 @@ abstract final class RoutePaths {
   static const String timetable = '/timetable';
   static const String internalMarks = '/internal-marks';
   static const String semester = '/semesters';
-  static const String semesterDetails = '/semester-details';
+  static const String semesterDetails = '/semester-details/:id';
   static const String settings = '/settings';
 
   static const String dataSync = '/data-sync';
   static const String helpSupport = '/help-support';
   static const String about = '/about';
   static const String accountInformation = '/account-information';
-  static const String focusMode = '/focus-mode';
+  static const String focusMode = '/profile/focus';
   static const String subjectDetails = '/subject-details';
   static const String resources = '/resources';
   static const String resourceDetails = '/resource-details';
-  static const String assignmentDetails = '/assignment-details';
+  static const String assignmentDetails = '/assignment-details/:id';
   static const String addEditEvent = '/calendar/add-edit';
-  static const String eventDetails = '/calendar/event-details';
+  static const String eventDetails = '/calendar/event-details/:id';
 
   /// Routes that do not require authentication.
   static const List<String> publicRoutes = [splash, login, onboarding];
@@ -146,6 +147,7 @@ final _profileNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'profile');
 /// The [ref] parameter is required for authentication redirect logic.
 /// The [refreshListenable] triggers redirect re-evaluation when auth
 /// state changes.
+
 GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
@@ -154,6 +156,7 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
     refreshListenable: refreshListenable,
     redirect: (context, state) {
       final authState = ref.read(authStateProvider);
+      final hasCompletedOnboarding = ref.read(onboardingCompletedProvider);
       final currentPath = state.matchedLocation;
 
       // While auth is initializing, keep user on splash.
@@ -166,12 +169,18 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
 
       // Auth resolved: redirect away from splash.
       if (currentPath == RoutePaths.splash) {
-        return isAuthenticated ? RoutePaths.home : RoutePaths.login;
+        if (!isAuthenticated) return RoutePaths.login;
+        return hasCompletedOnboarding ? RoutePaths.home : RoutePaths.onboarding;
       }
 
-      // Authenticated user on login page → send to home.
+      // Authenticated user on login page → send to home/onboarding.
       if (isAuthenticated && currentPath == RoutePaths.login) {
-        return RoutePaths.home;
+        return hasCompletedOnboarding ? RoutePaths.home : RoutePaths.onboarding;
+      }
+
+      // Authenticated user on non-onboarding route without having completed onboarding.
+      if (isAuthenticated && !hasCompletedOnboarding && currentPath != RoutePaths.onboarding) {
+        return RoutePaths.onboarding;
       }
 
       // Unauthenticated user on protected route → send to login.
@@ -283,7 +292,7 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
         path: RoutePaths.internalMarks,
         name: RouteNames.internalMarks,
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const SemesterDetailsScreen(),
+        builder: (context, state) => const SemestersListScreen(),
       ),
       GoRoute(
         path: RoutePaths.semester,
@@ -295,7 +304,9 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
         path: RoutePaths.semesterDetails,
         name: RouteNames.semesterDetails,
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const SemesterDetailsScreen(),
+        builder: (context, state) => SemesterDetailsScreen(
+          semesterId: state.pathParameters['id']!,
+        ),
       ),
       GoRoute(
         path: RoutePaths.settings,
@@ -368,7 +379,9 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
         path: RoutePaths.assignmentDetails,
         name: RouteNames.assignmentDetails,
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const AssignmentDetailsScreen(),
+        builder: (context, state) => AssignmentDetailsScreen(
+          assignmentId: state.pathParameters['id']!,
+        ),
       ),
       GoRoute(
         path: RoutePaths.addEditEvent,
@@ -380,7 +393,9 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
         path: RoutePaths.eventDetails,
         name: RouteNames.eventDetails,
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const EventDetailsScreen(),
+        builder: (context, state) => EventDetailsScreen(
+          eventId: state.pathParameters['id']!,
+        ),
       ),
       GoRoute(
         path: RoutePaths.notifications,

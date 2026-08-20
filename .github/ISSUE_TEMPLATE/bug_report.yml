@@ -1,0 +1,26 @@
+name: 🐛 Bug Report
+description: Report a reproducible defect or test failure.
+title: "[BUG]: <Concise Defect Title>"
+labels: ["type:bug", "status:spec-ready"]
+body:
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: 1. Steps to Reproduce
+      placeholder: "1. Open app offline\n2. Mark lecture attendance\n3. Restart app..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected_vs_actual
+    attributes:
+      label: 2. Expected vs Actual Behavior
+      placeholder: "Expected: Drift marks syncStatus as pending.\nActual: Runtime assertion thrown."
+    validations:
+      required: true
+  - type: textarea
+    id: regression_test
+    attributes:
+      label: 3. Required Regression Test
+      placeholder: "Define the test file and assertion to prevent recurrence in test/..."
+    validations:
+      required: true

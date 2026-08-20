@@ -9,10 +9,13 @@ import 'package:college_companion/database/tables/assignments.dart';
 import 'package:college_companion/database/tables/attendance.dart';
 import 'package:college_companion/database/tables/calendar_events.dart';
 import 'package:college_companion/database/tables/internal_marks.dart';
+import 'package:college_companion/database/tables/lecture_evidence.dart';
 import 'package:college_companion/database/tables/lecture_records.dart';
+import 'package:college_companion/database/tables/notifications.dart';
 import 'package:college_companion/database/tables/resources.dart';
 import 'package:college_companion/database/tables/semesters.dart';
 import 'package:college_companion/database/tables/subjects.dart';
+import 'package:college_companion/database/tables/sync_metadata.dart';
 import 'package:college_companion/database/tables/sync_queue.dart';
 import 'package:college_companion/database/tables/timetable.dart';
 import 'package:college_companion/database/tables/user_settings.dart';
@@ -40,6 +43,9 @@ part 'app_database.g.dart';
     SyncQueueItems,
     CalendarEvents,
     Resources,
+    LectureEvidence,
+    SyncMetadata,
+    Notifications,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -52,7 +58,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration {
@@ -61,8 +67,10 @@ class AppDatabase extends _$AppDatabase {
         await m.createAll();
       },
       onUpgrade: (Migrator m, int from, int to) async {
-        // Future migrations will be handled here.
-        // Must preserve existing data (per backend/database.md).
+        if (from < 2) {
+          await m.addColumn(semesters, semesters.startDate);
+          await m.addColumn(semesters, semesters.expectedCompletionDate);
+        }
       },
     );
   }

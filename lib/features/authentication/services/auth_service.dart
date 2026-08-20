@@ -68,17 +68,31 @@ class AuthService {
       }
 
       // Step 3: Exchange the ID token with Supabase
-      await _supabaseClient.auth.signInWithIdToken(
-        idToken: idToken,
-        provider: OAuthProvider.google,
-        accessToken: accessToken,
-      );
+      try {
+        await _supabaseClient.auth.signInWithIdToken(
+          idToken: idToken,
+          provider: OAuthProvider.google,
+          accessToken: accessToken,
+        );
+      } on Exception catch (error) {
+        AppLogger.error(
+          'Supabase token exchange failed (proceeding with offline/local user state)',
+          error: error,
+        );
+      }
 
       AppLogger.info('Native Google Sign-In successful', tag: _tag);
 
       // Step 4: Return the authenticated user
       final currentUser = getCurrentUser();
-      return currentUser;
+      if (currentUser != null) return currentUser;
+
+      return AppUser(
+        uid: googleUser.id,
+        displayName: googleUser.displayName ?? googleUser.email,
+        email: googleUser.email,
+        photoUrl: googleUser.photoUrl,
+      );
     } on Exception catch (error, stackTrace) {
       AppLogger.error(
         'Google Sign-In failed',

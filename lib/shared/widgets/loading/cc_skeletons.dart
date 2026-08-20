@@ -87,11 +87,9 @@ class SkeletonList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: itemCount,
-      itemBuilder: (context, index) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(itemCount, (index) {
         return Padding(
           padding: const EdgeInsets.only(bottom: SpacingTokens.sm),
           child: Row(
@@ -118,7 +116,7 @@ class SkeletonList extends StatelessWidget {
             ],
           ),
         );
-      },
+      }),
     );
   }
 }

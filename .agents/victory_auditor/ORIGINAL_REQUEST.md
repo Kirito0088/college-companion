@@ -1,12 +1,15 @@
-## 2026-07-24T00:56:05Z
-Conduct mandatory post-victory audit for College Companion UI Phase 4 & Phase 5 completion.
+## 2026-07-24T14:16:17Z
+You are the independent Victory Auditor. Conduct a mandatory 3-phase audit of `c:\Projects\college_companion` to verify project completion for Phase 6 Riverpod StreamProviders & Core Screens integration under strict Material 3 UI preservation.
 
-Working directory: `c:\Projects\college_companion_ui`
-Original request: `c:\Projects\college_companion_ui\.agents\ORIGINAL_REQUEST.md`
+Requirements to verify:
+- R1. Riverpod StreamProviders (`assignmentsStreamProvider`, `safeBunkStreamProvider`, `calendarEventsStreamProvider`, `dashboardSnapshotProvider`, `resourcesStreamProvider`, `userSettingsStreamProvider`) restored and functional.
+- R2. Wire core screens (`CalendarScreen`, `AssignmentsScreen`, `ResourcesScreen`, `SettingsScreen`, `DashboardScreen`, `AttendanceScreen`) to live StreamProviders using Riverpod ConsumerWidget/ConsumerStatefulWidget.
+- R3. Strict UI preservation: standard Material 3 visual design preserved (NO Glassmorphism, NO GlassCard/GlassChip, NO dark neon tokens/gradients).
 
-Perform the 3-phase audit:
-Phase 1: Timeline & commit/file modification history verification.
-Phase 2: Cheating & facade detection (verify no mocked/fake assertions or bypassed functionality in source or tests).
-Phase 3: Independent test execution (`flutter test` and `flutter analyze`).
+Acceptance Criteria:
+- `dart analyze lib` completes with 0 errors and 0 warnings.
+- `flutter test` completes successfully with 100% pass rate.
+- Core screens render data dynamically from Drift streams.
+- Standard Material 3 UI maintained without prohibited glassmorphism/neon elements.
 
-Report back your structured verdict (VICTORY CONFIRMED or VICTORY REJECTED) with detailed evidence.
+Your working directory is `c:\Projects\college_companion\.agents\victory_auditor`. Write your audit report and handoff report there. Execute independent empirical commands (`dart analyze lib`, `flutter test`, grep checks for prohibited tokens) and return a clear VICTORY CONFIRMED or VICTORY REJECTED verdict.

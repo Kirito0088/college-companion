@@ -30,7 +30,12 @@ class ProfileMenuList extends StatelessWidget {
             showBorder: true,
             onTap: () => context.push(RoutePaths.semester),
           ),
-
+          _MenuItem(
+            icon: Symbols.timer,
+            label: 'Focus Mode',
+            showBorder: true,
+            onTap: () => context.push(RoutePaths.focusMode),
+          ),
           _MenuItem(
             icon: Symbols.notifications,
             label: 'Notifications',

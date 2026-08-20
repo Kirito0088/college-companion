@@ -3,6 +3,9 @@
 /// Displays a synthesized summary of macro-level academic status.
 library;
 
+import 'package:college_companion/features/authentication/models/auth_state.dart';
+import 'package:college_companion/features/authentication/providers/auth_provider.dart';
+import 'package:college_companion/features/dashboard/models/dashboard_snapshot.dart';
 import 'package:college_companion/features/dashboard/providers/dashboard_provider.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
@@ -18,7 +21,10 @@ class AcademicSnapshotSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final snapshot = ref.watch(dashboardSnapshotProvider);
+    final authState = ref.watch(authStateProvider);
+    final userId = authState is AuthAuthenticated ? authState.user.uid : '';
+    final snapshot = ref.watch(dashboardSnapshotProvider(userId)).valueOrNull ??
+        DashboardSnapshot.empty();
     final theme = Theme.of(context);
     final stats = snapshot.academicSnapshot;
 

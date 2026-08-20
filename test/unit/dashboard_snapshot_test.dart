@@ -3,11 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('DashboardSnapshot Unit Tests', () {
-    test('mockHeavyDay returns correct mock model data', () {
-      final snapshot = DashboardSnapshot.mockHeavyDay();
-      expect(snapshot.greetingContext, equals('4 lectures today'));
-      expect(snapshot.nextAction?.title, equals('Statistics ML'));
-      expect(snapshot.timelineEvents.length, greaterThan(0));
+    test('empty returns correct initial state model data', () {
+      final snapshot = DashboardSnapshot.empty();
+      expect(snapshot.greetingContext, equals('0 lectures today'));
+      expect(snapshot.nextAction, isNull);
+      expect(snapshot.timelineEvents, isEmpty);
+      expect(snapshot.academicSnapshot.attendanceState, equals('No Data'));
     });
   });
 }

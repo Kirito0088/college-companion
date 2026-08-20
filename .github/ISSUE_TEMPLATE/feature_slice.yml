@@ -1,0 +1,57 @@
+name: 🚀 Feature Vertical Slice
+description: Specify an atomic, end-to-end vertical tracer-bullet slice.
+title: "[SLICE]: <Concise Slice Title>"
+labels: ["type:slice", "status:spec-ready"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### 🎯 Vertical Slice Definition
+        Every feature slice must cut through all required layers (UI -> State -> Repository -> Drift/Supabase -> Test).
+  - type: textarea
+    id: problem_context
+    attributes:
+      label: 1. Student Context & Problem
+      description: What student problem does this solve? How does this reduce uncertainty or cognitive load?
+      placeholder: "e.g., Students need to verify that their attendance record matches cloud sync before generating a verified export..."
+    validations:
+      required: true
+  - type: textarea
+    id: tracer_bullet_scope
+    attributes:
+      label: 2. Tracer-Bullet Architecture Scope
+      description: Detail the changes across each architectural layer.
+      value: |
+        - **UI Layer:** [Screens/Widgets/Design Tokens]
+        - **State Layer (Riverpod):** [Notifier/Provider]
+        - **Data/Repository Layer:** [Repository methods/Business rules]
+        - **Database (Drift/Supabase):** [Table/DAO/SyncQueue]
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: 3. Acceptance Criteria (Given / When / Then)
+      description: Exhaustive, testable acceptance criteria.
+      value: |
+        - [ ] **Scenario 1:**
+          - **Given** [Initial system state]
+          - **When** [User action or event]
+          - **Then** [Expected outcome & database state]
+        - [ ] **Scenario 2 (Offline / Error):**
+          - **Given** [Offline state or error condition]
+          - **When** [Action taken]
+          - **Then** [Graceful fallback without data loss]
+    validations:
+      required: true
+  - type: textarea
+    id: verification_plan
+    attributes:
+      label: 4. Verification & Quality Gates
+      description: Exact commands and tests required to close this issue.
+      value: |
+        - [ ] `dart analyze`
+        - [ ] `flutter test test/features/<feature>_test.dart`
+        - [ ] Virtual Device test on `emulator-5554`
+    validations:
+      required: true

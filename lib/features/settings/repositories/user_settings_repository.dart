@@ -104,4 +104,30 @@ class UserSettingsRepository {
       );
     }
   }
+
+  /// Updates lecture reminders enabled state for a user.
+  Future<void> updateLectureRemindersEnabled(String userId, bool enabled) async {
+    try {
+      final now = DateTime.now().toUtc().toIso8601String();
+      await (_database.update(_database.userSettings)
+            ..where((t) => t.userId.equals(userId)))
+          .write(UserSettingsCompanion(
+            lectureRemindersEnabled: Value(enabled),
+            updatedAt: Value(now),
+          ));
+      final existing = await getByUserId(userId);
+      if (existing != null) {
+        await _syncQueueRepository?.enqueue(
+          targetTable: 'user_settings',
+          recordId: existing.id,
+          operation: 'UPDATE',
+        );
+      }
+    } catch (e) {
+      throw DatabaseException(
+        'Failed to update lecture reminders enabled for user: $userId',
+        e,
+      );
+    }
+  }
 }

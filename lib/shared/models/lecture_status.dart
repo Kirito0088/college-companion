@@ -15,15 +15,6 @@ class LectureStatus {
     this.otherText,
   });
 
-  /// The primary status (spec §5).
-  final String primary;
-
-  /// The optional secondary context (spec §5).
-  final String? secondary;
-
-  /// Custom text when secondary is "other" (spec §5).
-  final String? otherText;
-
   /// Present — no secondary.
   const LectureStatus.present() : this._(primary: 'present');
 
@@ -48,18 +39,6 @@ class LectureStatus {
     : primary = 'present',
       secondary = 'other';
 
-  /// Encodes the status as stored in `lecture_records.status_text`.
-  String encode() {
-    final buf = StringBuffer(primary);
-    if (secondary != null) {
-      buf.write('|$secondary');
-      if (secondary == 'other' && otherText != null) {
-        buf.write('|$otherText');
-      }
-    }
-    return buf.toString();
-  }
-
   /// Decodes a `status_text` string back to a [LectureStatus].
   factory LectureStatus.decode(String encoded) {
     final parts = encoded.split('|');
@@ -71,6 +50,27 @@ class LectureStatus {
       secondary: secondary,
       otherText: otherText,
     );
+  }
+
+  /// The primary status (spec §5).
+  final String primary;
+
+  /// The optional secondary context (spec §5).
+  final String? secondary;
+
+  /// Custom text when secondary is "other" (spec §5).
+  final String? otherText;
+
+  /// Encodes the status as stored in `lecture_records.status_text`.
+  String encode() {
+    final buf = StringBuffer(primary);
+    if (secondary != null) {
+      buf.write('|$secondary');
+      if (secondary == 'other' && otherText != null) {
+        buf.write('|$otherText');
+      }
+    }
+    return buf.toString();
   }
 
   @override

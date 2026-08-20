@@ -1,5 +1,8 @@
+import 'package:college_companion/database/app_database.dart';
+import 'package:college_companion/features/authentication/models/auth_state.dart';
+import 'package:college_companion/features/authentication/providers/auth_provider.dart';
+import 'package:college_companion/features/resources/providers/resources_provider.dart';
 import 'package:college_companion/routing/app_router.dart';
-import 'package:college_companion/shared/models/mock_ui_state.dart';
 import 'package:college_companion/shared/widgets/empty_states/cc_empty_states.dart';
 import 'package:college_companion/shared/widgets/errors/cc_errors.dart';
 import 'package:college_companion/shared/widgets/loading/cc_skeletons.dart';
@@ -7,6 +10,7 @@ import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -19,15 +23,16 @@ import 'package:material_symbols_icons/symbols.dart';
 // Supabase is intentionally NOT used for storing
 // PDFs, images, videos, or other large assets.
 
-class ResourcesScreen extends StatefulWidget {
+class ResourcesScreen extends ConsumerStatefulWidget {
   const ResourcesScreen({super.key});
 
   @override
-  State<ResourcesScreen> createState() => _ResourcesScreenState();
+  ConsumerState<ResourcesScreen> createState() => _ResourcesScreenState();
 }
 
-class _ResourcesScreenState extends State<ResourcesScreen> {
-  MockUiState _uiState = MockUiState.success;
+class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
   String _selectedCategory = 'All';
 
   final List<String> _categories = [
@@ -42,7 +47,20 @@ class _ResourcesScreenState extends State<ResourcesScreen> {
   ];
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authStateProvider);
+    final userId = authState is AuthAuthenticated && authState.user.uid.isNotEmpty
+        ? authState.user.uid
+        : 'default_user';
+
+    final resourcesAsync = ref.watch(resourcesStreamProvider(userId));
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
@@ -50,36 +68,41 @@ class _ResourcesScreenState extends State<ResourcesScreen> {
           children: [
             _buildHeader(context),
             Expanded(
-              child: CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                        left: LayoutTokens.screenPadding,
-                        right: LayoutTokens.screenPadding,
-                        top: SpacingTokens.md,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _buildSearchBar(context),
-                          const SizedBox(height: SpacingTokens.lg),
-                          _buildRecentResources(context),
-                          _buildCategories(context),
-                          const SizedBox(height: SpacingTokens.xl),
-                        ],
+              child: ExcludeSemantics(
+                child: CustomScrollView(
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          left: LayoutTokens.screenPadding,
+                          right: LayoutTokens.screenPadding,
+                          top: SpacingTokens.md,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildSearchBar(context),
+                            const SizedBox(height: SpacingTokens.lg),
+                            resourcesAsync.maybeWhen(
+                              data: (list) => _buildRecentResources(context, list),
+                              orElse: () => _buildRecentResources(context, const []),
+                            ),
+                            _buildCategories(context),
+                            const SizedBox(height: SpacingTokens.xl),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  _buildResourcesList(context),
-                  const SliverToBoxAdapter(
-                    child: SizedBox(
-                      height:
-                          LayoutTokens.bottomNavigationHeight +
-                          SpacingTokens.xl,
+                    _buildResourcesList(context, resourcesAsync, userId),
+                    const SliverToBoxAdapter(
+                      child: SizedBox(
+                        height:
+                            LayoutTokens.bottomNavigationHeight +
+                            SpacingTokens.xl,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
@@ -145,8 +168,8 @@ class _ResourcesScreenState extends State<ResourcesScreen> {
     final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: SpacingTokens.lg,
-        vertical: SpacingTokens.md,
+        horizontal: SpacingTokens.md,
+        vertical: SpacingTokens.xs,
       ),
       decoration: BoxDecoration(
         color: ColorTokens.surfaceContainer,
@@ -155,28 +178,32 @@ class _ResourcesScreenState extends State<ResourcesScreen> {
           color: ColorTokens.outlineVariant.withValues(alpha: 0.2),
         ),
       ),
-      child: Row(
-        children: [
-          const Icon(Symbols.search, color: ColorTokens.onSurfaceVariant),
-          const SizedBox(width: SpacingTokens.md),
-          Expanded(
-            child: Text(
-              'Search resources...',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: ColorTokens.onSurfaceVariant,
-              ),
-            ),
+      child: TextField(
+        controller: _searchController,
+        onChanged: (val) {
+          setState(() {
+            _searchQuery = val;
+          });
+        },
+        decoration: InputDecoration(
+          hintText: 'Search resources...',
+          hintStyle: theme.textTheme.bodyMedium?.copyWith(
+            color: ColorTokens.onSurfaceVariant,
           ),
-        ],
+          prefixIcon: const Icon(Symbols.search, color: ColorTokens.onSurfaceVariant),
+          border: InputBorder.none,
+          isDense: true,
+        ),
       ),
     );
   }
 
   Widget _buildCategories(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      clipBehavior: Clip.none,
-      child: Row(
+    return ExcludeSemantics(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        clipBehavior: Clip.none,
+        child: Row(
         children: _categories.map((category) {
           final isSelected = _selectedCategory == category;
           return Padding(
@@ -215,43 +242,54 @@ class _ResourcesScreenState extends State<ResourcesScreen> {
           );
         }).toList(),
       ),
-    );
+    ),
+  );
   }
 
-  Widget _buildResourcesList(BuildContext context) {
-    switch (_uiState) {
-      case MockUiState.loading:
-        return const SliverFillRemaining(
-          hasScrollBody: false,
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: LayoutTokens.screenPadding,
-            ),
-            child: SkeletonList(),
+  Widget _buildResourcesList(
+    BuildContext context,
+    AsyncValue<List<ResourceEntity>> resourcesAsync,
+    String userId,
+  ) {
+    return resourcesAsync.when(
+      loading: () => const SliverFillRemaining(
+        hasScrollBody: false,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: LayoutTokens.screenPadding,
           ),
-        );
-      case MockUiState.empty:
-        return const SliverFillRemaining(
-          hasScrollBody: false,
-          child: EmptyResources(),
-        );
-      case MockUiState.error:
-        return SliverFillRemaining(
-          hasScrollBody: false,
-          child: NetworkErrorWidget(
-            onRetry: () {
-              setState(() {
-                _uiState = MockUiState.loading;
-                Future.delayed(
-                  const Duration(seconds: 1),
-                  () => setState(() => _uiState = MockUiState.success),
-                );
-              });
-            },
-          ),
-        );
-      case MockUiState.success:
-        if (_selectedCategory != 'All') {
+          child: SkeletonList(),
+        ),
+      ),
+      error: (err, stack) => SliverFillRemaining(
+        hasScrollBody: false,
+        child: NetworkErrorWidget(
+          onRetry: () {
+            ref.invalidate(resourcesStreamProvider(userId));
+          },
+        ),
+      ),
+      data: (allResources) {
+        final filtered = allResources.where((r) {
+          // Category filter
+          if (_selectedCategory == 'Favorites') {
+            if (!r.category.toLowerCase().contains('fav')) return false;
+          } else if (_selectedCategory != 'All') {
+            if (!r.category.toLowerCase().contains(_selectedCategory.toLowerCase())) {
+              return false;
+            }
+          }
+          // Search filter
+          if (_searchQuery.isNotEmpty) {
+            if (!r.title.toLowerCase().contains(_searchQuery.toLowerCase()) &&
+                !(r.subjectId?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false)) {
+              return false;
+            }
+          }
+          return true;
+        }).toList();
+
+        if (filtered.isEmpty) {
           return const SliverFillRemaining(
             hasScrollBody: false,
             child: EmptyResources(),
@@ -263,49 +301,42 @@ class _ResourcesScreenState extends State<ResourcesScreen> {
             horizontal: LayoutTokens.screenPadding,
           ),
           sliver: SliverList(
-            delegate: SliverChildListDelegate([
-              _buildResourceCard(
-                context,
-                icon: Symbols.picture_as_pdf,
-                title: 'Operating Systems Unit 3 Notes',
-                subject: 'Operating Systems',
-                fileType: 'PDF',
-                fileSize: '2.4 MB',
-                lastModified: 'Yesterday',
-                iconColor: Colors.redAccent,
-                isFavorite: true,
-              ),
-              const SizedBox(height: SpacingTokens.md),
-              _buildResourceCard(
-                context,
-                icon: Symbols.picture_as_pdf,
-                title: 'DBMS Lab Manual',
-                subject: 'Database Management',
-                fileType: 'PDF',
-                fileSize: '5.1 MB',
-                lastModified: 'Monday',
-                iconColor: Colors.redAccent,
-                isFavorite: false,
-              ),
-              const SizedBox(height: SpacingTokens.md),
-              _buildResourceCard(
-                context,
-                icon: Symbols.description,
-                title: 'Question Paper 2025',
-                subject: 'Computer Networks',
-                fileType: 'PDF',
-                fileSize: '1.2 MB',
-                lastModified: '2 weeks ago',
-                iconColor: Colors.blueAccent,
-                isFavorite: true,
-              ),
-            ]),
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final r = filtered[index];
+                final isPdf = r.url.toLowerCase().contains('pdf') ||
+                    r.category.toLowerCase().contains('notes') ||
+                    r.category.toLowerCase().contains('paper');
+                final icon = isPdf ? Symbols.picture_as_pdf : Symbols.description;
+                final iconColor = isPdf ? Colors.redAccent : Colors.blueAccent;
+                final isFav = r.category.toLowerCase().contains('fav');
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: SpacingTokens.md),
+                  child: _buildResourceCard(
+                    context,
+                    icon: icon,
+                    title: r.title,
+                    subject: r.subjectId ?? 'General',
+                    fileType: isPdf ? 'PDF' : 'DOC',
+                    fileSize: '2.4 MB',
+                    lastModified: r.updatedAt.length > 10
+                        ? r.updatedAt.substring(0, 10)
+                        : r.updatedAt,
+                    iconColor: iconColor,
+                    isFavorite: isFav,
+                  ),
+                );
+              },
+              childCount: filtered.length,
+            ),
           ),
         );
-    }
+      },
+    );
   }
 
-  Widget _buildRecentResources(BuildContext context) {
+  Widget _buildRecentResources(BuildContext context, List<ResourceEntity> list) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -317,29 +348,46 @@ class _ResourcesScreenState extends State<ResourcesScreen> {
           ),
         ),
         const SizedBox(height: SpacingTokens.md),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          clipBehavior: Clip.none,
-          child: Row(
-            children: [
-              _buildRecentResourceCard(
-                context,
-                icon: Symbols.picture_as_pdf,
-                title: 'Data Structures...',
-                subject: 'Computer Science',
-                timeAgo: '2 hours ago',
-                color: Colors.redAccent,
-              ),
-              const SizedBox(width: SpacingTokens.md),
-              _buildRecentResourceCard(
-                context,
-                icon: Symbols.description,
-                title: 'Math Assignment',
-                subject: 'Mathematics',
-                timeAgo: 'Yesterday',
-                color: Colors.blueAccent,
-              ),
-            ],
+        ExcludeSemantics(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            clipBehavior: Clip.none,
+            child: Row(
+              children: list.isNotEmpty
+                  ? list.take(3).map((r) {
+                      final isPdf = r.url.toLowerCase().contains('pdf') ||
+                          r.category.toLowerCase().contains('notes');
+                      return Padding(
+                        padding: const EdgeInsets.only(right: SpacingTokens.md),
+                        child: _buildRecentResourceCard(
+                          context,
+                          icon: isPdf ? Symbols.picture_as_pdf : Symbols.description,
+                          title: r.title,
+                          subject: r.subjectId ?? 'General',
+                          timeAgo: r.updatedAt.length > 10 ? r.updatedAt.substring(0, 10) : 'Recent',
+                          color: isPdf ? Colors.redAccent : Colors.blueAccent,
+                        ),
+                      );
+                    }).toList()
+                  : [
+                      _buildRecentResourceCard(
+                        context,
+                        icon: Symbols.picture_as_pdf,
+                        title: 'Data Structures Notes',
+                        subject: 'CS201',
+                        timeAgo: '2h ago',
+                        color: Colors.redAccent,
+                      ),
+                      _buildRecentResourceCard(
+                        context,
+                        icon: Symbols.description,
+                        title: 'OS Lab Manual',
+                        subject: 'CS204',
+                        timeAgo: 'Yesterday',
+                        color: Colors.blueAccent,
+                      ),
+                    ],
+            ),
           ),
         ),
         const SizedBox(height: SpacingTokens.xl),
@@ -531,3 +579,4 @@ class _ResourcesScreenState extends State<ResourcesScreen> {
     );
   }
 }
+

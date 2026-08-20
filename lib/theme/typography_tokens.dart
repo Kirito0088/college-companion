@@ -2,6 +2,10 @@
 ///
 /// Single font family: Inter (per 01-design-tokens.md).
 /// No custom font sizes outside the typography scale.
+///
+/// Issue #21 — De-Vibecode: Deliberate tracking constants for editorial
+/// precision. Headlines use tighter tracking; uppercase labels use expanded
+/// spacing to distinguish metadata from body copy.
 library;
 
 import 'package:flutter/material.dart';
@@ -11,6 +15,19 @@ import 'package:google_fonts/google_fonts.dart';
 ///
 /// Uses Inter as the single font family per design token specification.
 abstract final class TypographyTokens {
+  // ── Letter-spacing utility constants ─────────────────────────────────────
+  /// Tight tracking for large display text — editorial crispness.
+  static const double displayLetterSpacing = -0.5;
+
+  /// Slight tightening for headlines — focused, purposeful headers.
+  static const double headlineLetterSpacing = -0.25;
+
+  /// Expanded tracking for uppercase label text — distinguishes metadata
+  /// from body copy at a glance.
+  static const double labelUppercaseSpacing = 0.8;
+
+  /// Moderate tracking for metadata/caption text — readable density.
+  static const double metadataSpacing = 0.5;
   /// Base text theme using Inter font family.
   static TextTheme get textTheme {
     return GoogleFonts.interTextTheme(
@@ -39,19 +56,19 @@ abstract final class TypographyTokens {
         headlineLarge: TextStyle(
           fontSize: 32,
           fontWeight: FontWeight.w600,
-          letterSpacing: 0,
+          letterSpacing: -0.5, // displayLetterSpacing — editorial crispness
           height: 1.25,
         ),
         headlineMedium: TextStyle(
           fontSize: 28,
           fontWeight: FontWeight.w600,
-          letterSpacing: 0,
+          letterSpacing: -0.25, // headlineLetterSpacing — focused headers
           height: 1.29,
         ),
         headlineSmall: TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.w600,
-          letterSpacing: 0,
+          letterSpacing: -0.25, // headlineLetterSpacing
           height: 1.33,
         ),
 

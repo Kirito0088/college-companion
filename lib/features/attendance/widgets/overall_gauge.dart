@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:college_companion/features/attendance/providers/attendance_provider.dart';
 import 'package:college_companion/routing/app_router.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
@@ -7,11 +8,26 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class OverallGauge extends StatelessWidget {
-  const OverallGauge({super.key});
+  const OverallGauge({super.key, this.safeBunk});
+
+  final SafeBunkResult? safeBunk;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final pct = safeBunk != null ? safeBunk!.currentPercentage : 82.0;
+    final progress = (pct / 100.0).clamp(0.0, 1.0);
+    final pctText = '${pct.round()}%';
+    final isSafe = safeBunk == null || safeBunk!.currentPercentage >= safeBunk!.targetPercentage;
+    final badgeColor = isSafe ? ColorTokens.success : ColorTokens.error;
+    final badgeText = safeBunk != null
+        ? (safeBunk!.safeBunks > 0
+            ? 'You can miss ${safeBunk!.safeBunks} lectures'
+            : (safeBunk!.mustAttend > 0
+                ? 'Must attend ${safeBunk!.mustAttend} lectures'
+                : 'On target (${safeBunk!.targetPercentage.round()}%)'))
+        : 'You can miss 12 lectures';
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xl),
       child: Center(
@@ -27,9 +43,9 @@ class OverallGauge extends StatelessWidget {
                 Positioned.fill(
                   child: CustomPaint(
                     painter: _GaugePainter(
-                      progress: 0.82,
+                      progress: progress,
                       backgroundColor: ColorTokens.surfaceContainer,
-                      progressColor: ColorTokens.success,
+                      progressColor: badgeColor,
                       strokeWidth: 12,
                     ),
                   ),
@@ -39,7 +55,7 @@ class OverallGauge extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        '82%',
+                        pctText,
                         style: theme.textTheme.displayLarge?.copyWith(
                           color: ColorTokens.onSurface,
                           fontWeight: FontWeight.w700,
@@ -62,13 +78,13 @@ class OverallGauge extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: ColorTokens.success.withValues(alpha: 0.1),
+                          color: badgeColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: Text(
-                          'You can miss 12 lectures',
+                          badgeText,
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: ColorTokens.success,
+                            color: badgeColor,
                             fontWeight: FontWeight.w600,
                           ),
                         ),

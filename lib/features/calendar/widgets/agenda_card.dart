@@ -1,19 +1,45 @@
-import 'package:college_companion/features/calendar/models/mock_event.dart';
+import 'package:college_companion/database/app_database.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
 
+extension CalendarEventEntityColorX on CalendarEventEntity {
+  Color get typeColor {
+    switch (eventType.toLowerCase()) {
+      case 'academic':
+        return ColorTokens.primary;
+      case 'assignment':
+        return ColorTokens.secondary;
+      case 'exam':
+        return ColorTokens.error;
+      case 'personal':
+      default:
+        return ColorTokens.tertiary;
+    }
+  }
+
+  String get typeLabel {
+    if (eventType.isEmpty) return 'Event';
+    return '${eventType[0].toUpperCase()}${eventType.substring(1)}';
+  }
+}
+
 class AgendaCard extends StatelessWidget {
   const AgendaCard({super.key, required this.event, this.onTap});
 
-  final MockEvent event;
+  final CalendarEventEntity event;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final typeColor = event.type.color;
+    final typeColor = event.typeColor;
+
+    final startDate = DateTime.tryParse(event.startDate);
+    final timeStr = startDate != null
+        ? '${startDate.hour.toString().padLeft(2, '0')}:${startDate.minute.toString().padLeft(2, '0')}'
+        : null;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: SpacingTokens.sm),
@@ -56,9 +82,9 @@ class AgendaCard extends StatelessWidget {
                         const SizedBox(height: 2),
                         Row(
                           children: [
-                            if (event.time != null) ...[
+                            if (timeStr != null) ...[
                               Text(
-                                event.time!,
+                                timeStr,
                                 style: theme.textTheme.labelMedium?.copyWith(
                                   color: ColorTokens.onSurfaceVariant,
                                   fontWeight: FontWeight.w500,
@@ -76,13 +102,13 @@ class AgendaCard extends StatelessWidget {
                               const SizedBox(width: SpacingTokens.sm),
                             ],
                             Text(
-                              event.type.label,
+                              event.typeLabel,
                               style: theme.textTheme.labelMedium?.copyWith(
                                 color: typeColor,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            if (event.subject != null) ...[
+                            if (event.description != null && event.description!.isNotEmpty) ...[
                               const SizedBox(width: SpacingTokens.sm),
                               Container(
                                 width: 3,
@@ -95,7 +121,7 @@ class AgendaCard extends StatelessWidget {
                               const SizedBox(width: SpacingTokens.sm),
                               Flexible(
                                 child: Text(
-                                  event.subject!,
+                                  event.description!,
                                   style: theme.textTheme.labelMedium?.copyWith(
                                     color: ColorTokens.onSurfaceVariant,
                                   ),

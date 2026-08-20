@@ -38,8 +38,10 @@ class SyncQueueDao {
         .into(_database.syncQueueItems)
         .insert(
           SyncQueueItemsCompanion(
+            targetTable: Value(tableName),
             recordId: Value(recordId),
             operation: Value(operation),
+            createdAt: Value(DateTime.now().toUtc().toIso8601String()),
           ),
         );
   }
@@ -71,7 +73,7 @@ class SyncQueueDao {
     )..where((t) => t.id.equals(id))).write(
       SyncQueueItemsCompanion(
         error: Value(error),
-        lastAttempt: Value(DateTime.now().toUtc()),
+        lastAttempt: Value(DateTime.now().toUtc().toIso8601String()),
       ),
     );
   }
@@ -80,7 +82,8 @@ class SyncQueueDao {
   Future<void> purgeSynced(DateTime before) {
     return (_database.delete(_database.syncQueueItems)..where(
           (t) =>
-              t.isSynced.equals(true) & t.createdAt.isSmallerThanValue(before),
+              t.isSynced.equals(true) &
+              t.createdAt.isSmallerThanValue(before.toIso8601String()),
         ))
         .go();
   }

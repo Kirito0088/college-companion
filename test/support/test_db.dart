@@ -12,6 +12,7 @@ import 'package:college_companion/database/daos/sync_queue_dao.dart';
 import 'package:college_companion/features/attendance/repositories/attendance_repository.dart';
 import 'package:college_companion/features/attendance/repositories/lecture_record_repository.dart';
 import 'package:college_companion/features/attendance/repositories/sync_repository.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 
 /// The full backend stack wired over a single [AppDatabase] instance.
@@ -22,7 +23,7 @@ class Backend {
       metadataDao = SyncMetadataDao(db) {
     syncRepository = SyncRepository(queueDao, metadataDao);
     lectureRecords = LectureRecordRepository(db, syncRepository);
-    attendance = AttendanceRepository(lectureDao);
+    attendance = AttendanceRepository(db);
   }
 
   /// Builds a backend over a fresh in-memory database.
@@ -39,7 +40,7 @@ class Backend {
   Future<void> close() => db.close();
 }
 
-const testUserId = 'user-1';
+const testUserId = 'user-test-1';
 
 /// Seeds a minimal but valid parent graph: user → semester → subject →
 /// timetable slot. Returns the created IDs for use in lecture records.
@@ -54,11 +55,14 @@ Future<SeededGraph> seedGraph(
   String semesterId = 'semester-1',
   String timetableId = 'timetable-1',
 }) async {
+  final nowIso = DateTime.now().toUtc().toIso8601String();
   await db.into(db.users).insert(
     UsersCompanion.insert(
       id: userId,
       name: 'Test Student',
       email: 'test@example.com',
+      createdAt: nowIso,
+      updatedAt: nowIso,
     ),
   );
   await db.into(db.semesters).insert(
@@ -67,6 +71,8 @@ Future<SeededGraph> seedGraph(
       userId: userId,
       name: 'Semester 5',
       workingDays: '[0,1,2,3,4]',
+      createdAt: nowIso,
+      updatedAt: nowIso,
     ),
   );
   await db.into(db.subjects).insert(
@@ -75,6 +81,9 @@ Future<SeededGraph> seedGraph(
       userId: userId,
       semesterId: semesterId,
       name: 'Data Structures',
+      type: const Value('theory'),
+      createdAt: nowIso,
+      updatedAt: nowIso,
     ),
   );
   await db.into(db.timetable).insert(
@@ -85,6 +94,8 @@ Future<SeededGraph> seedGraph(
       dayOfWeek: 0,
       startTime: '09:00',
       endTime: '10:00',
+      createdAt: nowIso,
+      updatedAt: nowIso,
     ),
   );
   return SeededGraph(

@@ -9,8 +9,8 @@
 library;
 
 import 'package:college_companion/database/app_database.dart';
-import 'package:college_companion/database/daos/sync_queue_dao.dart';
 import 'package:college_companion/database/daos/sync_metadata_dao.dart';
+import 'package:college_companion/database/daos/sync_queue_dao.dart';
 
 /// Central sync operations — queuing writes to sync and bookkeeping.
 class SyncRepository {

@@ -4,10 +4,60 @@ import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class DataSyncScreen extends StatelessWidget {
+class DataSyncScreen extends StatefulWidget {
   const DataSyncScreen({super.key});
+
+  @override
+  State<DataSyncScreen> createState() => _DataSyncScreenState();
+}
+
+class _DataSyncScreenState extends State<DataSyncScreen> {
+  bool _isSyncing = false;
+  String _lastSynced = 'Never';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLastSync();
+  }
+
+  Future<void> _loadLastSync() async {
+    final prefs = await SharedPreferences.getInstance();
+    final timestamp = prefs.getInt('last_sync_timestamp');
+    if (timestamp != null) {
+      final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
+      setState(() {
+        _lastSynced = DateFormat('MMM d, y, h:mm a').format(date);
+      });
+    }
+  }
+
+  Future<void> _performSync() async {
+    setState(() {
+      _isSyncing = true;
+    });
+
+    // Simulate sync delay
+    await Future<void>.delayed(const Duration(seconds: 2));
+
+    final prefs = await SharedPreferences.getInstance();
+    final now = DateTime.now();
+    await prefs.setInt('last_sync_timestamp', now.millisecondsSinceEpoch);
+
+    if (mounted) {
+      setState(() {
+        _isSyncing = false;
+        _lastSynced = DateFormat('MMM d, y, h:mm a').format(now);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Data synced successfully!')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -119,16 +169,24 @@ class DataSyncScreen extends StatelessWidget {
               color: ColorTokens.success.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
-              Symbols.check_circle,
-              color: ColorTokens.success,
-              size: 40,
-              fill: 1.0,
-            ),
+            child: _isSyncing
+                ? const SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: CircularProgressIndicator(
+                      color: ColorTokens.success,
+                    ),
+                  )
+                : const Icon(
+                    Symbols.check_circle,
+                    color: ColorTokens.success,
+                    size: 40,
+                    fill: 1.0,
+                  ),
           ),
           const SizedBox(height: SpacingTokens.md),
           Text(
-            'All data synced',
+            _isSyncing ? 'Syncing data...' : 'All data synced',
             style: theme.textTheme.titleLarge?.copyWith(
               color: ColorTokens.onSurface,
               fontWeight: FontWeight.bold,
@@ -136,7 +194,7 @@ class DataSyncScreen extends StatelessWidget {
           ),
           const SizedBox(height: SpacingTokens.xs),
           Text(
-            'Last synced: Today, 9:30 AM',
+            'Last synced: $_lastSynced',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: ColorTokens.onSurfaceVariant,
             ),
@@ -145,7 +203,7 @@ class DataSyncScreen extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {}, // TODO: Implement manual sync
+              onPressed: _isSyncing ? null : _performSync,
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorTokens.primary,
                 foregroundColor: ColorTokens.onPrimary,
@@ -155,9 +213,9 @@ class DataSyncScreen extends StatelessWidget {
                   borderRadius: RadiusTokens.borderRadiusLg,
                 ),
               ),
-              child: const Text(
-                'Sync Now',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+              child: Text(
+                _isSyncing ? 'Syncing...' : 'Sync Now',
+                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
             ),
           ),

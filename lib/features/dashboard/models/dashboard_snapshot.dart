@@ -10,58 +10,22 @@ class DashboardSnapshot {
     required this.nextAction,
     required this.timelineEvents,
     required this.academicSnapshot,
+    required this.upcomingAssignments,
   });
 
-  /// Factory for the Phase 1 mock data (Heavy Academic Day)
-  factory DashboardSnapshot.mockHeavyDay() {
+  /// Factory for an initial/empty state when no database records exist
+  factory DashboardSnapshot.empty() {
     return const DashboardSnapshot(
-      greetingContext: '4 lectures today',
-      nextAction: HeroAction(
-        title: 'Statistics ML',
-        timeString: '09:00 AM',
-        location: 'Room 305',
-        urgencyString: 'Starts in 28m',
-      ),
-      timelineEvents: [
-        TimelineEvent(
-          title: 'Data Structures',
-          location: 'Room 101',
-          timeString: '08:00',
-          meridiem: 'AM',
-          isNow: false,
-          isPast: true,
-        ),
-        TimelineEvent(
-          title: 'Statistics ML',
-          location: 'Room 305',
-          timeString: '09:00',
-          meridiem: 'AM',
-          isNow: true,
-          isPast: false,
-        ),
-        TimelineEvent(
-          title: 'Artificial Intelligence',
-          location: 'Room 302',
-          timeString: '10:00',
-          meridiem: 'AM',
-          isNow: false,
-          isPast: false,
-        ),
-        TimelineEvent(
-          title: 'DevOps',
-          location: 'Lab 1',
-          timeString: '12:00',
-          meridiem: 'PM',
-          isNow: false,
-          isPast: false,
-        ),
-      ],
+      greetingContext: '0 lectures today',
+      nextAction: null,
+      timelineEvents: [],
       academicSnapshot: AcademicSnapshot(
-        attendanceState: 'On Track',
-        workloadState: 'Heavy',
-        deadlinesState: '1 Due',
-        nextBreakState: 'In 2 hrs',
+        attendanceState: 'No Data',
+        workloadState: 'Clear',
+        deadlinesState: 'All clear',
+        nextBreakState: 'N/A',
       ),
+      upcomingAssignments: [],
     );
   }
 
@@ -76,6 +40,9 @@ class DashboardSnapshot {
 
   /// Macro reassurance snapshot
   final AcademicSnapshot academicSnapshot;
+
+  /// Upcoming assignments
+  final List<DashboardAssignment> upcomingAssignments;
 }
 
 /// The immediate physical/temporal requirement.
@@ -125,4 +92,21 @@ class AcademicSnapshot {
   final String workloadState;
   final String deadlinesState;
   final String nextBreakState;
+}
+
+/// Upcoming assignment representation.
+class DashboardAssignment {
+  const DashboardAssignment({
+    required this.id,
+    required this.title,
+    required this.subject,
+    required this.dueDateString,
+    required this.daysLeft,
+  });
+
+  final String id;
+  final String title;
+  final String subject;
+  final String dueDateString;
+  final int daysLeft;
 }

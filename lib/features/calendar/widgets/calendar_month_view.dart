@@ -1,4 +1,5 @@
-import 'package:college_companion/features/calendar/models/mock_event.dart';
+import 'package:college_companion/database/app_database.dart';
+import 'package:college_companion/features/calendar/widgets/agenda_card.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -14,17 +15,27 @@ class CalendarMonthView extends StatelessWidget {
   final int selectedDate;
   final ValueChanged<int> onDateSelected;
 
-  /// Map of date (1-31) to a list of events.
-  final Map<int, List<MockEvent>> events;
+  /// Map of day number (1-31) to a list of calendar events.
+  final Map<int, List<CalendarEventEntity>> events;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final daysOfWeek = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    final now = DateTime.now();
+    final todayDay = now.day;
+
+    // Calculate total days in current month and first weekday offset
+    final firstDayOfMonth = DateTime(now.year, now.month, 1);
+    final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
+    final startingWeekday = firstDayOfMonth.weekday; // 1 = Mon, 7 = Sun
+    final offset = startingWeekday - 1; // Number of leading padding days
+
+    final totalGridCells = ((offset + daysInMonth) / 7).ceil() * 7;
 
     return Column(
       children: [
-        // Days of week
+        // Days of week header
         Padding(
           padding: const EdgeInsets.only(bottom: SpacingTokens.md),
           child: Row(
@@ -50,37 +61,36 @@ class CalendarMonthView extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 7,
-            mainAxisSpacing: SpacingTokens.md, // generous spacing
-            crossAxisSpacing: SpacingTokens.md, // generous spacing
+            mainAxisSpacing: SpacingTokens.md,
+            crossAxisSpacing: SpacingTokens.md,
             childAspectRatio: 1,
           ),
-          itemCount: 35, // 5 weeks (mock)
+          itemCount: totalGridCells,
           itemBuilder: (context, index) {
-            final isPrevMonth = index < 3;
-            final isNextMonth = index >= 34;
-            final isCurrentMonth = !isPrevMonth && !isNextMonth;
+            final dayNum = index - offset + 1;
+            final isCurrentMonth = dayNum >= 1 && dayNum <= daysInMonth;
 
-            final date = isPrevMonth
-                ? 28 + index
-                : isNextMonth
-                ? index - 33
-                : index - 2;
+            final displayDate = isCurrentMonth
+                ? dayNum
+                : (dayNum < 1
+                    ? DateTime(now.year, now.month, dayNum).day
+                    : dayNum - daysInMonth);
 
-            final isSelected = date == selectedDate && isCurrentMonth;
-            final isToday = date == 13 && isCurrentMonth; // Mock today is 13th
+            final isSelected = isCurrentMonth && displayDate == selectedDate;
+            final isToday = isCurrentMonth && displayDate == todayDay;
             final dayEvents = isCurrentMonth
-                ? (events[date] ?? [])
-                : <MockEvent>[];
+                ? (events[displayDate] ?? <CalendarEventEntity>[])
+                : <CalendarEventEntity>[];
 
             return _CalendarDateCell(
-              date: date.toString(),
+              date: displayDate.toString(),
               isCurrentMonth: isCurrentMonth,
               isToday: isToday,
               isSelected: isSelected,
               events: dayEvents,
               onTap: () {
                 if (isCurrentMonth) {
-                  onDateSelected(date);
+                  onDateSelected(displayDate);
                 }
               },
             );
@@ -105,7 +115,7 @@ class _CalendarDateCell extends StatelessWidget {
   final bool isCurrentMonth;
   final bool isToday;
   final bool isSelected;
-  final List<MockEvent> events;
+  final List<CalendarEventEntity> events;
   final VoidCallback onTap;
 
   @override
@@ -161,7 +171,7 @@ class _CalendarDateCell extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: isSelected
                             ? ColorTokens.onPrimary.withValues(alpha: 0.8)
-                            : event.type.color,
+                            : event.typeColor,
                         shape: BoxShape.circle,
                       ),
                     ),

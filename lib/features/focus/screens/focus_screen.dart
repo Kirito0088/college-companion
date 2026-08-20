@@ -1,25 +1,57 @@
+import 'package:college_companion/features/focus/models/focus_timer_state.dart';
+import 'package:college_companion/features/focus/providers/focus_timer_provider.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
-class FocusScreen extends StatefulWidget {
+class FocusScreen extends ConsumerStatefulWidget {
   const FocusScreen({super.key});
 
   @override
-  State<FocusScreen> createState() => _FocusScreenState();
+  ConsumerState<FocusScreen> createState() => _FocusScreenState();
 }
 
-class _FocusScreenState extends State<FocusScreen> {
-  bool _isRunning = false;
-  String _selectedPreset = '25 min';
-  bool _dndEnabled = true;
+class _FocusScreenState extends ConsumerState<FocusScreen> {
+  int _selectedEnvironmentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final timerState = ref.watch(focusTimerProvider);
+    final timerNotifier = ref.read(focusTimerProvider.notifier);
+
+    ref.listen<FocusTimerState>(focusTimerProvider, (previous, next) {
+      if (next.completionAlertMessage != null &&
+          next.completionAlertMessage != previous?.completionAlertMessage) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Symbols.notifications_active, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    next.completionAlertMessage!,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: ColorTokens.primary,
+            duration: const Duration(seconds: 5),
+            behavior: SnackBarBehavior.floating,
+            shape: const RoundedRectangleBorder(
+              borderRadius: RadiusTokens.borderRadiusMd,
+            ),
+          ),
+        );
+        timerNotifier.clearAlertMessage();
+      }
+    });
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -41,9 +73,10 @@ class _FocusScreenState extends State<FocusScreen> {
               ),
             ),
             Text(
-              'Stay focused. Study smarter.',
+              timerState.isBreak ? 'Break Time' : 'Stay focused. Study smarter.',
               style: theme.textTheme.labelSmall?.copyWith(
-                color: ColorTokens.onSurfaceVariant,
+                color: timerState.isBreak ? ColorTokens.tertiary : ColorTokens.onSurfaceVariant,
+                fontWeight: timerState.isBreak ? FontWeight.bold : FontWeight.normal,
               ),
             ),
           ],
@@ -58,21 +91,21 @@ class _FocusScreenState extends State<FocusScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildHeroTimer(context),
+            _buildHeroTimer(context, timerState),
             const SizedBox(height: SpacingTokens.xl),
-            _buildSessionControls(),
+            _buildSessionControls(timerState, timerNotifier),
             const SizedBox(height: SpacingTokens.xl),
-            _buildSessionPresets(),
+            _buildSessionPresets(timerState, timerNotifier),
             const SizedBox(height: LayoutTokens.sectionGap),
-            _buildStatisticsCard(context),
+            _buildStatisticsCard(context, timerState),
             const SizedBox(height: LayoutTokens.sectionGap),
-            _buildStudyGoalCard(context),
+            _buildStudyGoalCard(context, timerState),
             const SizedBox(height: LayoutTokens.sectionGap),
             _buildAmbientModeCard(context),
             const SizedBox(height: LayoutTokens.sectionGap),
-            _buildDndCard(context),
+            _buildDndCard(context, timerState, timerNotifier),
             const SizedBox(height: LayoutTokens.sectionGap),
-            _buildSessionHistory(context),
+            _buildSessionHistory(context, timerState),
             const SizedBox(height: LayoutTokens.sectionGap),
             _buildMotivationalCard(context),
             const SizedBox(height: SpacingTokens.xxl),
@@ -82,8 +115,11 @@ class _FocusScreenState extends State<FocusScreen> {
     );
   }
 
-  Widget _buildHeroTimer(BuildContext context) {
+  Widget _buildHeroTimer(BuildContext context, FocusTimerState state) {
     final theme = Theme.of(context);
+    final isBreak = state.isBreak;
+    final progressColor = isBreak ? ColorTokens.tertiary : ColorTokens.primary;
+
     return Center(
       child: SizedBox(
         width: 276,
@@ -91,25 +127,18 @@ class _FocusScreenState extends State<FocusScreen> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            TweenAnimationBuilder<double>(
-              tween: Tween<double>(begin: 0, end: 0.75),
-              duration: const Duration(seconds: 1),
-              curve: Curves.easeOutCubic,
-              builder: (context, value, child) {
-                return CircularProgressIndicator(
-                  value: value,
-                  strokeWidth: 10,
-                  backgroundColor: ColorTokens.surfaceContainerHighest,
-                  color: ColorTokens.primary,
-                  strokeCap: StrokeCap.round,
-                );
-              },
+            CircularProgressIndicator(
+              value: state.progress,
+              strokeWidth: 10,
+              backgroundColor: ColorTokens.surfaceContainerHighest,
+              color: progressColor,
+              strokeCap: StrokeCap.round,
             ),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  '25:00',
+                  state.formattedTime,
                   style: theme.textTheme.displayLarge?.copyWith(
                     fontSize: 62,
                     color: ColorTokens.onSurface,
@@ -119,9 +148,10 @@ class _FocusScreenState extends State<FocusScreen> {
                 ),
                 const SizedBox(height: SpacingTokens.xs),
                 Text(
-                  'Focus Session',
+                  isBreak ? 'Break Session' : 'Focus Session',
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: ColorTokens.onSurfaceVariant,
+                    color: isBreak ? ColorTokens.tertiary : ColorTokens.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: SpacingTokens.md + 4),
@@ -137,7 +167,7 @@ class _FocusScreenState extends State<FocusScreen> {
                     borderRadius: RadiusTokens.borderRadiusSm,
                   ),
                   child: Text(
-                    "Today's Progress: 2 / 8 Sessions",
+                    "Today's Progress: ${state.completedSessionsToday} / 8 Sessions",
                     style: theme.textTheme.labelMedium?.copyWith(
                       color: ColorTokens.onSurfaceVariant.withValues(
                         alpha: 0.8,
@@ -154,50 +184,64 @@ class _FocusScreenState extends State<FocusScreen> {
     );
   }
 
-  Widget _buildSessionControls() {
-    return _isRunning
-        ? Row(
-            children: [
-              Expanded(
-                child: _buildAnimatedButton(
-                  onTap: () {
-                    setState(() {
-                      _isRunning = false;
-                    });
-                  },
-                  icon: Symbols.pause,
-                  label: 'Pause',
-                  backgroundColor: ColorTokens.surfaceContainerHigh,
-                  foregroundColor: ColorTokens.onSurface,
-                ),
-              ),
-              const SizedBox(width: SpacingTokens.md),
-              Expanded(
-                child: _buildAnimatedButton(
-                  onTap: () {
-                    setState(() {
-                      _isRunning = false;
-                    });
-                  },
-                  icon: Symbols.stop,
-                  label: 'End Session',
-                  backgroundColor: ColorTokens.error.withValues(alpha: 0.9),
-                  foregroundColor: ColorTokens.onError,
-                ),
-              ),
-            ],
-          )
-        : _buildAnimatedButton(
-            onTap: () {
-              setState(() {
-                _isRunning = true;
-              });
-            },
-            icon: Symbols.play_arrow,
-            label: 'Start Focus Session',
-            backgroundColor: ColorTokens.primary.withValues(alpha: 0.85),
-            foregroundColor: ColorTokens.onPrimary,
-          );
+  Widget _buildSessionControls(FocusTimerState state, FocusTimerNotifier notifier) {
+    if (state.status == FocusTimerStatus.running || state.status == FocusTimerStatus.breakMode) {
+      return Row(
+        children: [
+          Expanded(
+            child: _buildAnimatedButton(
+              onTap: () => notifier.pause(),
+              icon: Symbols.pause,
+              label: 'Pause',
+              backgroundColor: ColorTokens.surfaceContainerHigh,
+              foregroundColor: ColorTokens.onSurface,
+            ),
+          ),
+          const SizedBox(width: SpacingTokens.md),
+          Expanded(
+            child: _buildAnimatedButton(
+              onTap: () => notifier.stop(),
+              icon: Symbols.stop,
+              label: 'End Session',
+              backgroundColor: ColorTokens.error.withValues(alpha: 0.9),
+              foregroundColor: ColorTokens.onError,
+            ),
+          ),
+        ],
+      );
+    } else if (state.status == FocusTimerStatus.paused) {
+      return Row(
+        children: [
+          Expanded(
+            child: _buildAnimatedButton(
+              onTap: () => notifier.start(),
+              icon: Symbols.play_arrow,
+              label: 'Resume',
+              backgroundColor: ColorTokens.primary.withValues(alpha: 0.85),
+              foregroundColor: ColorTokens.onPrimary,
+            ),
+          ),
+          const SizedBox(width: SpacingTokens.md),
+          Expanded(
+            child: _buildAnimatedButton(
+              onTap: () => notifier.stop(),
+              icon: Symbols.refresh,
+              label: 'Reset',
+              backgroundColor: ColorTokens.surfaceContainerHigh,
+              foregroundColor: ColorTokens.onSurface,
+            ),
+          ),
+        ],
+      );
+    } else {
+      return _buildAnimatedButton(
+        onTap: () => notifier.start(),
+        icon: Symbols.play_arrow,
+        label: 'Start Focus Session',
+        backgroundColor: ColorTokens.primary.withValues(alpha: 0.85),
+        foregroundColor: ColorTokens.onPrimary,
+      );
+    }
   }
 
   Widget _buildAnimatedButton({
@@ -238,26 +282,39 @@ class _FocusScreenState extends State<FocusScreen> {
     );
   }
 
-  Widget _buildSessionPresets() {
-    final presets = ['25 min', '45 min', '60 min', 'Custom'];
+  Widget _buildSessionPresets(FocusTimerState state, FocusTimerNotifier notifier) {
+    final presets = [
+      {'label': '25 min', 'work': 25, 'break': 5},
+      {'label': '45 min', 'work': 45, 'break': 10},
+      {'label': '60 min', 'work': 60, 'break': 15},
+      {'label': 'Custom', 'work': 30, 'break': 5},
+    ];
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: presets.map((preset) {
-          final isSelected = _selectedPreset == preset;
+          final label = preset['label'] as String;
+          final isSelected = state.selectedPreset == label;
           return Padding(
             padding: const EdgeInsets.only(right: SpacingTokens.md),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               child: ChoiceChip(
-                label: Text(preset),
+                label: Text(label),
                 selected: isSelected,
                 onSelected: (selected) {
                   if (selected) {
-                    setState(() {
-                      _selectedPreset = preset;
-                    });
+                    if (label == 'Custom') {
+                      _showCustomDurationDialog(context, state, notifier);
+                    } else {
+                      notifier.setPreset(
+                        label,
+                        workMinutes: preset['work'] as int,
+                        breakMinutes: preset['break'] as int,
+                      );
+                    }
                   }
                 },
                 selectedColor: ColorTokens.primaryContainer,
@@ -287,19 +344,101 @@ class _FocusScreenState extends State<FocusScreen> {
     );
   }
 
-  Widget _buildStatisticsCard(BuildContext context) {
+  void _showCustomDurationDialog(
+    BuildContext context,
+    FocusTimerState state,
+    FocusTimerNotifier notifier,
+  ) {
+    int workMins = state.workDurationMinutes;
+    int breakMins = state.breakDurationMinutes;
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Custom Focus Timer'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Focus Duration: $workMins mins'),
+                  Slider(
+                    value: workMins.toDouble(),
+                    min: 5,
+                    max: 120,
+                    divisions: 23,
+                    label: '$workMins min',
+                    onChanged: (val) {
+                      setDialogState(() {
+                        workMins = val.toInt();
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Text('Break Duration: $breakMins mins'),
+                  Slider(
+                    value: breakMins.toDouble(),
+                    min: 1,
+                    max: 30,
+                    divisions: 29,
+                    label: '$breakMins min',
+                    onChanged: (val) {
+                      setDialogState(() {
+                        breakMins = val.toInt();
+                      });
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    notifier.setPreset(
+                      'Custom',
+                      workMinutes: workMins,
+                      breakMinutes: breakMins,
+                    );
+                    Navigator.of(dialogContext).pop();
+                  },
+                  child: const Text('Set'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildStatisticsCard(BuildContext context, FocusTimerState state) {
+    final totalMins = state.history.fold<int>(0, (sum, s) => sum + s.durationMinutes);
+    final hours = totalMins ~/ 60;
+    final mins = totalMins % 60;
+    final focusTimeString = hours > 0 ? '${hours}h ${mins}m' : '${mins}m';
+
     return _buildSectionContainer(
       context: context,
       title: "Today's Focus",
       child: Row(
         children: [
-          Expanded(child: _buildStatItem(context, 'Focus Time', '2h 15m')),
+          Expanded(child: _buildStatItem(context, 'Focus Time', focusTimeString)),
           Container(
             width: 1,
             height: 40,
             color: ColorTokens.outlineVariant.withValues(alpha: 0.15),
           ),
-          Expanded(child: _buildStatItem(context, 'Sessions', '5')),
+          Expanded(
+            child: _buildStatItem(
+              context,
+              'Sessions',
+              '${state.completedSessionsToday}',
+            ),
+          ),
           Container(
             width: 1,
             height: 40,
@@ -334,8 +473,10 @@ class _FocusScreenState extends State<FocusScreen> {
     );
   }
 
-  Widget _buildStudyGoalCard(BuildContext context) {
+  Widget _buildStudyGoalCard(BuildContext context, FocusTimerState state) {
     final theme = Theme.of(context);
+    final goalProgress = (state.completedSessionsToday / 8).clamp(0.0, 1.0);
+
     return _buildSectionContainer(
       context: context,
       title: "Today's Goal",
@@ -352,7 +493,7 @@ class _FocusScreenState extends State<FocusScreen> {
                 ),
               ),
               Text(
-                '5 / 8 Sessions',
+                '${state.completedSessionsToday} / 8 Sessions',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: ColorTokens.onSurface,
                   fontWeight: FontWeight.bold,
@@ -361,21 +502,14 @@ class _FocusScreenState extends State<FocusScreen> {
             ],
           ),
           const SizedBox(height: SpacingTokens.lg),
-          TweenAnimationBuilder<double>(
-            tween: Tween<double>(begin: 0, end: 5 / 8),
-            duration: const Duration(milliseconds: 800),
-            curve: Curves.easeOutCubic,
-            builder: (context, value, child) {
-              return LinearProgressIndicator(
-                value: value,
-                backgroundColor: ColorTokens.surfaceContainerHighest.withValues(
-                  alpha: 0.5,
-                ),
-                color: ColorTokens.primary,
-                minHeight: 10,
-                borderRadius: BorderRadius.circular(100),
-              );
-            },
+          LinearProgressIndicator(
+            value: goalProgress,
+            backgroundColor: ColorTokens.surfaceContainerHighest.withValues(
+              alpha: 0.5,
+            ),
+            color: ColorTokens.primary,
+            minHeight: 10,
+            borderRadius: BorderRadius.circular(100),
           ),
           const SizedBox(height: SpacingTokens.lg),
           Row(
@@ -388,7 +522,9 @@ class _FocusScreenState extends State<FocusScreen> {
               const SizedBox(width: SpacingTokens.sm),
               Expanded(
                 child: Text(
-                  "Keep going! You're making great progress.",
+                  state.completedSessionsToday >= 8
+                      ? 'Awesome! Goal completed for today!'
+                      : "Keep going! You're making great progress.",
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: ColorTokens.onSurfaceVariant,
                   ),
@@ -421,14 +557,23 @@ class _FocusScreenState extends State<FocusScreen> {
             icon: env['icon'] as IconData,
             label: env['label'] as String,
             showBorder: index != environments.length - 1,
-            isSelected: index == 0,
+            isSelected: index == _selectedEnvironmentIndex,
+            onTap: () {
+              setState(() {
+                _selectedEnvironmentIndex = index;
+              });
+            },
           );
         }).toList(),
       ),
     );
   }
 
-  Widget _buildDndCard(BuildContext context) {
+  Widget _buildDndCard(
+    BuildContext context,
+    FocusTimerState state,
+    FocusTimerNotifier notifier,
+  ) {
     final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -457,12 +602,8 @@ class _FocusScreenState extends State<FocusScreen> {
           ),
           const SizedBox(width: SpacingTokens.sm),
           Switch(
-            value: _dndEnabled,
-            onChanged: (val) {
-              setState(() {
-                _dndEnabled = val;
-              });
-            },
+            value: state.dndEnabled,
+            onChanged: (val) => notifier.toggleDnd(val),
             activeThumbColor: ColorTokens.surface,
             activeTrackColor: ColorTokens.primary,
             inactiveThumbColor: ColorTokens.outline,
@@ -473,41 +614,44 @@ class _FocusScreenState extends State<FocusScreen> {
     );
   }
 
-  Widget _buildSessionHistory(BuildContext context) {
+  Widget _buildSessionHistory(BuildContext context, FocusTimerState state) {
     final theme = Theme.of(context);
-    final history = [
-      {
-        'subject': 'Mathematics',
-        'duration': '25 min',
-        'icon': Symbols.calculate,
-      },
-      {
-        'subject': 'Operating Systems',
-        'duration': '45 min',
-        'icon': Symbols.memory,
-      },
-      {
-        'subject': 'DBMS Revision',
-        'duration': '25 min',
-        'icon': Symbols.database,
-      },
-    ];
+    final history = state.history;
+
+    if (history.isEmpty) {
+      return _buildSectionContainer(
+        context: context,
+        title: 'Recent Sessions',
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: SpacingTokens.md),
+          child: Text(
+            'No study sessions recorded yet. Start your first session above!',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: ColorTokens.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
 
     return _buildSectionContainer(
       context: context,
       title: 'Recent Sessions',
       padding: EdgeInsets.zero,
       child: Column(
-        children: history.asMap().entries.map((entry) {
+        children: history.take(10).toList().asMap().entries.map((entry) {
           final index = entry.key;
           final session = entry.value;
+          final IconData iconData = _getSubjectIcon(session.subject);
+
           return Container(
             padding: const EdgeInsets.symmetric(
               horizontal: LayoutTokens.cardPadding,
               vertical: LayoutTokens.cardPadding + 4,
             ),
             decoration: BoxDecoration(
-              border: index != history.length - 1
+              border: index != history.length - 1 && index != 9
                   ? Border(
                       bottom: BorderSide(
                         color: ColorTokens.outlineVariant.withValues(
@@ -526,7 +670,7 @@ class _FocusScreenState extends State<FocusScreen> {
                     borderRadius: RadiusTokens.borderRadiusSm,
                   ),
                   child: Icon(
-                    session['icon'] as IconData,
+                    iconData,
                     size: 20,
                     color: ColorTokens.onSurfaceVariant,
                   ),
@@ -537,7 +681,7 @@ class _FocusScreenState extends State<FocusScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        session['subject'] as String,
+                        session.subject,
                         style: theme.textTheme.bodyLarge?.copyWith(
                           color: ColorTokens.onSurface,
                           fontWeight: FontWeight.w500,
@@ -545,7 +689,7 @@ class _FocusScreenState extends State<FocusScreen> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        session['duration'] as String,
+                        '${session.durationMinutes} min',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: ColorTokens.onSurfaceVariant.withValues(
                             alpha: 0.7,
@@ -566,6 +710,14 @@ class _FocusScreenState extends State<FocusScreen> {
         }).toList(),
       ),
     );
+  }
+
+  IconData _getSubjectIcon(String subject) {
+    final lower = subject.toLowerCase();
+    if (lower.contains('math')) return Symbols.calculate;
+    if (lower.contains('operating') || lower.contains('system')) return Symbols.memory;
+    if (lower.contains('dbms') || lower.contains('data')) return Symbols.database;
+    return Symbols.book;
   }
 
   Widget _buildMotivationalCard(BuildContext context) {
@@ -651,12 +803,14 @@ class _ActionRow extends StatelessWidget {
     required this.label,
     required this.showBorder,
     this.isSelected = false,
+    this.onTap,
   });
 
   final IconData icon;
   final String label;
   final bool showBorder;
   final bool isSelected;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -665,7 +819,7 @@ class _ActionRow extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {},
+        onTap: onTap,
         hoverColor: ColorTokens.surfaceContainerHigh,
         child: Container(
           padding: const EdgeInsets.symmetric(

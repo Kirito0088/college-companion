@@ -1,38 +1,60 @@
+import 'package:college_companion/features/profile/providers/profile_provider.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
-class AccountInformationScreen extends StatefulWidget {
+class AccountInformationScreen extends ConsumerStatefulWidget {
   const AccountInformationScreen({super.key});
 
   @override
-  State<AccountInformationScreen> createState() =>
+  ConsumerState<AccountInformationScreen> createState() =>
       _AccountInformationScreenState();
 }
 
-class _AccountInformationScreenState extends State<AccountInformationScreen> {
-  // Placeholder controllers
-  final _displayNameController = TextEditingController(text: 'Jayesh Patil');
-  final _collegeNameController = TextEditingController(
-    text: 'ABC College of Engineering',
-  );
-  final _branchController = TextEditingController(text: 'Computer Science');
-  final _semesterController = TextEditingController(text: '6');
-  final _studentIdController = TextEditingController(text: '12345678');
+class _AccountInformationScreenState extends ConsumerState<AccountInformationScreen> {
+  late final TextEditingController _displayNameController;
+  late final TextEditingController _collegeNameController;
+  late final TextEditingController _branchController;
+  late final TextEditingController _semesterController;
+  late final TextEditingController _studentIdController;
+  late final TextEditingController _universityController;
+  late final TextEditingController _courseController;
+  late final TextEditingController _departmentController;
+  late final TextEditingController _gradYearController;
 
-  final _universityController = TextEditingController(
-    text: 'Mumbai University',
-  );
-  final _courseController = TextEditingController(
-    text: 'Bachelor of Engineering',
-  );
-  final _departmentController = TextEditingController(
-    text: 'Computer Science (AI & ML)',
-  );
-  final _gradYearController = TextEditingController(text: '2028');
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _displayNameController = TextEditingController();
+    _collegeNameController = TextEditingController();
+    _branchController = TextEditingController();
+    _semesterController = TextEditingController();
+    _studentIdController = TextEditingController();
+    _universityController = TextEditingController();
+    _courseController = TextEditingController();
+    _departmentController = TextEditingController();
+    _gradYearController = TextEditingController();
+  }
+
+  void _initControllers(UserProfileDetails profile) {
+    if (_initialized) return;
+    _initialized = true;
+    _displayNameController.text = profile.displayName;
+    _collegeNameController.text = profile.collegeName;
+    _branchController.text = profile.branch;
+    _semesterController.text = profile.semester;
+    _studentIdController.text = profile.studentId;
+    _universityController.text = profile.university;
+    _courseController.text = profile.course;
+    _departmentController.text = profile.department;
+    _gradYearController.text = profile.gradYear;
+  }
 
   @override
   void dispose() {
@@ -51,6 +73,8 @@ class _AccountInformationScreenState extends State<AccountInformationScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final profile = ref.watch(userProfileProvider);
+    _initControllers(profile);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -79,7 +103,7 @@ class _AccountInformationScreenState extends State<AccountInformationScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildProfileCard(context),
+            _buildProfileCard(context, profile),
             const SizedBox(height: LayoutTokens.sectionGap),
             _buildPersonalInformation(context),
             const SizedBox(height: LayoutTokens.sectionGap),
@@ -87,7 +111,7 @@ class _AccountInformationScreenState extends State<AccountInformationScreen> {
             const SizedBox(height: LayoutTokens.sectionGap),
             _buildAccountStatus(context),
             const SizedBox(height: LayoutTokens.sectionGap),
-            _buildSaveChangesButton(),
+            _buildSaveChangesButton(profile),
             const SizedBox(height: SpacingTokens.xxl),
           ],
         ),
@@ -95,8 +119,10 @@ class _AccountInformationScreenState extends State<AccountInformationScreen> {
     );
   }
 
-  Widget _buildProfileCard(BuildContext context) {
+  Widget _buildProfileCard(BuildContext context, UserProfileDetails profile) {
     final theme = Theme.of(context);
+    final initial = profile.displayName.isNotEmpty ? profile.displayName[0].toUpperCase() : 'J';
+
     return Container(
       padding: const EdgeInsets.all(SpacingTokens.xl),
       decoration: const BoxDecoration(
@@ -109,7 +135,7 @@ class _AccountInformationScreenState extends State<AccountInformationScreen> {
             radius: 40,
             backgroundColor: ColorTokens.primaryContainer,
             child: Text(
-              'J',
+              initial,
               style: theme.textTheme.displaySmall?.copyWith(
                 color: ColorTokens.onPrimaryContainer,
                 fontWeight: FontWeight.bold,
@@ -118,7 +144,7 @@ class _AccountInformationScreenState extends State<AccountInformationScreen> {
           ),
           const SizedBox(height: SpacingTokens.lg),
           Text(
-            'Jayesh Patil',
+            profile.displayName,
             style: theme.textTheme.titleLarge?.copyWith(
               color: ColorTokens.onSurface,
               fontWeight: FontWeight.bold,
@@ -126,7 +152,7 @@ class _AccountInformationScreenState extends State<AccountInformationScreen> {
           ),
           const SizedBox(height: SpacingTokens.xs),
           Text(
-            'jayeshpatil@gmail.com',
+            profile.email,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: ColorTokens.onSurfaceVariant,
             ),
@@ -355,9 +381,27 @@ class _AccountInformationScreenState extends State<AccountInformationScreen> {
     );
   }
 
-  Widget _buildSaveChangesButton() {
+  Widget _buildSaveChangesButton(UserProfileDetails currentProfile) {
     return FilledButton(
-      onPressed: () {},
+      onPressed: () async {
+        final updated = currentProfile.copyWith(
+          displayName: _displayNameController.text.trim(),
+          collegeName: _collegeNameController.text.trim(),
+          branch: _branchController.text.trim(),
+          semester: _semesterController.text.trim(),
+          studentId: _studentIdController.text.trim(),
+          university: _universityController.text.trim(),
+          course: _courseController.text.trim(),
+          department: _departmentController.text.trim(),
+          gradYear: _gradYearController.text.trim(),
+        );
+        await ref.read(userProfileProvider.notifier).updateProfile(updated);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Account information updated successfully!')),
+          );
+        }
+      },
       style: FilledButton.styleFrom(
         padding: const EdgeInsets.all(SpacingTokens.lg),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),

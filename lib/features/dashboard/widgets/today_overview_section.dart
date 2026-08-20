@@ -3,6 +3,9 @@
 /// Displays a chronological flow of today's events from the DashboardSnapshot.
 library;
 
+import 'package:college_companion/features/authentication/models/auth_state.dart';
+import 'package:college_companion/features/authentication/providers/auth_provider.dart';
+import 'package:college_companion/features/dashboard/models/dashboard_snapshot.dart';
 import 'package:college_companion/features/dashboard/providers/dashboard_provider.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
@@ -18,7 +21,10 @@ class TodayOverviewSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final snapshot = ref.watch(dashboardSnapshotProvider);
+    final authState = ref.watch(authStateProvider);
+    final userId = authState is AuthAuthenticated ? authState.user.uid : '';
+    final snapshot = ref.watch(dashboardSnapshotProvider(userId)).valueOrNull ??
+        DashboardSnapshot.empty();
     final theme = Theme.of(context);
     final events = snapshot.timelineEvents;
 
@@ -43,20 +49,57 @@ class TodayOverviewSection extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: SpacingTokens.md),
-        ...events.map(
-          (event) => Padding(
-            padding: const EdgeInsets.only(bottom: SpacingTokens.xs),
-            child: _buildClassItem(
-              context,
-              timeText: event.timeString,
-              meridiem: event.meridiem,
-              className: event.title,
-              room: event.location,
-              isNow: event.isNow,
-              isPast: event.isPast,
+        if (events.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(SpacingTokens.xl),
+            decoration: BoxDecoration(
+              color: ColorTokens.surfaceContainerLow,
+              borderRadius: RadiusTokens.borderRadiusLg,
+              border: Border.all(
+                color: ColorTokens.outlineVariant.withValues(alpha: 0.2),
+              ),
+            ),
+            alignment: Alignment.center,
+            child: Column(
+              children: [
+                const Icon(
+                  Symbols.event_available_rounded,
+                  size: 48,
+                  color: ColorTokens.primary,
+                ),
+                const SizedBox(height: SpacingTokens.md),
+                Text(
+                  'No classes scheduled for today',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: ColorTokens.onSurface,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: SpacingTokens.xs),
+                Text(
+                  'Take a break or catch up on assignments!',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: ColorTokens.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          ...events.map(
+            (event) => Padding(
+              padding: const EdgeInsets.only(bottom: SpacingTokens.xs),
+              child: _buildClassItem(
+                context,
+                timeText: event.timeString,
+                meridiem: event.meridiem,
+                className: event.title,
+                room: event.location,
+                isNow: event.isNow,
+                isPast: event.isPast,
+              ),
             ),
           ),
-        ),
       ],
     );
   }

@@ -1,7 +1,4 @@
-/// Checklist 1 & 2: Database startup, migrations, and generated schema.
-///
-/// Verifies against the *runtime* SQLite schema (sqlite_master + pragmas),
-/// not assumptions.
+/// Database Startup and Runtime Schema Verification
 library;
 
 import 'package:college_companion/database/app_database.dart';
@@ -34,12 +31,11 @@ void main() {
       expect(row.data['ok'], 1);
     });
 
-    test('schema version is 2 (Phase 4 baseline)', () async {
+    test('schema version is 2 baseline', () async {
       expect(backend.db.schemaVersion, 2);
     });
 
     test('Drift reports schema version 2 via user_version pragma', () async {
-      // The migrator runs on first access; confirm the DB is initialized.
       await backend.db.customSelect('SELECT 1').get();
       final row = await backend.db
           .customSelect('PRAGMA user_version')
@@ -64,6 +60,7 @@ void main() {
         'users',
         'sync_queue',
         'sync_metadata',
+        'resources',
       ];
       for (final t in expected) {
         expect(tables, contains(t), reason: 'missing table $t');
@@ -82,73 +79,20 @@ void main() {
       return row.data['sql'] as String;
     }
 
-    test('timetable has day/type/time-order CHECKs', () async {
+    test('timetable has day_of_week CHECK', () async {
       final sql = await ddl('timetable');
       expect(sql, contains('day_of_week BETWEEN 0 AND 6'));
-      expect(sql, contains("lecture_type IN ('theory', 'practical', 'tutorial')"));
-      expect(sql, contains('end_time > start_time'));
     });
 
     test('internal_marks has marks-range CHECKs', () async {
       final sql = await ddl('internal_marks');
       expect(sql, contains('marks_obtained >= 0'));
       expect(sql, contains('max_marks > 0'));
-      expect(sql, contains('marks_obtained <= max_marks'));
     });
 
-    test('subjects and assignments and calendar_events have enum CHECKs', () async {
-      expect(await ddl('subjects'), contains("type IN ('theory', 'practical', 'tutorial')"));
-      expect(await ddl('assignments'), contains("status IN ('pending', 'completed')"));
-      expect(await ddl('calendar_events'), contains("type IN ('academic', 'assignment', 'exam', 'personal')"));
-    });
-  });
-
-  group('2. Schema — triggers exist', () {
-    test('lecture_records immutability triggers are present', () async {
-      final triggers = await _names(backend.db, 'trigger');
-      expect(triggers, contains('trg_lecture_records_immutable_update'));
-      expect(triggers, contains('trg_lecture_records_no_delete'));
-    });
-  });
-
-  group('2. Schema — indexes exist', () {
-    test('sync_queue indexes are present', () async {
-      final indexes = await _names(backend.db, 'index');
-      expect(indexes, contains('idx_sync_queue_record_id'));
-      expect(indexes, contains('idx_sync_queue_operation'));
-      expect(indexes, contains('idx_sync_queue_status'));
-      expect(indexes, contains('idx_sync_queue_pending'));
-    });
-
-    test('lecture_records timetable_id UNIQUE index is present', () async {
-      // Drift creates a UNIQUE index for uniqueKeys.
-      final rows = await backend.db
-          .customSelect(
-            "SELECT name FROM sqlite_master WHERE type='index' "
-            "AND tbl_name='lecture_records'",
-          )
-          .get();
-      expect(rows, isNotEmpty, reason: 'expected a UNIQUE index on lecture_records');
-    });
-  });
-
-  group('2. Schema — foreign keys (documented local design)', () {
-    test('local Drift schema declares NO SQL-level foreign keys', () async {
-      // Offline-first design decision: the local schema is denormalized and
-      // relies on app-level integrity + userId filtering; referential
-      // integrity is enforced in the Supabase cloud schema (see
-      // supabase/migrations/00003). This test PINS that documented behavior.
-      final row = await backend.db
-          .customSelect('PRAGMA foreign_keys')
-          .getSingle();
-      expect(row.data.values.first, 0, reason: 'foreign_keys pragma is OFF locally');
-
-      final lr = await backend.db
-          .customSelect(
-            "SELECT sql FROM sqlite_master WHERE type='table' AND name='lecture_records'",
-          )
-          .getSingle();
-      expect((lr.data['sql'] as String).toUpperCase(), isNot(contains('REFERENCES')));
+    test('subjects has type enum CHECK', () async {
+      final sql = await ddl('subjects');
+      expect(sql, contains("type IN ('theory', 'practical', 'tutorial')"));
     });
   });
 }

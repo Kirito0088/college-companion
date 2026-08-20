@@ -15,7 +15,7 @@ import 'package:material_symbols_icons/symbols.dart';
 /// - View Timetable
 /// - Check Attendance
 /// - View Assignments
-/// - Check Internal Marks
+/// - Start Focus Mode
 class QuickActionsSection extends StatelessWidget {
   /// Creates a [QuickActionsSection].
   const QuickActionsSection({
@@ -23,7 +23,7 @@ class QuickActionsSection extends StatelessWidget {
     this.onTimetablePressed,
     this.onAttendancePressed,
     this.onAssignmentsPressed,
-    this.onMarksPressed,
+    this.onFocusPressed,
   });
 
   /// Callback when timetable action is pressed.
@@ -35,8 +35,8 @@ class QuickActionsSection extends StatelessWidget {
   /// Callback when assignments action is pressed.
   final VoidCallback? onAssignmentsPressed;
 
-  /// Callback when marks action is pressed.
-  final VoidCallback? onMarksPressed;
+  /// Callback when focus mode action is pressed.
+  final VoidCallback? onFocusPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -48,37 +48,50 @@ class QuickActionsSection extends StatelessWidget {
       children: [
         const SectionHeader(title: 'Quick Actions'),
         const SizedBox(height: SpacingTokens.md),
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: SpacingTokens.md,
-          crossAxisSpacing: SpacingTokens.md,
-          childAspectRatio: 1.2,
+        Column(
           children: [
-            _QuickActionTile(
-              icon: Symbols.schedule_rounded,
-              label: 'Timetable',
-              color: colorScheme.primary,
-              onPressed: onTimetablePressed,
+            Row(
+              children: [
+                Expanded(
+                  child: _QuickActionTile(
+                    icon: Symbols.schedule_rounded,
+                    label: 'Calendar',
+                    color: colorScheme.primary,
+                    onPressed: onTimetablePressed,
+                  ),
+                ),
+                const SizedBox(width: SpacingTokens.md),
+                Expanded(
+                  child: _QuickActionTile(
+                    icon: Symbols.fact_check_rounded,
+                    label: 'Attendance',
+                    color: colorScheme.tertiary,
+                    onPressed: onAttendancePressed,
+                  ),
+                ),
+              ],
             ),
-            _QuickActionTile(
-              icon: Symbols.fact_check_rounded,
-              label: 'Attendance',
-              color: colorScheme.tertiary,
-              onPressed: onAttendancePressed,
-            ),
-            _QuickActionTile(
-              icon: Symbols.assignment_rounded,
-              label: 'Assignments',
-              color: colorScheme.secondary,
-              onPressed: onAssignmentsPressed,
-            ),
-            _QuickActionTile(
-              icon: Symbols.star_rounded,
-              label: 'Internal Marks',
-              color: colorScheme.primary,
-              onPressed: onMarksPressed,
+            const SizedBox(height: SpacingTokens.md),
+            Row(
+              children: [
+                Expanded(
+                  child: _QuickActionTile(
+                    icon: Symbols.assignment_rounded,
+                    label: 'Assignments',
+                    color: colorScheme.secondary,
+                    onPressed: onAssignmentsPressed,
+                  ),
+                ),
+                const SizedBox(width: SpacingTokens.md),
+                Expanded(
+                  child: _QuickActionTile(
+                    icon: Symbols.timer_rounded,
+                    label: 'Focus Mode',
+                    color: colorScheme.error,
+                    onPressed: onFocusPressed,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -114,36 +127,39 @@ class _QuickActionTile extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return InkWell(
-      onTap: onPressed,
+    return Material(
+      color: colorScheme.surfaceContainer,
       borderRadius: RadiusTokens.borderRadiusMd,
-      child: Container(
-        padding: const EdgeInsets.all(SpacingTokens.base),
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainer,
-          borderRadius: RadiusTokens.borderRadiusMd,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(SpacingTokens.md),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: RadiusTokens.borderRadiusMd,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: SpacingTokens.sm,
+            vertical: SpacingTokens.md,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(SpacingTokens.sm),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: color, size: 28),
               ),
-              child: Icon(icon, color: color, size: 28),
-            ),
-            const SizedBox(height: SpacingTokens.sm),
-            Text(
-              label,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface,
-                fontWeight: FontWeight.w500,
+              const SizedBox(height: SpacingTokens.xs),
+              Text(
+                label,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -1,54 +1,70 @@
-# Master Plan: Phase 4 & Phase 5 Enterprise Completion
+# Milestone Execution Plan
 
-## Audit Findings & Roadmap Summary
-The codebase exploration by 3 parallel Explorers revealed clear gaps in Phase 4, Phase 5, and Test Coverage.
-
-### Phase 4 Gaps
-1. `Users` table (`lib/database/tables/users.dart`) omitted from `@DriftDatabase` tables in `lib/database/app_database.dart` and `table_registry.dart`.
-2. `UserRepository` connects directly to Supabase bypassing local Drift DB, violating offline-first source of truth.
-3. 9 domain tables lack `@TableIndex` annotations on foreign keys, status fields, dates, and `deletedAt`.
-4. `CalendarRepository`, `ResourcesRepository`, `InternalMarksRepository` missing `getById`, `watchById`, and filtered streams (`watchBySubject`, `watchByCategory`, `watchByDateRange`).
-5. Missing domain exception hierarchy/mapping and transaction boundaries for multi-row/cascade operations.
-
-### Phase 5 Gaps
-1. `SyncQueueItems` missing `targetTable` column.
-2. Domain repositories do not enqueue write mutations into `SyncQueueRepository`.
-3. `SyncService._processItem()` is an empty stub.
-4. `SyncService` not registered in Riverpod and not listening to `ConnectivityService` reconnect events.
-
-### Test Coverage Gaps
-1. 5 of 11 repositories (`Assignments`, `User`, `Semester`, `Subject`, `Timetable`) have 0% test coverage.
-2. `SyncService` (backoff, retry, offline skipping) and `AppDatabase` schema migrations have 0% test coverage.
-3. Lack `mocktail` package in `pubspec.yaml` for testing network and service mocks.
+## Overview
+This plan decomposes the 10 requirements (R1-R10) into 6 manageable milestones, ensuring step-by-step implementation, testing, review, and verification.
 
 ---
 
-## Execution Milestones
+## Milestone 1: Quick Fixes & Details Screens CRUD (R1, R2, R3)
+- **R1: Onboarding Button Label**
+  - File: `lib/features/onboarding/screens/onboarding_screen.dart`
+  - Change button label from `'Start'` to `'Get Started'`.
+- **R2: Calendar Delete Event & UI/UX**
+  - File: `lib/features/calendar/screens/event_details_screen.dart`
+  - Receive route params (event ID), fetch real data from `CalendarRepository`, perform actual deletion, M3 destructive alert dialog.
+- **R3: Assignments CRUD & UI/UX**
+  - File: `lib/features/assignments/screens/assignment_details_screen.dart`
+  - Accept ID from route, load real data, implement Mark Complete, Edit, Delete with M3 dialog.
 
-### Milestone 1: Phase 4 Drift Database & 9 Repositories Enterprise Completion
-- **Worker 1**:
-  - Register `Users` table in `@DriftDatabase` and `table_registry.dart`.
-  - Add `@TableIndex` annotations across all 9 domain tables (`Semesters`, `Subjects`, `Timetable`, `Attendance`, `Assignments`, `InternalMarks`, `CalendarEvents`, `Resources`, `UserSettings`, `Users`).
-  - Refactor `UserRepository` to write to local Drift DB first (offline source of truth).
-  - Implement missing CRUD and stream methods in `CalendarRepository`, `ResourcesRepository`, `InternalMarksRepository`.
-  - Add domain exception mapping and transaction boundaries for cascade operations.
-- **Reviewer 1**: Review correctness, Drift index syntax, offline-first compliance, stream methods, and transactions.
+---
 
-### Milestone 2: Phase 5 Supabase Sync Engine, Queue Manager & Auth Integration
-- **Worker 2**:
-  - Add `targetTable` column to `SyncQueueItems` Drift table and update `SyncQueueRepository.enqueue()`.
-  - Inject `SyncQueueRepository` into all domain repositories and enqueue mutations (`insert`, `update`, `delete`).
-  - Complete `SyncService._processItem()` to push local Drift rows to Supabase based on `targetTable` & `recordId`.
-  - Wire up `SyncService` in Riverpod (`app_providers.dart`) and subscribe to `ConnectivityService.onStatusChange` for automatic queue flushing on network reconnect.
-  - Implement exponential backoff, retry handling (max 5 retries), error recording, and Auth token refresh stream binding in `AuthStateNotifier`.
-- **Reviewer 2**: Review sync queue state transitions, backoff math, connectivity listener, and RLS / Auth session persistence.
+## Milestone 2: Semester Feature & Attendance Cleanup (R4, R9)
+- **R4: Semester Feature**
+  - Screens: `lib/features/semester/screens/semester_details_screen.dart` and dialogs.
+  - Load real data, Add Subject dialog, Add Timetable slots, Edit dates, Add important dates, overall metrics replacing "This Week".
+- **R9: Attendance Cleanup**
+  - File: `lib/features/attendance/screens/attendance_screen.dart`
+  - Strip fake placeholder cards/percentages, add empty state, overview insight text using real data, quick action buttons, zero attendance display (0%).
 
-### Milestone 3: Full Test Suite Verification, Stress Testing & Forensic Audit
-- **Worker 3**:
-  - Add `mocktail` to `pubspec.yaml` `dev_dependencies` if needed.
-  - Add unit tests for all 9 repositories in `test/unit/database/` (covering CRUD, stream filtering, soft deletion, and error handling).
-  - Add unit tests for `SyncService` in `test/unit/services/sync_service_test.dart` (covering queue processing, exponential backoff, network drops, max retries).
-  - Add database schema/migration tests in `test/unit/database/database_migration_test.dart`.
-  - Run `flutter test` and achieve 100% pass rate across all tests.
-- **Challenger**: Run empirical verification and edge case stress tests (network drop simulation, invalid payloads, duplicate record upserts).
-- **Forensic Auditor**: Run static and execution integrity audit to guarantee zero facade / hardcoded test results.
+---
+
+## Milestone 3: Notifications & Push Reminders (R5, R6)
+- **R5: Local Notifications System**
+  - Data model/storage for notifications.
+  - Generators for upcoming lectures, assignment due dates, calendar events, low attendance warnings.
+  - Mark all as read, tap navigation to details.
+- **R6: Push / Local Notifications Setup**
+  - `flutter_local_notifications` setup.
+  - Android system permission request when toggle enabled.
+  - Schedule reminders (15 min before lectures, morning of assignment due dates, calendar event time).
+  - Persist preference toggle in DB.
+
+---
+
+## Milestone 4: Focus / Pomodoro Mode (R7)
+- **R7: Pomodoro Timer & Profile Navigation**
+  - Move Focus Mode to `Profile > Focus Mode`.
+  - Countdown timer via `dart:async` Timer.
+  - Configurable work/break duration, session counter, timer states, local notification on completion.
+  - Session history storage.
+  - Router (`app_router.dart`) and profile UI updates.
+
+---
+
+## Milestone 5: Data Sync & Dashboard Integration (R8, R10)
+- **R8: Data Sync & Storage Info**
+  - Sync Now (`SyncService.syncPendingMutations()`).
+  - Auto/Wi-Fi/Background toggles in `UserSettingsRepository`.
+  - Real database file size calculation.
+  - Clear cache implementation with confirmation dialog.
+- **R10: Home/Dashboard Real Data Integration**
+  - Connect dashboard widgets to providers (timetable, assignments, attendance summary).
+  - Remove all mock/placeholder data.
+  - Functional quick actions.
+
+---
+
+## Milestone 6: Quality Gate & Verification
+- `dart analyze lib` -> 0 errors.
+- `flutter test` -> All unit/widget/integration tests passing.
+- Forensic Auditor integrity check across all updated features.

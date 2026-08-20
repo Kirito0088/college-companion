@@ -61,16 +61,19 @@ class AttendanceTrendCard extends StatelessWidget {
                   top: 0,
                   bottom: 24,
                   width: 32,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildYLabel(context, '100%'),
-                      _buildYLabel(context, '75%'),
-                      _buildYLabel(context, '50%'),
-                      _buildYLabel(context, '25%'),
-                      _buildYLabel(context, '0%'),
-                    ],
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildYLabel(context, '100%'),
+                        _buildYLabel(context, '75%'),
+                        _buildYLabel(context, '50%'),
+                        _buildYLabel(context, '25%'),
+                        _buildYLabel(context, '0%'),
+                      ],
+                    ),
                   ),
                 ),
                 Positioned(

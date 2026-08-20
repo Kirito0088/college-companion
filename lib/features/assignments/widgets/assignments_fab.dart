@@ -1,3 +1,4 @@
+import 'package:college_companion/features/assignments/widgets/add_assignment_dialog.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -14,7 +15,7 @@ class AssignmentsFab extends StatelessWidget {
     return SizedBox(
       height: 48,
       child: FloatingActionButton.extended(
-        onPressed: () {},
+        onPressed: () => AddAssignmentDialog.show(context),
         backgroundColor: ColorTokens.primary,
         foregroundColor: ColorTokens.onPrimary,
         elevation: 1, // Reduced elevation
@@ -35,3 +36,4 @@ class AssignmentsFab extends StatelessWidget {
     );
   }
 }
+

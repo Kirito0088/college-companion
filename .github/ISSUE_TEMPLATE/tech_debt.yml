@@ -1,0 +1,23 @@
+name: 🧹 Tech Debt & Refactor
+description: Performance optimization, token cleanup, accessibility, or dead code removal.
+title: "[DEBT]: <Refactor Target>"
+labels: ["type:tech-debt", "status:spec-ready"]
+body:
+  - type: textarea
+    id: target
+    attributes:
+      label: 1. Target Code / Architecture
+    validations:
+      required: true
+  - type: textarea
+    id: motivation
+    attributes:
+      label: 2. Motivation & Non-Functional Gain
+    validations:
+      required: true
+  - type: textarea
+    id: verification_plan
+    attributes:
+      label: 3. Verification Plan
+    validations:
+      required: true

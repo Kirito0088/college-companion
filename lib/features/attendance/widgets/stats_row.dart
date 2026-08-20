@@ -1,18 +1,25 @@
+import 'package:college_companion/features/attendance/providers/attendance_provider.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
 
 class StatsRow extends StatelessWidget {
-  const StatsRow({super.key});
+  const StatsRow({super.key, this.safeBunk});
+
+  final SafeBunkResult? safeBunk;
 
   @override
   Widget build(BuildContext context) {
+    final presentStr = safeBunk != null ? '${safeBunk!.attended}' : '148';
+    final absentStr = safeBunk != null ? '${safeBunk!.total - safeBunk!.attended}' : '32';
+    final totalStr = safeBunk != null ? '${safeBunk!.total}' : '180';
+
     return Row(
       children: [
         Expanded(
           child: _buildStatCard(
             context,
-            value: '148',
+            value: presentStr,
             label: 'Present',
             valueColor: ColorTokens.success,
           ),
@@ -21,7 +28,7 @@ class StatsRow extends StatelessWidget {
         Expanded(
           child: _buildStatCard(
             context,
-            value: '32',
+            value: absentStr,
             label: 'Absent',
             valueColor: ColorTokens.error,
           ),
@@ -30,7 +37,7 @@ class StatsRow extends StatelessWidget {
         Expanded(
           child: _buildStatCard(
             context,
-            value: '180',
+            value: totalStr,
             label: 'Total',
             valueColor: ColorTokens.onSurface,
           ),

@@ -1,33 +1,36 @@
-# Project: College Companion Phase 4 & Phase 5
+# Project: College Companion Feature Completion & Bug Fix Sprint
 
 ## Architecture
-- Flutter Application with Drift (SQLite) local database layer and Supabase cloud persistence.
-- Offline-first paradigm: local Drift DB is the single source of truth; local changes write to `sync_queue` table for async processing to Supabase when network is connected.
+- **Framework**: Flutter 3.33+ with Dart
+- **State Management**: Riverpod 2.x (`StateNotifierProvider`, `StreamProvider`, `Provider`)
+- **Database**: Drift 2.34 SQLite (`companion` pattern for mutations, UUID primary keys, soft-delete `deletedAt`, sync queue)
+- **Routing**: GoRouter 15.x with `StatefulShellRoute.indexedStack`
+- **Auth**: Supabase Google Sign-In (`ref.read(authStateProvider)`)
+- **Design System**: Material 3 dark theme (`lib/theme/` tokens)
 
 ## Milestones
+
 | # | Name | Scope | Dependencies | Status |
 |---|------|-------|-------------|--------|
-| 0 | Exploration & Analysis | Audit 9 Repos, DB indices, sync queue, tests | None | DONE |
-| 1 | Drift Repos & Indices (Phase 4) | Register Users table, add @TableIndex across all 10 tables, complete all 9 Repositories CRUD/streams/transactions/soft-delete/errors, refactor UserRepository to offline-first | M0 | DONE |
-| 2 | Supabase Sync & Auth (Phase 5) | Fix sync_queue table schema (targetTable), local write enqueuing in repos, complete SyncService processing, backoff, connectivity listener, auth token refresh | M1 | DONE |
-| 3 | Comprehensive Testing & Audit | Write unit/integration tests for all 9 repos, SyncService, DB schema, network drop & edge cases. Pass flutter test 100%. Reviewer, Challenger & Forensic Audit | M1, M2 | DONE |
+| M1 | Onboarding, Calendar & Assignment CRUD | R1, R2, R3 | None | PLANNED |
+| M2 | Semester Complete Feature & Attendance Cleanup | R4, R9 | M1 | PLANNED |
+| M3 | Notifications & Push Reminders System | R5, R6 | M1 | PLANNED |
+| M4 | Focus / Pomodoro Mode & Profile Routing | R7 | M1 | PLANNED |
+| M5 | Data Sync & Dashboard Integration | R8, R10 | M1, M2 | PLANNED |
+| M6 | Quality Gate & Verification | All (R1-R10) | M1-M5 | PLANNED |
 
-## Interface Contracts
-### Drift Database & Repositories (Phase 4) - VERIFIED DONE
-- **AppDatabase**: Registers 11 tables (`Semesters`, `Subjects`, `Timetable`, `Attendance`, `Assignments`, `InternalMarks`, `UserSettings`, `SyncQueueItems`, `CalendarEvents`, `Resources`, `Users`).
-- **Indices**: `@TableIndex` on foreign keys (`userId`, `semesterId`, `subjectId`), status fields, dates, and `deletedAt`.
+## Interface Contracts & Data Models
+- Repositories: `create(Companion)`, `update(userId, id, data)`, `delete(userId, id)` (soft-delete), `watchAll(userId)`, `watchById(userId, id)`
+- Tables: `semesters`, `subjects`, `timetable`, `attendance`, `assignments`, `calendar_events`, `resources`, `internal_marks`, `lecture_records`, `users`, `user_settings`, `sync_queue`, `sync_metadata`, `lecture_evidence`
 
-### Sync Queue & Sync Engine (Phase 5) - VERIFIED DONE
-- **SyncQueueItems Table**: `id` (int PK auto), `recordId` (text UUID), `targetTable` (text), `operation` ('INSERT'/'UPDATE'/'DELETE'), `retryCount` (int), `createdAt` (ISO text), `lastAttempt` (ISO text nullable), `error` (text nullable), `isSynced` (bool).
-- **SyncService**: Background worker triggered on initialization and `ConnectivityService.onStatusChange` (when `connected`).
-  - Reads `targetTable` + `recordId` from Drift.
-  - Pushes payload to Supabase via `.upsert()` or `.delete()`.
-  - Calculates exponential backoff: `2^retryCount * 500ms`, max retries: 5.
-
-### Comprehensive Testing & Verification (Milestone 3) - VERIFIED DONE
-- 100% repository unit test coverage across all 9 domain repositories + `UserSettingsRepository` + `SyncQueueRepository`.
-- Complete unit test suite for `SyncService` (queue state transitions, exponential backoff, max retries limit, network drop handling).
-- Database migration & schema instantiation unit tests.
-- 100% test pass rate (`flutter test` - 114/114 passing tests, 0 `flutter analyze` issues).
-- Challenger empirical stress testing verified (emissions, soft-deletes, transactions, indices, backoff).
-- Forensic Auditor verdict: **CLEAN**.
+## Code Layout
+- `lib/features/onboarding/`
+- `lib/features/calendar/`
+- `lib/features/assignments/`
+- `lib/features/semester/`
+- `lib/features/attendance/`
+- `lib/features/notifications/`
+- `lib/features/focus/`
+- `lib/features/settings/`
+- `lib/features/dashboard/`
+- `lib/theme/`

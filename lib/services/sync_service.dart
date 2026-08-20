@@ -219,6 +219,18 @@ class SyncService {
             .getSingleOrNull();
         if (entity != null) jsonMap = entity.toJson();
         break;
+      case 'lecture_records':
+        final entity = await (database.select(database.lectureRecords)
+              ..where((t) => t.id.equals(recordId)))
+            .getSingleOrNull();
+        if (entity != null) jsonMap = entity.toJson();
+        break;
+      case 'notifications':
+        final entity = await (database.select(database.notifications)
+              ..where((t) => t.id.equals(recordId)))
+            .getSingleOrNull();
+        if (entity != null) jsonMap = entity.toJson();
+        break;
       default:
         AppLogger.info('Unknown targetTable: $targetTable', tag: _tag);
         return null;

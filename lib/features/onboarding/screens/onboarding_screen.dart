@@ -1,19 +1,21 @@
+import 'package:college_companion/features/onboarding/providers/onboarding_provider.dart';
 import 'package:college_companion/routing/app_router.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   final int _totalPages = 5;
@@ -35,7 +37,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
-  void _finishOnboarding() {
+  Future<void> _finishOnboarding() async {
+    await ref.read(onboardingCompletedProvider.notifier).completeOnboarding();
+    if (!mounted) return;
     if (context.canPop()) {
       context.pop();
     } else {
@@ -59,12 +63,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               });
             },
             physics: const BouncingScrollPhysics(),
-            children: const [
-              _WelcomePage(),
-              _AttendancePage(),
-              _PlanningPage(),
-              _StudyHubPage(),
-              _ReadyPage(),
+            children: [
+              const _WelcomePage(),
+              const _AttendancePage(),
+              const _PlanningPage(),
+              const _StudyHubPage(),
+              _ReadyPage(onFinish: _finishOnboarding),
             ],
           ),
 
@@ -135,7 +139,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     }),
                   ),
 
-                  // Next / Start Button
+                  // Next Button
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     child: _currentPage < _totalPages - 1
@@ -149,22 +153,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             ),
                             icon: const Icon(Symbols.arrow_forward),
                           )
-                        : FilledButton(
-                            key: const ValueKey('start'),
-                            onPressed: _finishOnboarding,
-                            style: FilledButton.styleFrom(
-                              backgroundColor: ColorTokens.primary,
-                              foregroundColor: ColorTokens.onPrimary,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: SpacingTokens.xl,
-                                vertical: SpacingTokens.md,
-                              ),
-                            ),
-                            child: const Text(
-                              'Start',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
+                        : const SizedBox.shrink(),
                   ),
                 ],
               ),
@@ -184,11 +173,13 @@ class _OnboardingPageLayout extends StatelessWidget {
     required this.heroVisual,
     required this.title,
     required this.subtitle,
+    this.bottomContent,
   });
 
   final Widget heroVisual;
   final String title;
   final String subtitle;
+  final Widget? bottomContent;
 
   @override
   Widget build(BuildContext context) {
@@ -238,6 +229,10 @@ class _OnboardingPageLayout extends StatelessWidget {
                       height: 1.5,
                     ),
                   ),
+                  if (bottomContent != null) ...[
+                    const SizedBox(height: SpacingTokens.xxl),
+                    bottomContent!,
+                  ],
                 ],
               ),
             ),
@@ -764,15 +759,38 @@ class _FolderIcon extends StatelessWidget {
 // Screen 5: Ready
 // -----------------------------------------------------------------------------
 class _ReadyPage extends StatelessWidget {
-  const _ReadyPage();
+  const _ReadyPage({required this.onFinish});
+  
+  final VoidCallback onFinish;
 
   @override
   Widget build(BuildContext context) {
-    return const _OnboardingPageLayout(
-      heroVisual: _ReadyHero(),
+    return _OnboardingPageLayout(
+      heroVisual: const _ReadyHero(),
       title: 'You\'re Ready',
       subtitle:
           'Dive in and experience a smarter way to handle your college journey.',
+      bottomContent: SizedBox(
+        width: double.infinity,
+        child: FilledButton(
+          onPressed: onFinish,
+          style: FilledButton.styleFrom(
+            backgroundColor: ColorTokens.primary,
+            foregroundColor: ColorTokens.onPrimary,
+            padding: const EdgeInsets.symmetric(
+              horizontal: SpacingTokens.xl,
+              vertical: SpacingTokens.lg,
+            ),
+            shape: const RoundedRectangleBorder(
+              borderRadius: RadiusTokens.borderRadiusLg,
+            ),
+          ),
+          child: const Text(
+            'Continue to App',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+        ),
+      ),
     );
   }
 }

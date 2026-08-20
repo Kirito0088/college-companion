@@ -289,7 +289,7 @@ abstract final class AppTheme {
       surfaceContainerHighest: ColorTokens.surfaceContainerHighest,
       surfaceContainerHigh: ColorTokens.surfaceContainerHigh,
       surfaceContainer: ColorTokens.surfaceContainer,
-      surfaceContainerLow: ColorTokens.surfaceVariant,
+      surfaceContainerLow: ColorTokens.surfaceContainerLow,
       surfaceContainerLowest: ColorTokens.background,
     );
   }

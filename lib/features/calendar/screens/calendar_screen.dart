@@ -1,8 +1,10 @@
-import 'package:college_companion/features/calendar/models/mock_event.dart';
+import 'package:college_companion/database/app_database.dart';
+import 'package:college_companion/features/authentication/models/auth_state.dart';
+import 'package:college_companion/features/authentication/providers/auth_provider.dart';
+import 'package:college_companion/features/calendar/providers/calendar_provider.dart';
 import 'package:college_companion/features/calendar/widgets/agenda_card.dart';
 import 'package:college_companion/features/calendar/widgets/calendar_month_view.dart';
 import 'package:college_companion/routing/app_router.dart';
-import 'package:college_companion/shared/models/mock_ui_state.dart';
 import 'package:college_companion/shared/widgets/empty_states/cc_empty_states.dart';
 import 'package:college_companion/shared/widgets/errors/cc_errors.dart';
 import 'package:college_companion/shared/widgets/loading/cc_skeletons.dart';
@@ -10,76 +12,34 @@ import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
-class CalendarScreen extends StatefulWidget {
+class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
 
   @override
-  State<CalendarScreen> createState() => _CalendarScreenState();
+  ConsumerState<CalendarScreen> createState() => _CalendarScreenState();
 }
 
-class _CalendarScreenState extends State<CalendarScreen> {
-  int _selectedDate = 13; // Mock today
-  MockUiState _uiState = MockUiState.success;
+class _CalendarScreenState extends ConsumerState<CalendarScreen> {
+  int _selectedDate = DateTime.now().day;
+  DateTime _selectedMonth = DateTime(DateTime.now().year, DateTime.now().month);
 
-  // Mock events
-  final List<MockEvent> _allEvents = [
-    MockEvent(
-      id: '1',
-      title: 'Midterm Physics',
-      type: EventType.exam,
-      date: DateTime(2025, 5, 14),
-      time: '10:00 AM - 12:00 PM',
-      subject: 'Physics 101',
-      location: 'Room 304, Science Building',
-    ),
-    MockEvent(
-      id: '2',
-      title: 'Lab Report Due',
-      type: EventType.assignment,
-      date: DateTime(2025, 5, 14),
-      time: '11:59 PM',
-      subject: 'Physics 101',
-    ),
-    MockEvent(
-      id: '3',
-      title: 'Team Meeting',
-      type: EventType.academic,
-      date: DateTime(2025, 5, 16),
-      time: '2:00 PM - 3:00 PM',
-    ),
-    MockEvent(
-      id: '4',
-      title: 'CS Guest Lecture',
-      type: EventType.academic,
-      date: DateTime(2025, 5, 20),
-      time: '4:00 PM',
-      subject: 'Computer Science',
-    ),
-    MockEvent(
-      id: '5',
-      title: 'Database Project',
-      type: EventType.assignment,
-      date: DateTime(2025, 5, 20),
-      time: '11:59 PM',
-      subject: 'DBMS',
-    ),
-    MockEvent(
-      id: '6',
-      title: 'Dentist Appointment',
-      type: EventType.personal,
-      date: DateTime(2025, 5, 28),
-      time: '9:00 AM',
-    ),
+  static const List<String> _monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
-  Map<int, List<MockEvent>> get _events {
-    final map = <int, List<MockEvent>>{};
-    for (final event in _allEvents) {
-      if (event.date.month == 5 && event.date.year == 2025) {
-        map.putIfAbsent(event.date.day, () => []).add(event);
+  Map<int, List<CalendarEventEntity>> _buildEventsMap(List<CalendarEventEntity> entities) {
+    final map = <int, List<CalendarEventEntity>>{};
+    for (final entity in entities) {
+      final startDt = DateTime.tryParse(entity.startDate);
+      if (startDt != null &&
+          startDt.month == _selectedMonth.month &&
+          startDt.year == _selectedMonth.year) {
+        map.putIfAbsent(startDt.day, () => []).add(entity);
       }
     }
     return map;
@@ -88,37 +48,62 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final authState = ref.watch(authStateProvider);
+    final userId = authState is AuthAuthenticated && authState.user.uid.isNotEmpty
+        ? authState.user.uid
+        : 'default_user';
+
+    final eventsAsync = ref.watch(calendarEventsStreamProvider(userId));
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(theme),
+            _buildHeader(theme, userId),
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(
-                  left: LayoutTokens.screenPadding,
-                  right: LayoutTokens.screenPadding,
-                  top: SpacingTokens.md,
-                  bottom: SpacingTokens.huge, // Space for FAB
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    CalendarMonthView(
-                      selectedDate: _selectedDate,
-                      events: _events,
-                      onDateSelected: (date) {
-                        setState(() {
-                          _selectedDate = date;
-                        });
-                      },
+              child: eventsAsync.when(
+                data: (entities) {
+                  final eventsMap = _buildEventsMap(entities);
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.only(
+                      left: LayoutTokens.screenPadding,
+                      right: LayoutTokens.screenPadding,
+                      top: SpacingTokens.md,
+                      bottom: SpacingTokens.huge,
                     ),
-                    const SizedBox(height: SpacingTokens.xxl),
-                    _buildAgendaSection(theme),
-                    const SizedBox(height: 100), // Extra FAB space
-                  ],
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        CalendarMonthView(
+                          selectedDate: _selectedDate,
+                          events: eventsMap,
+                          onDateSelected: (date) {
+                            setState(() {
+                              _selectedDate = date;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: SpacingTokens.xxl),
+                        _buildAgendaSection(theme, eventsMap),
+                        const SizedBox(height: 100),
+                      ],
+                    ),
+                  );
+                },
+                loading: () => const Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: LayoutTokens.screenPadding,
+                    vertical: SpacingTokens.md,
+                  ),
+                  child: SkeletonList(),
+                ),
+                error: (err, stack) => Center(
+                  child: NetworkErrorWidget(
+                    onRetry: () {
+                      ref.invalidate(calendarEventsStreamProvider(userId));
+                    },
+                  ),
                 ),
               ),
             ),
@@ -137,7 +122,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  Widget _buildHeader(ThemeData theme) {
+  Widget _buildHeader(ThemeData theme, String userId) {
+    final monthLabel = '${_monthNames[_selectedMonth.month - 1]} ${_selectedMonth.year}';
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         LayoutTokens.screenPadding,
@@ -160,9 +147,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     color: ColorTokens.onSurface,
                   ),
                 ),
-                const SizedBox(height: SpacingTokens.sm),
+                const SizedBox(height: SpacingTokens.xs),
                 InkWell(
-                  onTap: () {}, // Future: open month picker
+                  onTap: () {},
                   borderRadius: RadiusTokens.borderRadiusSm,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
@@ -173,7 +160,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'May 2025',
+                          monthLabel,
                           style: theme.textTheme.titleMedium?.copyWith(
                             color: ColorTokens.primary,
                             fontWeight: FontWeight.w600,
@@ -197,7 +184,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
               IconButton(
                 onPressed: () {
                   setState(() {
-                    _selectedDate = 13;
+                    _selectedMonth = DateTime(DateTime.now().year, DateTime.now().month);
+                    _selectedDate = DateTime.now().day;
                   });
                 },
                 icon: const Icon(Symbols.today, size: 24),
@@ -205,12 +193,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 tooltip: 'Today',
               ),
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  setState(() {
+                    _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month - 1);
+                  });
+                },
                 icon: const Icon(Symbols.chevron_left, size: 28),
                 color: ColorTokens.onSurface,
               ),
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  setState(() {
+                    _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month + 1);
+                  });
+                },
                 icon: const Icon(Symbols.chevron_right, size: 28),
                 color: ColorTokens.onSurface,
               ),
@@ -221,49 +217,26 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  Widget _buildAgendaSection(ThemeData theme) {
-    final eventsForSelected = _events[_selectedDate] ?? [];
+  Widget _buildAgendaSection(ThemeData theme, Map<int, List<CalendarEventEntity>> eventsMap) {
+    final eventsForSelected = eventsMap[_selectedDate] ?? [];
 
     Widget content;
-    switch (_uiState) {
-      case MockUiState.loading:
-        content = const SkeletonList();
-        break;
-      case MockUiState.empty:
-        content = const EmptyCalendar();
-        break;
-      case MockUiState.error:
-        content = NetworkErrorWidget(
-          onRetry: () {
-            setState(() {
-              _uiState = MockUiState.loading;
-              Future.delayed(
-                const Duration(seconds: 1),
-                () => setState(() => _uiState = MockUiState.success),
-              );
-            });
-          },
-        );
-        break;
-      case MockUiState.success:
-        if (eventsForSelected.isEmpty) {
-          content = const EmptyCalendar();
-        } else {
-          content = Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: eventsForSelected
-                .map(
-                  (event) => AgendaCard(
-                    event: event,
-                    onTap: () {
-                      context.push(RoutePaths.eventDetails);
-                    },
-                  ),
-                )
-                .toList(),
-          );
-        }
-        break;
+    if (eventsForSelected.isEmpty) {
+      content = const EmptyCalendar();
+    } else {
+      content = Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: eventsForSelected
+            .map(
+              (event) => AgendaCard(
+                event: event,
+                onTap: () {
+                  context.push('/calendar/event-details/${event.id}');
+                },
+              ),
+            )
+            .toList(),
+      );
     }
 
     return Column(
@@ -281,7 +254,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 letterSpacing: 0.5,
               ),
             ),
-            if (eventsForSelected.isNotEmpty && _uiState == MockUiState.success)
+            if (eventsForSelected.isNotEmpty)
               Text(
                 '${eventsForSelected.length} event${eventsForSelected.length == 1 ? '' : 's'}',
                 style: theme.textTheme.labelMedium?.copyWith(
@@ -296,7 +269,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           switchInCurve: Curves.easeOut,
           switchOutCurve: Curves.easeIn,
           child: KeyedSubtree(
-            key: ValueKey<String>('$_selectedDate-${_uiState.name}'),
+            key: ValueKey<String>('$_selectedDate-${eventsForSelected.length}'),
             child: content,
           ),
         ),

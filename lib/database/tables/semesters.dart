@@ -41,6 +41,12 @@ class Semesters extends Table {
   /// Soft delete: NULL = active, timestamp = deleted.
   TextColumn get deletedAt => text().nullable()();
 
+  /// Optional ISO 8601 formatted UTC timestamp for the semester start date.
+  TextColumn get startDate => text().nullable()();
+
+  /// Optional ISO 8601 formatted UTC timestamp for the expected completion date.
+  TextColumn get expectedCompletionDate => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }

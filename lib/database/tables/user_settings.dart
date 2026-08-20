@@ -26,6 +26,10 @@ class UserSettings extends Table {
   BoolColumn get notificationsEnabled =>
       boolean().withDefault(const Constant(true))();
 
+  /// Whether lecture reminders are enabled.
+  BoolColumn get lectureRemindersEnabled =>
+      boolean().withDefault(const Constant(true))();
+
   /// Map of module names to enabled booleans.
   /// Stored as JSON string (e.g., {"attendance": true, "assignments": true}).
   TextColumn get enabledModules => text().withDefault(const Constant('{}'))();

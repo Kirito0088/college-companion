@@ -1,5 +1,7 @@
 import 'package:college_companion/database/app_database.dart';
 import 'package:college_companion/features/attendance/providers/attendance_provider.dart';
+import 'package:college_companion/features/authentication/models/auth_state.dart';
+import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
@@ -24,7 +26,9 @@ enum SecondaryStatus {
 }
 
 class LectureRecordScreen extends ConsumerStatefulWidget {
-  const LectureRecordScreen({super.key});
+  const LectureRecordScreen({super.key, this.subjectId});
+
+  final String? subjectId;
 
   @override
   ConsumerState<LectureRecordScreen> createState() => _LectureRecordScreenState();
@@ -625,10 +629,15 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
                       final repo = ref.read(attendanceRepositoryProvider);
                       final now = DateTime.now().toUtc();
                       
+                      final authState = ref.read(authStateProvider);
+                      final activeUserId = authState is AuthAuthenticated && authState.user.uid.isNotEmpty
+                          ? authState.user.uid
+                          : 'default_user';
+
                       await repo.create(AttendanceCompanion(
                         id: drift.Value(const Uuid().v4()),
-                        userId: const drift.Value('mock_user_123'), // TODO: Real user
-                        subjectId: const drift.Value('mock_subject_123'), // TODO: Pass from route
+                        userId: drift.Value(activeUserId),
+                        subjectId: drift.Value(widget.subjectId ?? 'default_subject'),
                         date: drift.Value(now.toIso8601String().split('T')[0]),
                         primaryStatus: drift.Value(_primaryStatus!.name),
                         secondaryStatus: drift.Value(_secondaryStatus?.name),

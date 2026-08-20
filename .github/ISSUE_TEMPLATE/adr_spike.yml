@@ -1,0 +1,23 @@
+name: ⚖️ ADR Spike
+description: Propose or investigate an architectural decision.
+title: "[ADR-SPIKE]: <Decision Title>"
+labels: ["type:spike-adr", "status:grilling"]
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: 1. Context & Problem Statement
+    validations:
+      required: true
+  - type: textarea
+    id: options_considered
+    attributes:
+      label: 2. Alternatives Considered & Trade-offs
+    validations:
+      required: true
+  - type: textarea
+    id: decision_outcome
+    attributes:
+      label: 3. Recommended Decision & Resulting ADR File
+    validations:
+      required: true

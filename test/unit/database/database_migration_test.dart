@@ -14,25 +14,29 @@ void main() {
   });
 
   group('Database Migration & Schema Tests', () {
-    test('Drift database instantiates with schema version 1', () {
-      expect(database.schemaVersion, 1);
+    test('Drift database instantiates with schema version 2', () {
+      expect(database.schemaVersion, 2);
     });
 
-    test('All 11 tables are registered in database schema', () {
+    test('All tables are registered in database schema', () {
       final tables = database.allTables.map((t) => t.actualTableName).toList();
-      expect(tables.length, 11);
+      expect(tables.length, 15);
       expect(tables, containsAll([
         'users',
         'semesters',
         'subjects',
         'timetable',
         'attendance',
+        'lecture_records',
         'assignments',
         'internal_marks',
         'user_settings',
         'sync_queue',
         'calendar_events',
         'resources',
+        'lecture_evidence',
+        'sync_metadata',
+        'notifications',
       ]));
     });
 

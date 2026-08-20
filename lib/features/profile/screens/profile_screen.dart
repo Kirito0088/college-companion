@@ -1,30 +1,33 @@
+import 'package:college_companion/features/authentication/models/auth_state.dart';
+import 'package:college_companion/features/authentication/providers/auth_provider.dart';
+import 'package:college_companion/features/profile/providers/profile_provider.dart';
 import 'package:college_companion/features/profile/widgets/profile_app_bar.dart';
 import 'package:college_companion/features/profile/widgets/profile_header_card.dart';
 import 'package:college_companion/features/profile/widgets/profile_menu_list.dart';
 import 'package:college_companion/routing/app_router.dart';
-import 'package:college_companion/shared/models/mock_ui_state.dart';
 import 'package:college_companion/shared/widgets/dialogs/cc_dialogs.dart';
-import 'package:college_companion/shared/widgets/errors/cc_errors.dart';
-import 'package:college_companion/shared/widgets/loading/cc_skeletons.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
-}
-
-class _ProfileScreenState extends State<ProfileScreen> {
-  MockUiState _uiState = MockUiState.success;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final authState = ref.watch(authStateProvider);
+    final profile = ref.watch(userProfileProvider);
+
+    String name = profile.displayName;
+    String email = profile.email;
+    if (authState is AuthAuthenticated) {
+      name = authState.user.displayName.isNotEmpty ? authState.user.displayName : name;
+      email = authState.user.email.isNotEmpty ? authState.user.email : email;
+    }
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -32,67 +35,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           children: [
             const ProfileAppBar(),
-            Expanded(child: _buildBody(context)),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: LayoutTokens.screenPadding,
+                  vertical: SpacingTokens.sm,
+                ),
+                child: Column(
+                  children: [
+                    ProfileHeaderCard(
+                      name: name,
+                      email: email,
+                      semester: 'SEM ${profile.semester}',
+                      course: profile.branch,
+                    ),
+                    const SizedBox(height: LayoutTokens.sectionGap),
+                    const ProfileMenuList(),
+                    const SizedBox(height: LayoutTokens.sectionGap),
+                    const _PreviewOnboardingButton(),
+                    const SizedBox(height: SpacingTokens.md),
+                    const _LogoutButton(),
+                    const SizedBox(height: SpacingTokens.huge),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
-  }
-
-  Widget _buildBody(BuildContext context) {
-    switch (_uiState) {
-      case MockUiState.loading:
-        return const SingleChildScrollView(
-          padding: EdgeInsets.symmetric(
-            horizontal: LayoutTokens.screenPadding,
-            vertical: SpacingTokens.sm,
-          ),
-          child: Column(
-            children: [
-              SkeletonProfile(),
-              SizedBox(height: LayoutTokens.sectionGap),
-              SkeletonList(itemCount: 4),
-            ],
-          ),
-        );
-      case MockUiState.empty:
-      case MockUiState.error:
-        return NetworkErrorWidget(
-          onRetry: () {
-            setState(() {
-              _uiState = MockUiState.loading;
-              Future.delayed(
-                const Duration(seconds: 1),
-                () => setState(() => _uiState = MockUiState.success),
-              );
-            });
-          },
-        );
-      case MockUiState.success:
-        return const SingleChildScrollView(
-          padding: EdgeInsets.symmetric(
-            horizontal: LayoutTokens.screenPadding,
-            vertical: SpacingTokens.sm, // py-2
-          ),
-          child: Column(
-            children: [
-              ProfileHeaderCard(
-                name: 'Jayesh Patil',
-                email: 'jayeshpatil@gmail.com',
-                semester: 'SEM 5',
-                course: 'CSE (AI & ML)',
-              ),
-              SizedBox(height: LayoutTokens.sectionGap), // space-y-section-gap
-              ProfileMenuList(),
-              SizedBox(height: LayoutTokens.sectionGap),
-              _PreviewOnboardingButton(),
-              SizedBox(height: SpacingTokens.md),
-              _LogoutButton(),
-              SizedBox(height: SpacingTokens.huge), // bottom padding for scroll
-            ],
-          ),
-        );
-    }
   }
 }
 
@@ -135,11 +106,11 @@ class _PreviewOnboardingButton extends StatelessWidget {
   }
 }
 
-class _LogoutButton extends StatelessWidget {
+class _LogoutButton extends ConsumerWidget {
   const _LogoutButton();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
 
     return Material(
@@ -149,7 +120,8 @@ class _LogoutButton extends StatelessWidget {
         onTap: () async {
           final confirm = await CCDialogs.showLogoutConfirmation(context);
           if (confirm == true) {
-            // TODO: Implement actual logout logic here
+            final authService = ref.read(authServiceProvider);
+            await authService.signOut();
           }
         },
         borderRadius: RadiusTokens.borderRadiusXl,
@@ -158,7 +130,7 @@ class _LogoutButton extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.symmetric(
             vertical: SpacingTokens.base,
-          ), // py-4
+          ),
           decoration: BoxDecoration(
             border: Border.all(
               color: ColorTokens.outlineVariant.withValues(alpha: 0.2),

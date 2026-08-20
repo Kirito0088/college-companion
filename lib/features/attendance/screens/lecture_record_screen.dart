@@ -1,5 +1,6 @@
 import 'package:college_companion/database/app_database.dart';
 import 'package:college_companion/features/attendance/providers/attendance_provider.dart';
+import 'package:college_companion/features/attendance/widgets/evidence_thumbnail_strip.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/theme/color_tokens.dart';
@@ -36,6 +37,7 @@ class LectureRecordScreen extends ConsumerStatefulWidget {
 }
 
 class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
+  late final String _recordId = const Uuid().v4();
   PrimaryStatus? _primaryStatus;
   SecondaryStatus? _secondaryStatus;
   final TextEditingController _noteController = TextEditingController();
@@ -517,58 +519,7 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
           ],
         ),
         const SizedBox(height: SpacingTokens.lg),
-
-        // Future-ready placeholder card
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xxl),
-          decoration: BoxDecoration(
-            color: ColorTokens.surfaceContainerHigh,
-            borderRadius: RadiusTokens.borderRadiusXl,
-            border: Border.all(
-              color: ColorTokens.outlineVariant,
-              style: BorderStyle.solid,
-            ),
-          ),
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(SpacingTokens.lg),
-                decoration: const BoxDecoration(
-                  color: ColorTokens.surfaceContainerHighest,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Symbols.add_a_photo,
-                  size: 32,
-                  color: ColorTokens.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: SpacingTokens.lg),
-              FilledButton.tonal(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Camera support will be available in a future update.',
-                      ),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                },
-                style: FilledButton.styleFrom(
-                  backgroundColor: ColorTokens.surfaceContainerHighest,
-                  foregroundColor: ColorTokens.onSurface,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: SpacingTokens.xl,
-                    vertical: SpacingTokens.md,
-                  ),
-                ),
-                child: const Text('Take Photo'),
-              ),
-            ],
-          ),
-        ),
+        EvidenceThumbnailStrip(recordId: _recordId),
       ],
     );
   }
@@ -639,7 +590,7 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
 
                       await repo.create(
                         AttendanceCompanion(
-                          id: drift.Value(const Uuid().v4()),
+                          id: drift.Value(_recordId),
                           userId: drift.Value(activeUserId),
                           subjectId: drift.Value(
                             widget.subjectId ?? 'default_subject',

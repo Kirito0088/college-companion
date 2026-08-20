@@ -38,7 +38,11 @@ class FocusRepository {
 
     try {
       return jsonList
-          .map((item) => FocusSession.fromJson(json.decode(item) as Map<String, dynamic>))
+          .map(
+            (item) => FocusSession.fromJson(
+              json.decode(item) as Map<String, dynamic>,
+            ),
+          )
           .toList();
     } catch (_) {
       return [];

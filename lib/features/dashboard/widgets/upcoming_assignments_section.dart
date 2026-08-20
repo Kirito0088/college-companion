@@ -26,7 +26,8 @@ class UpcomingAssignmentsSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateProvider);
     final userId = authState is AuthAuthenticated ? authState.user.uid : '';
-    final snapshot = ref.watch(dashboardSnapshotProvider(userId)).valueOrNull ??
+    final snapshot =
+        ref.watch(dashboardSnapshotProvider(userId)).valueOrNull ??
         DashboardSnapshot.empty();
     final theme = Theme.of(context);
     final assignments = snapshot.upcomingAssignments;
@@ -86,8 +87,10 @@ class UpcomingAssignmentsSection extends ConsumerWidget {
                 dueDate: assignment.dueDateString,
                 daysLeft: assignment.daysLeft,
                 onTap: () => context.push(
-                  RoutePaths.assignmentDetails
-                      .replaceFirst(':id', assignment.id),
+                  RoutePaths.assignmentDetails.replaceFirst(
+                    ':id',
+                    assignment.id,
+                  ),
                 ),
               ),
             ),
@@ -105,7 +108,7 @@ class UpcomingAssignmentsSection extends ConsumerWidget {
     required VoidCallback onTap,
   }) {
     final theme = Theme.of(context);
-    
+
     // Determine color based on urgency
     Color indicatorColor = ColorTokens.primary;
     if (daysLeft <= 1) {
@@ -179,10 +182,7 @@ class UpcomingAssignmentsSection extends ConsumerWidget {
             ),
             const SizedBox(width: SpacingTokens.sm),
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 4,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: indicatorColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(4),

@@ -136,7 +136,10 @@ void main() {
     });
 
     test('watchBySubject filters by subject', () async {
-      final stream = backend.lectureRecords.watchBySubject(g.userId, g.subjectId);
+      final stream = backend.lectureRecords.watchBySubject(
+        g.userId,
+        g.subjectId,
+      );
       final future = stream.firstWhere((rows) => rows.isNotEmpty);
       await createPresent();
       final rows = await future.timeout(const Duration(seconds: 5));
@@ -160,10 +163,7 @@ void main() {
       final id2 = await createPresent(timetableId: 'tt-2');
       final id3 = await createPresent(timetableId: 'tt-3');
       final pending = await backend.syncRepository.fetchPending();
-      expect(
-        pending.map((e) => e.recordId).toList(),
-        [id1, id2, id3],
-      );
+      expect(pending.map((e) => e.recordId).toList(), [id1, id2, id3]);
     });
 
     test('duplicate enqueue for same record+op is merged', () async {
@@ -177,35 +177,53 @@ void main() {
       expect(await backend.queueDao.getPendingCount(), 1);
     });
 
-    test('markEntireDayAbsent creates + enqueues per slot and is idempotent', () async {
-      final created = await backend.lectureRecords.markEntireDayAbsent(
-        userId: g.userId,
-        slots: [
-          MarkAbsentSlot(timetableId: 'd-1', subjectId: g.subjectId, semesterId: g.semesterId),
-          MarkAbsentSlot(timetableId: 'd-2', subjectId: g.subjectId, semesterId: g.semesterId),
-        ],
-        deviceTimezone: 'Asia/Kolkata',
-        appVersion: '1.0.0',
-      );
-      expect(created.length, 2);
-      expect(await backend.queueDao.getPendingCount(), 2);
+    test(
+      'markEntireDayAbsent creates + enqueues per slot and is idempotent',
+      () async {
+        final created = await backend.lectureRecords.markEntireDayAbsent(
+          userId: g.userId,
+          slots: [
+            MarkAbsentSlot(
+              timetableId: 'd-1',
+              subjectId: g.subjectId,
+              semesterId: g.semesterId,
+            ),
+            MarkAbsentSlot(
+              timetableId: 'd-2',
+              subjectId: g.subjectId,
+              semesterId: g.semesterId,
+            ),
+          ],
+          deviceTimezone: 'Asia/Kolkata',
+          appVersion: '1.0.0',
+        );
+        expect(created.length, 2);
+        expect(await backend.queueDao.getPendingCount(), 2);
 
-      // Re-running skips existing slots (no duplicates).
-      final again = await backend.lectureRecords.markEntireDayAbsent(
-        userId: g.userId,
-        slots: [
-          MarkAbsentSlot(timetableId: 'd-1', subjectId: g.subjectId, semesterId: g.semesterId),
-        ],
-        deviceTimezone: 'Asia/Kolkata',
-        appVersion: '1.0.0',
-      );
-      expect(again, isEmpty);
-    });
+        // Re-running skips existing slots (no duplicates).
+        final again = await backend.lectureRecords.markEntireDayAbsent(
+          userId: g.userId,
+          slots: [
+            MarkAbsentSlot(
+              timetableId: 'd-1',
+              subjectId: g.subjectId,
+              semesterId: g.semesterId,
+            ),
+          ],
+          deviceTimezone: 'Asia/Kolkata',
+          appVersion: '1.0.0',
+        );
+        expect(again, isEmpty);
+      },
+    );
   });
 
   group('6. sync metadata store', () {
     test('set then get round-trips a bookkeeping value', () async {
-      await backend.syncRepository.setMetadata('last_pull', '2026-07-07T00:00:00Z');
+      await backend.syncRepository.setMetadata(
+        'last_pull',
+        '2026-07-07T00:00:00Z',
+      );
       expect(
         await backend.syncRepository.getMetadata('last_pull'),
         '2026-07-07T00:00:00Z',

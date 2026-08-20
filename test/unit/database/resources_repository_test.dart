@@ -56,15 +56,17 @@ void main() {
   test('update resource modifies title and enqueues sync UPDATE', () async {
     final now = DateTime.now().toUtc().toIso8601String();
 
-    await repository.create(ResourcesCompanion(
-      id: const Value('res_1'),
-      userId: const Value('user_1'),
-      title: const Value('Initial Title'),
-      url: const Value('https://example.com/link'),
-      category: const Value('notes'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+    await repository.create(
+      ResourcesCompanion(
+        id: const Value('res_1'),
+        userId: const Value('user_1'),
+        title: const Value('Initial Title'),
+        url: const Value('https://example.com/link'),
+        category: const Value('notes'),
+        createdAt: Value(now),
+        updatedAt: Value(now),
+      ),
+    );
 
     await repository.update(
       'user_1',
@@ -87,15 +89,17 @@ void main() {
   test('delete soft-deletes resource and enqueues sync DELETE', () async {
     final now = DateTime.now().toUtc().toIso8601String();
 
-    await repository.create(ResourcesCompanion(
-      id: const Value('res_1'),
-      userId: const Value('user_1'),
-      title: const Value('Old Paper'),
-      url: const Value('https://example.com/old.pdf'),
-      category: const Value('past_papers'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+    await repository.create(
+      ResourcesCompanion(
+        id: const Value('res_1'),
+        userId: const Value('user_1'),
+        title: const Value('Old Paper'),
+        url: const Value('https://example.com/old.pdf'),
+        category: const Value('past_papers'),
+        createdAt: Value(now),
+        updatedAt: Value(now),
+      ),
+    );
 
     await repository.delete('user_1', 'res_1');
 
@@ -106,61 +110,74 @@ void main() {
     expect(pendingSync.last.operation, 'DELETE');
   });
 
-  test('watchAll, watchBySubject, watchByCategory, and watchById stream resources properly', () async {
-    final now = DateTime.now().toUtc().toIso8601String();
+  test(
+    'watchAll, watchBySubject, watchByCategory, and watchById stream resources properly',
+    () async {
+      final now = DateTime.now().toUtc().toIso8601String();
 
-    await repository.create(ResourcesCompanion(
-      id: const Value('res_notes_subA'),
-      userId: const Value('user_1'),
-      subjectId: const Value('sub_A'),
-      title: const Value('Sub A Notes'),
-      url: const Value('https://example.com/subA.pdf'),
-      category: const Value('notes'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+      await repository.create(
+        ResourcesCompanion(
+          id: const Value('res_notes_subA'),
+          userId: const Value('user_1'),
+          subjectId: const Value('sub_A'),
+          title: const Value('Sub A Notes'),
+          url: const Value('https://example.com/subA.pdf'),
+          category: const Value('notes'),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+        ),
+      );
 
-    await repository.create(ResourcesCompanion(
-      id: const Value('res_papers_subA'),
-      userId: const Value('user_1'),
-      subjectId: const Value('sub_A'),
-      title: const Value('Sub A Past Papers'),
-      url: const Value('https://example.com/papers.pdf'),
-      category: const Value('past_papers'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+      await repository.create(
+        ResourcesCompanion(
+          id: const Value('res_papers_subA'),
+          userId: const Value('user_1'),
+          subjectId: const Value('sub_A'),
+          title: const Value('Sub A Past Papers'),
+          url: const Value('https://example.com/papers.pdf'),
+          category: const Value('past_papers'),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+        ),
+      );
 
-    await repository.create(ResourcesCompanion(
-      id: const Value('res_deleted'),
-      userId: const Value('user_1'),
-      subjectId: const Value('sub_A'),
-      title: const Value('Deleted Link'),
-      url: const Value('https://example.com/del.pdf'),
-      category: const Value('notes'),
-      deletedAt: Value(now),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+      await repository.create(
+        ResourcesCompanion(
+          id: const Value('res_deleted'),
+          userId: const Value('user_1'),
+          subjectId: const Value('sub_A'),
+          title: const Value('Deleted Link'),
+          url: const Value('https://example.com/del.pdf'),
+          category: const Value('notes'),
+          deletedAt: Value(now),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+        ),
+      );
 
-    // watchAll: 2 active resources
-    final allList = await repository.watchAll('user_1').first;
-    expect(allList.length, 2);
+      // watchAll: 2 active resources
+      final allList = await repository.watchAll('user_1').first;
+      expect(allList.length, 2);
 
-    // watchBySubject for sub_A: 2 active resources
-    final subAList = await repository.watchBySubject('user_1', 'sub_A').first;
-    expect(subAList.length, 2);
+      // watchBySubject for sub_A: 2 active resources
+      final subAList = await repository.watchBySubject('user_1', 'sub_A').first;
+      expect(subAList.length, 2);
 
-    // watchByCategory for past_papers: 1 resource
-    final categoryList = await repository.watchByCategory('user_1', 'past_papers').first;
-    expect(categoryList.length, 1);
-    expect(categoryList.first.id, 'res_papers_subA');
+      // watchByCategory for past_papers: 1 resource
+      final categoryList = await repository
+          .watchByCategory('user_1', 'past_papers')
+          .first;
+      expect(categoryList.length, 1);
+      expect(categoryList.first.id, 'res_papers_subA');
 
-    // watchById
-    final single = await repository.watchById('user_1', 'res_notes_subA').first;
-    expect(single, isNotNull);
-    expect(single?.title, 'Sub A Notes');
-  });
+      // watchById
+      final single = await repository
+          .watchById('user_1', 'res_notes_subA')
+          .first;
+      expect(single, isNotNull);
+      expect(single?.title, 'Sub A Notes');
+    },
+  );
 
   test('wraps database errors in DatabaseException', () async {
     expect(

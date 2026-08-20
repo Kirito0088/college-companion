@@ -24,7 +24,10 @@ class InternalMarksRepository {
             ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
           .watch();
     } catch (e) {
-      throw DatabaseException('Failed to watch internal marks for user: $userId', e);
+      throw DatabaseException(
+        'Failed to watch internal marks for user: $userId',
+        e,
+      );
     }
   }
 
@@ -44,7 +47,10 @@ class InternalMarksRepository {
             ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
           .watch();
     } catch (e) {
-      throw DatabaseException('Failed to watch internal marks for subject: $subjectId', e);
+      throw DatabaseException(
+        'Failed to watch internal marks for subject: $subjectId',
+        e,
+      );
     }
   }
 
@@ -81,8 +87,9 @@ class InternalMarksRepository {
   /// Creates a new internal mark. Returns the new row's ID.
   Future<String> create(InternalMarksCompanion data) async {
     try {
-      final result =
-          await _database.into(_database.internalMarks).insertReturning(data);
+      final result = await _database
+          .into(_database.internalMarks)
+          .insertReturning(data);
       await _syncQueueRepository?.enqueue(
         targetTable: 'internal_marks',
         recordId: result.id,
@@ -101,9 +108,9 @@ class InternalMarksRepository {
     InternalMarksCompanion data,
   ) async {
     try {
-      await (_database.update(_database.internalMarks)
-            ..where((t) => t.userId.equals(userId) & t.id.equals(id)))
-          .write(data);
+      await (_database.update(
+        _database.internalMarks,
+      )..where((t) => t.userId.equals(userId) & t.id.equals(id))).write(data);
       await _syncQueueRepository?.enqueue(
         targetTable: 'internal_marks',
         recordId: id,
@@ -117,13 +124,13 @@ class InternalMarksRepository {
   /// Soft-deletes an internal mark.
   Future<void> delete(String userId, String id) async {
     try {
-      await (_database.update(_database.internalMarks)
-            ..where((t) => t.userId.equals(userId) & t.id.equals(id)))
-          .write(
-            InternalMarksCompanion(
-              deletedAt: Value(DateTime.now().toUtc().toIso8601String()),
-            ),
-          );
+      await (_database.update(
+        _database.internalMarks,
+      )..where((t) => t.userId.equals(userId) & t.id.equals(id))).write(
+        InternalMarksCompanion(
+          deletedAt: Value(DateTime.now().toUtc().toIso8601String()),
+        ),
+      );
       await _syncQueueRepository?.enqueue(
         targetTable: 'internal_marks',
         recordId: id,

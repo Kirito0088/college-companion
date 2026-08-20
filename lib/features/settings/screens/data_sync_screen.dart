@@ -215,7 +215,10 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
               ),
               child: Text(
                 _isSyncing ? 'Syncing...' : 'Sync Now',
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
               ),
             ),
           ),

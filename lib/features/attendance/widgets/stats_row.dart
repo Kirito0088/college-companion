@@ -11,7 +11,9 @@ class StatsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final presentStr = safeBunk != null ? '${safeBunk!.attended}' : '148';
-    final absentStr = safeBunk != null ? '${safeBunk!.total - safeBunk!.attended}' : '32';
+    final absentStr = safeBunk != null
+        ? '${safeBunk!.total - safeBunk!.attended}'
+        : '32';
     final totalStr = safeBunk != null ? '${safeBunk!.total}' : '180';
 
     return Row(

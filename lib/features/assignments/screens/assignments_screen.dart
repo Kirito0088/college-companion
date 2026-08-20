@@ -62,7 +62,8 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final authState = ref.watch(authStateProvider);
-    final userId = authState is AuthAuthenticated && authState.user.uid.isNotEmpty
+    final userId =
+        authState is AuthAuthenticated && authState.user.uid.isNotEmpty
         ? authState.user.uid
         : 'default_user';
 
@@ -83,8 +84,12 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
                       // Filter by search query
                       final searchFiltered = allAssignments.where((a) {
                         if (_searchQuery.isEmpty) return true;
-                        return a.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                            a.subjectId.toLowerCase().contains(_searchQuery.toLowerCase());
+                        return a.title.toLowerCase().contains(
+                              _searchQuery.toLowerCase(),
+                            ) ||
+                            a.subjectId.toLowerCase().contains(
+                              _searchQuery.toLowerCase(),
+                            );
                       }).toList();
 
                       // Filter by chip category
@@ -373,7 +378,9 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
       }
 
       final dueDt = DateTime.tryParse(entity.dueDate);
-      final dueStr = dueDt != null ? '${dueDt.month}/${dueDt.day}' : entity.dueDate;
+      final dueStr = dueDt != null
+          ? '${dueDt.month}/${dueDt.day}'
+          : entity.dueDate;
 
       return AssignmentCard(
         title: entity.title,
@@ -410,4 +417,3 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
     );
   }
 }
-

@@ -75,13 +75,17 @@ class NotificationsScreen extends ConsumerWidget {
 
           final now = DateTime.now();
           final startOfToday = DateTime(now.year, now.month, now.day);
-          final startOfYesterday = startOfToday.subtract(const Duration(days: 1));
+          final startOfYesterday = startOfToday.subtract(
+            const Duration(days: 1),
+          );
 
           for (final n in notifications) {
             final date = DateTime.parse(n.createdAt).toLocal();
-            if (date.isAfter(startOfToday) || date.isAtSameMomentAs(startOfToday)) {
+            if (date.isAfter(startOfToday) ||
+                date.isAtSameMomentAs(startOfToday)) {
               today.add(n);
-            } else if (date.isAfter(startOfYesterday) || date.isAtSameMomentAs(startOfYesterday)) {
+            } else if (date.isAfter(startOfYesterday) ||
+                date.isAtSameMomentAs(startOfYesterday)) {
               yesterday.add(n);
             } else {
               earlier.add(n);
@@ -123,7 +127,8 @@ class NotificationsScreen extends ConsumerWidget {
                     );
                   }).toList(),
                 ),
-                if (earlier.isNotEmpty) const SizedBox(height: LayoutTokens.sectionGap),
+                if (earlier.isNotEmpty)
+                  const SizedBox(height: LayoutTokens.sectionGap),
               ],
               if (earlier.isNotEmpty)
                 _NotificationGroup(
@@ -244,10 +249,12 @@ class _NotificationItem extends ConsumerWidget {
         child: const Icon(Symbols.delete, color: ColorTokens.onPrimary),
       ),
       onDismissed: (direction) {
-        ref.read(notificationRepositoryProvider).delete(userId, notification.id);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Notification deleted')),
-        );
+        ref
+            .read(notificationRepositoryProvider)
+            .delete(userId, notification.id);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Notification deleted')));
       },
       child: Material(
         color: !notification.isRead
@@ -256,9 +263,12 @@ class _NotificationItem extends ConsumerWidget {
         child: InkWell(
           onTap: () {
             if (!notification.isRead) {
-              ref.read(notificationRepositoryProvider).markRead(userId, notification.id);
+              ref
+                  .read(notificationRepositoryProvider)
+                  .markRead(userId, notification.id);
             }
-            if (notification.targetRoute != null && notification.targetRoute!.isNotEmpty) {
+            if (notification.targetRoute != null &&
+                notification.targetRoute!.isNotEmpty) {
               context.push(notification.targetRoute!);
             }
           },
@@ -269,7 +279,9 @@ class _NotificationItem extends ConsumerWidget {
               border: showBorder
                   ? Border(
                       bottom: BorderSide(
-                        color: ColorTokens.outlineVariant.withValues(alpha: 0.3),
+                        color: ColorTokens.outlineVariant.withValues(
+                          alpha: 0.3,
+                        ),
                       ),
                     )
                   : null,

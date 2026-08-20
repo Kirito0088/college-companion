@@ -28,6 +28,7 @@ abstract final class TypographyTokens {
 
   /// Moderate tracking for metadata/caption text — readable density.
   static const double metadataSpacing = 0.5;
+
   /// Base text theme using Inter font family.
   static TextTheme get textTheme {
     return GoogleFonts.interTextTheme(

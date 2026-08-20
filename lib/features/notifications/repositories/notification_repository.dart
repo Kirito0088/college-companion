@@ -24,7 +24,10 @@ class NotificationRepository {
             ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
           .watch();
     } catch (e) {
-      throw DatabaseException('Failed to watch notifications for user: $userId', e);
+      throw DatabaseException(
+        'Failed to watch notifications for user: $userId',
+        e,
+      );
     }
   }
 
@@ -47,9 +50,14 @@ class NotificationRepository {
   /// Marks all unread notifications as read for a given user.
   Future<void> markAllRead(String userId) async {
     try {
-      final unreadNotifications = await (_database.select(_database.notifications)
-            ..where((t) => t.userId.equals(userId) & t.isRead.equals(false) & t.deletedAt.isNull()))
-          .get();
+      final unreadNotifications =
+          await (_database.select(_database.notifications)..where(
+                (t) =>
+                    t.userId.equals(userId) &
+                    t.isRead.equals(false) &
+                    t.deletedAt.isNull(),
+              ))
+              .get();
 
       if (unreadNotifications.isEmpty) return;
 
@@ -74,13 +82,13 @@ class NotificationRepository {
   /// Soft-deletes a notification.
   Future<void> delete(String userId, String id) async {
     try {
-      await (_database.update(_database.notifications)
-            ..where((t) => t.userId.equals(userId) & t.id.equals(id)))
-          .write(
-            NotificationsCompanion(
-              deletedAt: Value(DateTime.now().toUtc().toIso8601String()),
-            ),
-          );
+      await (_database.update(
+        _database.notifications,
+      )..where((t) => t.userId.equals(userId) & t.id.equals(id))).write(
+        NotificationsCompanion(
+          deletedAt: Value(DateTime.now().toUtc().toIso8601String()),
+        ),
+      );
       await _syncQueueRepository?.enqueue(
         targetTable: 'notifications',
         recordId: id,

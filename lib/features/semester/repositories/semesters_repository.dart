@@ -61,8 +61,9 @@ class SemesterRepository {
   /// Creates a new semester.
   Future<String> create(SemestersCompanion data) async {
     try {
-      final result =
-          await _database.into(_database.semesters).insertReturning(data);
+      final result = await _database
+          .into(_database.semesters)
+          .insertReturning(data);
       await _syncQueueRepository?.enqueue(
         targetTable: 'semesters',
         recordId: result.id,
@@ -75,15 +76,11 @@ class SemesterRepository {
   }
 
   /// Updates an existing semester.
-  Future<void> update(
-    String userId,
-    String id,
-    SemestersCompanion data,
-  ) async {
+  Future<void> update(String userId, String id, SemestersCompanion data) async {
     try {
-      await (_database.update(_database.semesters)
-            ..where((t) => t.userId.equals(userId) & t.id.equals(id)))
-          .write(data);
+      await (_database.update(
+        _database.semesters,
+      )..where((t) => t.userId.equals(userId) & t.id.equals(id))).write(data);
       await _syncQueueRepository?.enqueue(
         targetTable: 'semesters',
         recordId: id,
@@ -106,13 +103,14 @@ class SemesterRepository {
             .write(SemestersCompanion(deletedAt: Value(now)));
 
         // 2. Find all active subjects in this semester
-        final subjects = await (_database.select(_database.subjects)..where(
-              (t) =>
-                  t.userId.equals(userId) &
-                  t.semesterId.equals(id) &
-                  t.deletedAt.isNull(),
-            ))
-            .get();
+        final subjects =
+            await (_database.select(_database.subjects)..where(
+                  (t) =>
+                      t.userId.equals(userId) &
+                      t.semesterId.equals(id) &
+                      t.deletedAt.isNull(),
+                ))
+                .get();
 
         final subjectIds = subjects.map((s) => s.id).toList();
 
@@ -189,7 +187,10 @@ class SemesterRepository {
           ))
           .watchSingleOrNull();
     } catch (e) {
-      throw DatabaseException('Failed to watch current semester for user: $userId', e);
+      throw DatabaseException(
+        'Failed to watch current semester for user: $userId',
+        e,
+      );
     }
   }
 
@@ -199,13 +200,14 @@ class SemesterRepository {
   /// The entire operation is transactional.
   Future<void> setCurrent(String userId, String id) async {
     try {
-      final semester = await (_database.select(_database.semesters)..where(
-            (t) =>
-                t.userId.equals(userId) &
-                t.id.equals(id) &
-                t.deletedAt.isNull(),
-          ))
-          .getSingleOrNull();
+      final semester =
+          await (_database.select(_database.semesters)..where(
+                (t) =>
+                    t.userId.equals(userId) &
+                    t.id.equals(id) &
+                    t.deletedAt.isNull(),
+              ))
+              .getSingleOrNull();
 
       if (semester == null) return;
 

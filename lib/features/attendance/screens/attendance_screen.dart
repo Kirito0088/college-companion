@@ -9,7 +9,6 @@ import 'package:college_companion/features/attendance/widgets/stats_row.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/features/subjects/providers/subjects_provider.dart';
-import 'package:college_companion/routing/app_router.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
@@ -33,13 +32,14 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
-    final userId = authState is AuthAuthenticated && authState.user.uid.isNotEmpty
+    final userId =
+        authState is AuthAuthenticated && authState.user.uid.isNotEmpty
         ? authState.user.uid
         : 'default_user';
 
     final safeBunkAsync = ref.watch(safeBunkStreamProvider(userId));
     final safeBunk = safeBunkAsync.valueOrNull;
-    
+
     final insightsAsync = ref.watch(attendanceInsightsProvider(userId));
     final insights = insightsAsync.valueOrNull;
 
@@ -111,7 +111,11 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
     );
   }
 
-  List<Widget> _buildOverviewTab(BuildContext context, SafeBunkResult? safeBunk, AttendanceInsights? insights) {
+  List<Widget> _buildOverviewTab(
+    BuildContext context,
+    SafeBunkResult? safeBunk,
+    AttendanceInsights? insights,
+  ) {
     return [
       OverallGauge(safeBunk: safeBunk),
       const SizedBox(height: LayoutTokens.sectionGap),
@@ -141,7 +145,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
         data: (subjects) {
           final filteredSubjects = subjects.where((s) {
             if (_subjectSearchQuery.isEmpty) return true;
-            return s.name.toLowerCase().contains(_subjectSearchQuery.toLowerCase());
+            return s.name.toLowerCase().contains(
+              _subjectSearchQuery.toLowerCase(),
+            );
           }).toList();
 
           return StreamBuilder<List<AttendanceEntity>>(
@@ -154,9 +160,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(SpacingTokens.xl),
                     child: Text(
-                      _subjectSearchQuery.isEmpty 
-                        ? 'No subjects added yet.' 
-                        : 'No subjects found matching query.',
+                      _subjectSearchQuery.isEmpty
+                          ? 'No subjects added yet.'
+                          : 'No subjects found matching query.',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: ColorTokens.onSurfaceVariant,
                       ),
@@ -166,8 +172,12 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
               }
 
               final cards = filteredSubjects.map((subject) {
-                final subjRecords = records.where((r) => r.subjectId == subject.id).toList();
-                final present = subjRecords.where((x) => x.primaryStatus == 'present').length;
+                final subjRecords = records
+                    .where((r) => r.subjectId == subject.id)
+                    .toList();
+                final present = subjRecords
+                    .where((x) => x.primaryStatus == 'present')
+                    .length;
                 final total = subjRecords.length;
                 final pct = total > 0 ? (present / total) : 0.0;
                 final pctStr = '${(pct * 100).round()}%';
@@ -196,9 +206,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
         error: (err, stack) => Center(
           child: Text(
             'Error loading subjects: $err',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: ColorTokens.error,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: ColorTokens.error),
           ),
         ),
       ),
@@ -207,13 +217,15 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
 
   Widget _buildHealthCard(BuildContext context, SafeBunkResult? safeBunk) {
     final theme = Theme.of(context);
-    final isSafe = safeBunk == null || safeBunk.currentPercentage >= safeBunk.targetPercentage;
+    final isSafe =
+        safeBunk == null ||
+        safeBunk.currentPercentage >= safeBunk.targetPercentage;
     final title = isSafe ? 'Safe' : 'Action Required';
     final color = isSafe ? ColorTokens.success : ColorTokens.error;
     final message = safeBunk != null
         ? (isSafe
-            ? 'You can miss approximately ${safeBunk.safeBunks} more lectures before reaching ${safeBunk.targetPercentage.round()}%.'
-            : 'You must attend ${safeBunk.mustAttend} more lectures to reach ${safeBunk.targetPercentage.round()}%.')
+              ? 'You can miss approximately ${safeBunk.safeBunks} more lectures before reaching ${safeBunk.targetPercentage.round()}%.'
+              : 'You must attend ${safeBunk.mustAttend} more lectures to reach ${safeBunk.targetPercentage.round()}%.')
         : 'Loading...';
 
     return Container(
@@ -221,20 +233,14 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
         borderRadius: RadiusTokens.borderRadiusLg,
-        border: Border.all(
-          color: color.withValues(alpha: 0.2),
-          width: 1,
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
             padding: const EdgeInsets.all(SpacingTokens.sm),
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             child: Icon(
               isSafe ? Symbols.check : Symbols.warning,
               color: isSafe ? ColorTokens.onSuccess : ColorTokens.onError,
@@ -268,9 +274,14 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
     );
   }
 
-  Widget _buildInsightsCard(BuildContext context, AttendanceInsights? insights) {
+  Widget _buildInsightsCard(
+    BuildContext context,
+    AttendanceInsights? insights,
+  ) {
     final theme = Theme.of(context);
-    final avgPctStr = insights != null ? '${insights.averagePercentage.round()}%' : '--%';
+    final avgPctStr = insights != null
+        ? '${insights.averagePercentage.round()}%'
+        : '--%';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,7 +317,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                     child: _buildInsightStat(
                       context,
                       'Highest Attendance',
-                      insights != null ? '${insights.highestSubject} (${insights.highestPercentage.round()}%)' : '--',
+                      insights != null
+                          ? '${insights.highestSubject} (${insights.highestPercentage.round()}%)'
+                          : '--',
                     ),
                   ),
                   const SizedBox(width: SpacingTokens.md),
@@ -314,7 +327,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                     child: _buildInsightStat(
                       context,
                       'Lowest Attendance',
-                      insights != null ? '${insights.lowestSubject} (${insights.lowestPercentage.round()}%)' : '--',
+                      insights != null
+                          ? '${insights.lowestSubject} (${insights.lowestPercentage.round()}%)'
+                          : '--',
                     ),
                   ),
                 ],
@@ -326,7 +341,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                     child: _buildInsightStat(
                       context,
                       'Subjects Below Target',
-                      insights != null ? '${insights.subjectsBelowTarget} Subject(s)' : '--',
+                      insights != null
+                          ? '${insights.subjectsBelowTarget} Subject(s)'
+                          : '--',
                     ),
                   ),
                   const SizedBox(width: SpacingTokens.md),
@@ -373,12 +390,22 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
 
   Widget _buildRequirementCard(BuildContext context, SafeBunkResult? safeBunk) {
     final theme = Theme.of(context);
-    final targetStr = safeBunk != null ? '${safeBunk.targetPercentage.round()}%' : '--%';
-    final currentStr = safeBunk != null ? '${safeBunk.currentPercentage.round()}%' : '--%';
+    final targetStr = safeBunk != null
+        ? '${safeBunk.targetPercentage.round()}%'
+        : '--%';
+    final currentStr = safeBunk != null
+        ? '${safeBunk.currentPercentage.round()}%'
+        : '--%';
     final statusStr = safeBunk != null
-        ? (safeBunk.currentPercentage >= safeBunk.targetPercentage ? 'Eligible' : 'Ineligible')
+        ? (safeBunk.currentPercentage >= safeBunk.targetPercentage
+              ? 'Eligible'
+              : 'Ineligible')
         : '--';
-    final statusColor = statusStr == 'Eligible' ? ColorTokens.success : (statusStr == '--' ? ColorTokens.onSurfaceVariant : ColorTokens.error);
+    final statusColor = statusStr == 'Eligible'
+        ? ColorTokens.success
+        : (statusStr == '--'
+              ? ColorTokens.onSurfaceVariant
+              : ColorTokens.error);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -421,12 +448,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                 currentStr,
                 ColorTokens.onSurface,
               ),
-              _buildRequirementStat(
-                context,
-                'Status',
-                statusStr,
-                statusColor,
-              ),
+              _buildRequirementStat(context, 'Status', statusStr, statusColor),
             ],
           ),
         ),
@@ -543,7 +565,10 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
         hintStyle: theme.textTheme.bodyMedium?.copyWith(
           color: ColorTokens.onSurfaceVariant,
         ),
-        prefixIcon: const Icon(Symbols.search, color: ColorTokens.onSurfaceVariant),
+        prefixIcon: const Icon(
+          Symbols.search,
+          color: ColorTokens.onSurfaceVariant,
+        ),
         filled: true,
         fillColor: ColorTokens.surfaceContainer,
         border: OutlineInputBorder(
@@ -602,7 +627,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
         ),
       ),
       child: InkWell(
-        onTap: () => context.push(RoutePaths.subjectDetails),
+        onTap: () => context.push('/subject-details/$subjectId'),
         child: Padding(
           padding: const EdgeInsets.all(LayoutTokens.cardPadding),
           child: Column(
@@ -652,39 +677,61 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                   Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Symbols.check_circle, color: ColorTokens.success),
+                        icon: const Icon(
+                          Symbols.check_circle,
+                          color: ColorTokens.success,
+                        ),
                         tooltip: 'Mark Present',
                         onPressed: () async {
-                           await repo.create(
-                             AttendanceCompanion.insert(
-                               id: const Uuid().v4(),
-                               userId: userId,
-                               subjectId: subjectId,
-                               date: DateTime.now().toUtc().toIso8601String().split('T').first,
-                               primaryStatus: 'present',
-                               lectureType: 'theory',
-                               createdAt: DateTime.now().toUtc().toIso8601String(),
-                               updatedAt: DateTime.now().toUtc().toIso8601String(),
-                             )
-                           );
+                          await repo.create(
+                            AttendanceCompanion.insert(
+                              id: const Uuid().v4(),
+                              userId: userId,
+                              subjectId: subjectId,
+                              date: DateTime.now()
+                                  .toUtc()
+                                  .toIso8601String()
+                                  .split('T')
+                                  .first,
+                              primaryStatus: 'present',
+                              lectureType: 'theory',
+                              createdAt: DateTime.now()
+                                  .toUtc()
+                                  .toIso8601String(),
+                              updatedAt: DateTime.now()
+                                  .toUtc()
+                                  .toIso8601String(),
+                            ),
+                          );
                         },
                       ),
                       IconButton(
-                        icon: const Icon(Symbols.cancel, color: ColorTokens.error),
+                        icon: const Icon(
+                          Symbols.cancel,
+                          color: ColorTokens.error,
+                        ),
                         tooltip: 'Mark Absent',
                         onPressed: () async {
-                           await repo.create(
-                             AttendanceCompanion.insert(
-                               id: const Uuid().v4(),
-                               userId: userId,
-                               subjectId: subjectId,
-                               date: DateTime.now().toUtc().toIso8601String().split('T').first,
-                               primaryStatus: 'absent',
-                               lectureType: 'theory',
-                               createdAt: DateTime.now().toUtc().toIso8601String(),
-                               updatedAt: DateTime.now().toUtc().toIso8601String(),
-                             )
-                           );
+                          await repo.create(
+                            AttendanceCompanion.insert(
+                              id: const Uuid().v4(),
+                              userId: userId,
+                              subjectId: subjectId,
+                              date: DateTime.now()
+                                  .toUtc()
+                                  .toIso8601String()
+                                  .split('T')
+                                  .first,
+                              primaryStatus: 'absent',
+                              lectureType: 'theory',
+                              createdAt: DateTime.now()
+                                  .toUtc()
+                                  .toIso8601String(),
+                              updatedAt: DateTime.now()
+                                  .toUtc()
+                                  .toIso8601String(),
+                            ),
+                          );
                         },
                       ),
                       const SizedBox(width: SpacingTokens.xs),
@@ -703,4 +750,3 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
     );
   }
 }
-

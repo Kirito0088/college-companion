@@ -16,9 +16,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('Dashboard Widget Tests', () {
-    testWidgets('WelcomeSection renders greeting', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('WelcomeSection renders greeting', (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [

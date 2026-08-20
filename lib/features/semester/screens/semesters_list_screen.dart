@@ -22,7 +22,8 @@ class SemestersListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final authState = ref.watch(authStateProvider);
-    final userId = authState is AuthAuthenticated && authState.user.uid.isNotEmpty
+    final userId =
+        authState is AuthAuthenticated && authState.user.uid.isNotEmpty
         ? authState.user.uid
         : 'default_user';
 
@@ -59,7 +60,8 @@ class SemestersListScreen extends ConsumerWidget {
                     const EmptySubjects(),
                     const SizedBox(height: SpacingTokens.lg),
                     FilledButton.icon(
-                      onPressed: () => _showAddSemesterDialog(context, ref, userId),
+                      onPressed: () =>
+                          _showAddSemesterDialog(context, ref, userId),
                       icon: const Icon(Symbols.add),
                       label: const Text('Add First Semester'),
                       style: FilledButton.styleFrom(
@@ -111,7 +113,11 @@ class SemestersListScreen extends ConsumerWidget {
     );
   }
 
-  void _showAddSemesterDialog(BuildContext context, WidgetRef ref, String userId) {
+  void _showAddSemesterDialog(
+    BuildContext context,
+    WidgetRef ref,
+    String userId,
+  ) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -254,7 +260,7 @@ class _AddSemesterSheetState extends ConsumerState<_AddSemesterSheet> {
     final initialDate = isStart
         ? (_startDate ?? DateTime.now())
         : (_expectedCompletionDate ?? _startDate ?? DateTime.now());
-    
+
     final picked = await showDatePicker(
       context: context,
       initialDate: initialDate,
@@ -277,7 +283,8 @@ class _AddSemesterSheetState extends ConsumerState<_AddSemesterSheet> {
       setState(() {
         if (isStart) {
           _startDate = picked;
-          if (_expectedCompletionDate != null && picked.isAfter(_expectedCompletionDate!)) {
+          if (_expectedCompletionDate != null &&
+              picked.isAfter(_expectedCompletionDate!)) {
             _expectedCompletionDate = null;
           }
         } else {
@@ -290,7 +297,7 @@ class _AddSemesterSheetState extends ConsumerState<_AddSemesterSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       margin: EdgeInsets.only(
         left: SpacingTokens.md,
@@ -353,7 +360,9 @@ class _AddSemesterSheetState extends ConsumerState<_AddSemesterSheet> {
             child: TextField(
               controller: _nameCtrl,
               autofocus: true,
-              style: theme.textTheme.bodyLarge?.copyWith(color: ColorTokens.onSurface),
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: ColorTokens.onSurface,
+              ),
               decoration: const InputDecoration(
                 labelText: 'Semester Name',
                 hintText: 'e.g. Semester 5, Fall 2026',
@@ -381,18 +390,31 @@ class _AddSemesterSheetState extends ConsumerState<_AddSemesterSheet> {
                         color: ColorTokens.surfaceContainerHigh,
                         borderRadius: RadiusTokens.borderRadiusLg,
                         border: Border.all(
-                          color: _startDate != null ? ColorTokens.primary : Colors.transparent,
+                          color: _startDate != null
+                              ? ColorTokens.primary
+                              : Colors.transparent,
                         ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Start Date', style: theme.textTheme.labelMedium?.copyWith(color: ColorTokens.onSurfaceVariant)),
+                          Text(
+                            'Start Date',
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: ColorTokens.onSurfaceVariant,
+                            ),
+                          ),
                           const SizedBox(height: SpacingTokens.xs),
                           Text(
-                            _startDate != null ? '${_startDate!.year}-${_startDate!.month.toString().padLeft(2, '0')}-${_startDate!.day.toString().padLeft(2, '0')}' : 'Select',
+                            _startDate != null
+                                ? '${_startDate!.year}-${_startDate!.month.toString().padLeft(2, '0')}-${_startDate!.day.toString().padLeft(2, '0')}'
+                                : 'Select',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: _startDate != null ? ColorTokens.onSurface : ColorTokens.onSurfaceVariant.withValues(alpha: 0.5),
+                              color: _startDate != null
+                                  ? ColorTokens.onSurface
+                                  : ColorTokens.onSurfaceVariant.withValues(
+                                      alpha: 0.5,
+                                    ),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -412,18 +434,31 @@ class _AddSemesterSheetState extends ConsumerState<_AddSemesterSheet> {
                         color: ColorTokens.surfaceContainerHigh,
                         borderRadius: RadiusTokens.borderRadiusLg,
                         border: Border.all(
-                          color: _expectedCompletionDate != null ? ColorTokens.primary : Colors.transparent,
+                          color: _expectedCompletionDate != null
+                              ? ColorTokens.primary
+                              : Colors.transparent,
                         ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('End Date', style: theme.textTheme.labelMedium?.copyWith(color: ColorTokens.onSurfaceVariant)),
+                          Text(
+                            'End Date',
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: ColorTokens.onSurfaceVariant,
+                            ),
+                          ),
                           const SizedBox(height: SpacingTokens.xs),
                           Text(
-                            _expectedCompletionDate != null ? '${_expectedCompletionDate!.year}-${_expectedCompletionDate!.month.toString().padLeft(2, '0')}-${_expectedCompletionDate!.day.toString().padLeft(2, '0')}' : 'Select',
+                            _expectedCompletionDate != null
+                                ? '${_expectedCompletionDate!.year}-${_expectedCompletionDate!.month.toString().padLeft(2, '0')}-${_expectedCompletionDate!.day.toString().padLeft(2, '0')}'
+                                : 'Select',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: _expectedCompletionDate != null ? ColorTokens.onSurface : ColorTokens.onSurfaceVariant.withValues(alpha: 0.5),
+                              color: _expectedCompletionDate != null
+                                  ? ColorTokens.onSurface
+                                  : ColorTokens.onSurfaceVariant.withValues(
+                                      alpha: 0.5,
+                                    ),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -444,10 +479,20 @@ class _AddSemesterSheetState extends ConsumerState<_AddSemesterSheet> {
                   child: TextButton(
                     onPressed: () => Navigator.pop(context),
                     style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: SpacingTokens.md),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: SpacingTokens.md,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                    child: const Text('Cancel', style: TextStyle(color: ColorTokens.onSurfaceVariant, fontWeight: FontWeight.w600)),
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(
+                        color: ColorTokens.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: SpacingTokens.md),
@@ -466,8 +511,19 @@ class _AddSemesterSheetState extends ConsumerState<_AddSemesterSheet> {
                             workingDays: const drift.Value('[0,1,2,3,4]'),
                             createdAt: drift.Value(now),
                             updatedAt: drift.Value(now),
-                            startDate: _startDate != null ? drift.Value(_startDate!.toUtc().toIso8601String()) : const drift.Value<String>.absent(),
-                            expectedCompletionDate: _expectedCompletionDate != null ? drift.Value(_expectedCompletionDate!.toUtc().toIso8601String()) : const drift.Value<String>.absent(),
+                            startDate: _startDate != null
+                                ? drift.Value(
+                                    _startDate!.toUtc().toIso8601String(),
+                                  )
+                                : const drift.Value<String>.absent(),
+                            expectedCompletionDate:
+                                _expectedCompletionDate != null
+                                ? drift.Value(
+                                    _expectedCompletionDate!
+                                        .toUtc()
+                                        .toIso8601String(),
+                                  )
+                                : const drift.Value<String>.absent(),
                           ),
                         );
                       }
@@ -476,11 +532,18 @@ class _AddSemesterSheetState extends ConsumerState<_AddSemesterSheet> {
                     style: FilledButton.styleFrom(
                       backgroundColor: ColorTokens.primary,
                       foregroundColor: ColorTokens.onPrimary,
-                      padding: const EdgeInsets.symmetric(vertical: SpacingTokens.md),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: SpacingTokens.md,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       elevation: 0,
                     ),
-                    child: const Text('Create', style: TextStyle(fontWeight: FontWeight.w600)),
+                    child: const Text(
+                      'Create',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
                   ),
                 ),
               ],

@@ -28,11 +28,23 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   DateTime _selectedMonth = DateTime(DateTime.now().year, DateTime.now().month);
 
   static const List<String> _monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
 
-  Map<int, List<CalendarEventEntity>> _buildEventsMap(List<CalendarEventEntity> entities) {
+  Map<int, List<CalendarEventEntity>> _buildEventsMap(
+    List<CalendarEventEntity> entities,
+  ) {
     final map = <int, List<CalendarEventEntity>>{};
     for (final entity in entities) {
       final startDt = DateTime.tryParse(entity.startDate);
@@ -49,7 +61,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final authState = ref.watch(authStateProvider);
-    final userId = authState is AuthAuthenticated && authState.user.uid.isNotEmpty
+    final userId =
+        authState is AuthAuthenticated && authState.user.uid.isNotEmpty
         ? authState.user.uid
         : 'default_user';
 
@@ -123,7 +136,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   }
 
   Widget _buildHeader(ThemeData theme, String userId) {
-    final monthLabel = '${_monthNames[_selectedMonth.month - 1]} ${_selectedMonth.year}';
+    final monthLabel =
+        '${_monthNames[_selectedMonth.month - 1]} ${_selectedMonth.year}';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -184,7 +198,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               IconButton(
                 onPressed: () {
                   setState(() {
-                    _selectedMonth = DateTime(DateTime.now().year, DateTime.now().month);
+                    _selectedMonth = DateTime(
+                      DateTime.now().year,
+                      DateTime.now().month,
+                    );
                     _selectedDate = DateTime.now().day;
                   });
                 },
@@ -195,7 +212,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               IconButton(
                 onPressed: () {
                   setState(() {
-                    _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month - 1);
+                    _selectedMonth = DateTime(
+                      _selectedMonth.year,
+                      _selectedMonth.month - 1,
+                    );
                   });
                 },
                 icon: const Icon(Symbols.chevron_left, size: 28),
@@ -204,7 +224,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               IconButton(
                 onPressed: () {
                   setState(() {
-                    _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month + 1);
+                    _selectedMonth = DateTime(
+                      _selectedMonth.year,
+                      _selectedMonth.month + 1,
+                    );
                   });
                 },
                 icon: const Icon(Symbols.chevron_right, size: 28),
@@ -217,7 +240,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     );
   }
 
-  Widget _buildAgendaSection(ThemeData theme, Map<int, List<CalendarEventEntity>> eventsMap) {
+  Widget _buildAgendaSection(
+    ThemeData theme,
+    Map<int, List<CalendarEventEntity>> eventsMap,
+  ) {
     final eventsForSelected = eventsMap[_selectedDate] ?? [];
 
     Widget content;

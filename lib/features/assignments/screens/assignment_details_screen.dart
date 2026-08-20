@@ -19,17 +19,21 @@ class AssignmentDetailsScreen extends ConsumerStatefulWidget {
   final String assignmentId;
 
   @override
-  ConsumerState<AssignmentDetailsScreen> createState() => _AssignmentDetailsScreenState();
+  ConsumerState<AssignmentDetailsScreen> createState() =>
+      _AssignmentDetailsScreenState();
 }
 
-class _AssignmentDetailsScreenState extends ConsumerState<AssignmentDetailsScreen> {
+class _AssignmentDetailsScreenState
+    extends ConsumerState<AssignmentDetailsScreen> {
   String get _userId {
     final auth = ref.read(authStateProvider);
     return (auth as AuthAuthenticated).user.uid;
   }
 
   Future<void> _markComplete() async {
-    await ref.read(assignmentRepositoryProvider).markCompleted(_userId, widget.assignmentId);
+    await ref
+        .read(assignmentRepositoryProvider)
+        .markCompleted(_userId, widget.assignmentId);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -44,10 +48,13 @@ class _AssignmentDetailsScreenState extends ConsumerState<AssignmentDetailsScree
     final confirm = await CCDialogs.showDeleteConfirmation(
       context,
       title: 'Delete Assignment',
-      message: 'Are you sure you want to delete this assignment? This action cannot be undone.',
+      message:
+          'Are you sure you want to delete this assignment? This action cannot be undone.',
     );
     if (confirm == true && mounted) {
-      await ref.read(assignmentRepositoryProvider).delete(_userId, widget.assignmentId);
+      await ref
+          .read(assignmentRepositoryProvider)
+          .delete(_userId, widget.assignmentId);
       if (mounted) context.pop();
     }
   }
@@ -96,19 +103,27 @@ class _AssignmentDetailsScreenState extends ConsumerState<AssignmentDetailsScree
               ),
               const SizedBox(height: SpacingTokens.xl),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.xl),
-                child: Text('Edit Assignment',
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingTokens.xl,
+                ),
+                child: Text(
+                  'Edit Assignment',
                   style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold, color: ColorTokens.onSurface,
+                    fontWeight: FontWeight.bold,
+                    color: ColorTokens.onSurface,
                   ),
                 ),
               ),
               const SizedBox(height: SpacingTokens.lg),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.xl),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingTokens.xl,
+                ),
                 child: TextField(
                   controller: titleCtrl,
-                  style: theme.textTheme.bodyLarge?.copyWith(color: ColorTokens.onSurface),
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: ColorTokens.onSurface,
+                  ),
                   decoration: const InputDecoration(
                     labelText: 'Title',
                     labelStyle: TextStyle(color: ColorTokens.onSurfaceVariant),
@@ -120,18 +135,25 @@ class _AssignmentDetailsScreenState extends ConsumerState<AssignmentDetailsScree
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: RadiusTokens.borderRadiusLg,
-                      borderSide: BorderSide(color: ColorTokens.primary, width: 2),
+                      borderSide: BorderSide(
+                        color: ColorTokens.primary,
+                        width: 2,
+                      ),
                     ),
                   ),
                 ),
               ),
               const SizedBox(height: SpacingTokens.md),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.xl),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingTokens.xl,
+                ),
                 child: TextField(
                   controller: descCtrl,
                   maxLines: 3,
-                  style: theme.textTheme.bodyLarge?.copyWith(color: ColorTokens.onSurface),
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: ColorTokens.onSurface,
+                  ),
                   decoration: const InputDecoration(
                     labelText: 'Description',
                     labelStyle: TextStyle(color: ColorTokens.onSurfaceVariant),
@@ -143,24 +165,39 @@ class _AssignmentDetailsScreenState extends ConsumerState<AssignmentDetailsScree
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: RadiusTokens.borderRadiusLg,
-                      borderSide: BorderSide(color: ColorTokens.primary, width: 2),
+                      borderSide: BorderSide(
+                        color: ColorTokens.primary,
+                        width: 2,
+                      ),
                     ),
                   ),
                 ),
               ),
               const SizedBox(height: SpacingTokens.xl),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.xl),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingTokens.xl,
+                ),
                 child: Row(
                   children: [
                     Expanded(
                       child: TextButton(
                         onPressed: () => Navigator.of(ctx).pop(false),
                         style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: SpacingTokens.md),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: SpacingTokens.md,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
-                        child: const Text('Cancel', style: TextStyle(color: ColorTokens.onSurfaceVariant, fontWeight: FontWeight.w600)),
+                        child: const Text(
+                          'Cancel',
+                          style: TextStyle(
+                            color: ColorTokens.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(width: SpacingTokens.md),
@@ -170,11 +207,18 @@ class _AssignmentDetailsScreenState extends ConsumerState<AssignmentDetailsScree
                         style: FilledButton.styleFrom(
                           backgroundColor: ColorTokens.primary,
                           foregroundColor: ColorTokens.onPrimary,
-                          padding: const EdgeInsets.symmetric(vertical: SpacingTokens.md),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: SpacingTokens.md,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           elevation: 0,
                         ),
-                        child: const Text('Save', style: TextStyle(fontWeight: FontWeight.w600)),
+                        child: const Text(
+                          'Save',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
                       ),
                     ),
                   ],
@@ -188,18 +232,25 @@ class _AssignmentDetailsScreenState extends ConsumerState<AssignmentDetailsScree
     );
 
     if (result == true && mounted) {
-      await ref.read(assignmentRepositoryProvider).update(
-        _userId,
-        widget.assignmentId,
-        AssignmentsCompanion(
-          title: Value(titleCtrl.text.trim()),
-          description: Value(descCtrl.text.trim().isEmpty ? null : descCtrl.text.trim()),
-          updatedAt: Value(DateTime.now().toUtc().toIso8601String()),
-        ),
-      );
+      await ref
+          .read(assignmentRepositoryProvider)
+          .update(
+            _userId,
+            widget.assignmentId,
+            AssignmentsCompanion(
+              title: Value(titleCtrl.text.trim()),
+              description: Value(
+                descCtrl.text.trim().isEmpty ? null : descCtrl.text.trim(),
+              ),
+              updatedAt: Value(DateTime.now().toUtc().toIso8601String()),
+            ),
+          );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Assignment updated'), backgroundColor: ColorTokens.primary),
+          const SnackBar(
+            content: Text('Assignment updated'),
+            backgroundColor: ColorTokens.primary,
+          ),
         );
       }
     }
@@ -232,10 +283,17 @@ class _AssignmentDetailsScreenState extends ConsumerState<AssignmentDetailsScree
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Symbols.assignment_late, size: 64, color: ColorTokens.onSurfaceVariant),
+                  const Icon(
+                    Symbols.assignment_late,
+                    size: 64,
+                    color: ColorTokens.onSurfaceVariant,
+                  ),
                   const SizedBox(height: SpacingTokens.md),
-                  Text('Assignment not found',
-                    style: theme.textTheme.titleMedium?.copyWith(color: ColorTokens.onSurfaceVariant),
+                  Text(
+                    'Assignment not found',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: ColorTokens.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -244,7 +302,9 @@ class _AssignmentDetailsScreenState extends ConsumerState<AssignmentDetailsScree
         }
 
         final isCompleted = assignment.status == 'completed';
-        final statusColor = isCompleted ? ColorTokens.success : ColorTokens.warning;
+        final statusColor = isCompleted
+            ? ColorTokens.success
+            : ColorTokens.warning;
         final statusLabel = isCompleted ? 'Completed' : 'Pending';
 
         // Parse dates
@@ -274,45 +334,53 @@ class _AssignmentDetailsScreenState extends ConsumerState<AssignmentDetailsScree
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Header
-                  Text(assignment.title,
+                  Text(
+                    assignment.title,
                     style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold, color: ColorTokens.onSurface,
+                      fontWeight: FontWeight.bold,
+                      color: ColorTokens.onSurface,
                     ),
                   ),
                   if (assignment.subjectId.isNotEmpty) ...[
                     const SizedBox(height: SpacingTokens.xs),
-                    Text(assignment.subjectId,
-                      style: theme.textTheme.titleMedium?.copyWith(color: ColorTokens.onSurfaceVariant),
+                    Text(
+                      assignment.subjectId,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: ColorTokens.onSurfaceVariant,
+                      ),
                     ),
                   ],
                   const SizedBox(height: SpacingTokens.md),
-                  Row(
-                    children: [
-                      _buildChip(theme, statusLabel, statusColor),
-                    ],
-                  ),
+                  Row(children: [_buildChip(theme, statusLabel, statusColor)]),
 
                   // Description
-                  if (assignment.description != null && assignment.description!.isNotEmpty) ...[
+                  if (assignment.description != null &&
+                      assignment.description!.isNotEmpty) ...[
                     const SizedBox(height: SpacingTokens.xl),
-                    Text('Description',
+                    Text(
+                      'Description',
                       style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold, color: ColorTokens.onSurface,
+                        fontWeight: FontWeight.bold,
+                        color: ColorTokens.onSurface,
                       ),
                     ),
                     const SizedBox(height: SpacingTokens.sm),
-                    Text(assignment.description!,
+                    Text(
+                      assignment.description!,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: ColorTokens.onSurfaceVariant, height: 1.5,
+                        color: ColorTokens.onSurfaceVariant,
+                        height: 1.5,
                       ),
                     ),
                   ],
 
                   // Dates
                   const SizedBox(height: SpacingTokens.xl),
-                  Text('Timeline',
+                  Text(
+                    'Timeline',
                     style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold, color: ColorTokens.onSurface,
+                      fontWeight: FontWeight.bold,
+                      color: ColorTokens.onSurface,
                     ),
                   ),
                   const SizedBox(height: SpacingTokens.sm),
@@ -321,20 +389,42 @@ class _AssignmentDetailsScreenState extends ConsumerState<AssignmentDetailsScree
                     decoration: BoxDecoration(
                       color: ColorTokens.surfaceContainerHigh,
                       borderRadius: RadiusTokens.borderRadiusXl,
-                      border: Border.all(color: ColorTokens.outlineVariant.withValues(alpha: 0.5)),
+                      border: Border.all(
+                        color: ColorTokens.outlineVariant.withValues(
+                          alpha: 0.5,
+                        ),
+                      ),
                     ),
                     child: Column(
                       children: [
                         if (createdStr.isNotEmpty)
-                          _buildDateRow(theme, 'Created', createdStr, Symbols.calendar_add_on),
+                          _buildDateRow(
+                            theme,
+                            'Created',
+                            createdStr,
+                            Symbols.calendar_add_on,
+                          ),
                         if (createdStr.isNotEmpty)
-                          const Divider(height: SpacingTokens.xl, color: ColorTokens.surfaceVariant),
-                        _buildDateRow(theme, 'Due', dueDateStr, Symbols.event_upcoming),
+                          const Divider(
+                            height: SpacingTokens.xl,
+                            color: ColorTokens.surfaceVariant,
+                          ),
+                        _buildDateRow(
+                          theme,
+                          'Due',
+                          dueDateStr,
+                          Symbols.event_upcoming,
+                        ),
                         if (isCompleted && assignment.completedAt != null) ...[
-                          const Divider(height: SpacingTokens.xl, color: ColorTokens.surfaceVariant),
+                          const Divider(
+                            height: SpacingTokens.xl,
+                            color: ColorTokens.surfaceVariant,
+                          ),
                           _buildDateRow(theme, 'Completed', () {
                             try {
-                              return DateFormat('MMM d, yyyy').format(DateTime.parse(assignment.completedAt!));
+                              return DateFormat(
+                                'MMM d, yyyy',
+                              ).format(DateTime.parse(assignment.completedAt!));
                             } catch (_) {
                               return assignment.completedAt!;
                             }
@@ -345,11 +435,14 @@ class _AssignmentDetailsScreenState extends ConsumerState<AssignmentDetailsScree
                   ),
 
                   // Additional Notes
-                  if (assignment.description != null && assignment.description!.isNotEmpty) ...[
+                  if (assignment.description != null &&
+                      assignment.description!.isNotEmpty) ...[
                     const SizedBox(height: SpacingTokens.xl),
-                    Text('Notes',
+                    Text(
+                      'Notes',
                       style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold, color: ColorTokens.onSurface,
+                        fontWeight: FontWeight.bold,
+                        color: ColorTokens.onSurface,
                       ),
                     ),
                     const SizedBox(height: SpacingTokens.sm),
@@ -359,11 +452,17 @@ class _AssignmentDetailsScreenState extends ConsumerState<AssignmentDetailsScree
                       decoration: BoxDecoration(
                         color: ColorTokens.surfaceContainerHigh,
                         borderRadius: RadiusTokens.borderRadiusXl,
-                        border: Border.all(color: ColorTokens.outlineVariant.withValues(alpha: 0.5)),
+                        border: Border.all(
+                          color: ColorTokens.outlineVariant.withValues(
+                            alpha: 0.5,
+                          ),
+                        ),
                       ),
-                      child: Text(assignment.description!,
+                      child: Text(
+                        assignment.description!,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: ColorTokens.onSurfaceVariant, height: 1.6,
+                          color: ColorTokens.onSurfaceVariant,
+                          height: 1.6,
                         ),
                       ),
                     ),
@@ -377,10 +476,20 @@ class _AssignmentDetailsScreenState extends ConsumerState<AssignmentDetailsScree
                       child: FilledButton.icon(
                         onPressed: _markComplete,
                         icon: const Icon(Symbols.check_circle, size: 20),
-                        label: const Text('Mark as Complete', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        label: const Text(
+                          'Mark as Complete',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
                         style: FilledButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: SpacingTokens.lg),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: SpacingTokens.lg,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                           backgroundColor: ColorTokens.success,
                           foregroundColor: ColorTokens.onPrimary,
                           elevation: 0,
@@ -394,11 +503,20 @@ class _AssignmentDetailsScreenState extends ConsumerState<AssignmentDetailsScree
                         child: OutlinedButton.icon(
                           onPressed: () => _showEditSheet(assignment),
                           icon: const Icon(Symbols.edit, size: 18),
-                          label: const Text('Edit', style: TextStyle(fontWeight: FontWeight.w600)),
+                          label: const Text(
+                            'Edit',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: SpacingTokens.md),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            side: const BorderSide(color: ColorTokens.outlineVariant),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: SpacingTokens.md,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            side: const BorderSide(
+                              color: ColorTokens.outlineVariant,
+                            ),
                             foregroundColor: ColorTokens.onSurface,
                           ),
                         ),
@@ -408,11 +526,20 @@ class _AssignmentDetailsScreenState extends ConsumerState<AssignmentDetailsScree
                         child: OutlinedButton.icon(
                           onPressed: _deleteAssignment,
                           icon: const Icon(Symbols.delete, size: 18),
-                          label: const Text('Delete', style: TextStyle(fontWeight: FontWeight.w600)),
+                          label: const Text(
+                            'Delete',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: SpacingTokens.md),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            side: BorderSide(color: ColorTokens.error.withValues(alpha: 0.5)),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: SpacingTokens.md,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            side: BorderSide(
+                              color: ColorTokens.error.withValues(alpha: 0.5),
+                            ),
                             foregroundColor: ColorTokens.error,
                           ),
                         ),
@@ -443,25 +570,48 @@ class _AssignmentDetailsScreenState extends ConsumerState<AssignmentDetailsScree
 
   Widget _buildChip(ThemeData theme, String label, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm, vertical: SpacingTokens.xxs),
+      padding: const EdgeInsets.symmetric(
+        horizontal: SpacingTokens.sm,
+        vertical: SpacingTokens.xxs,
+      ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
         borderRadius: RadiusTokens.borderRadiusMd,
       ),
-      child: Text(label,
-        style: theme.textTheme.labelMedium?.copyWith(color: color, fontWeight: FontWeight.w600),
+      child: Text(
+        label,
+        style: theme.textTheme.labelMedium?.copyWith(
+          color: color,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
 
-  Widget _buildDateRow(ThemeData theme, String label, String date, IconData icon) {
+  Widget _buildDateRow(
+    ThemeData theme,
+    String label,
+    String date,
+    IconData icon,
+  ) {
     return Row(
       children: [
         Icon(icon, size: 20, color: ColorTokens.onSurfaceVariant),
         const SizedBox(width: SpacingTokens.md),
-        Text(label, style: theme.textTheme.bodyMedium?.copyWith(color: ColorTokens.onSurfaceVariant)),
+        Text(
+          label,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: ColorTokens.onSurfaceVariant,
+          ),
+        ),
         const Spacer(),
-        Text(date, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: ColorTokens.onSurface)),
+        Text(
+          date,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: ColorTokens.onSurface,
+          ),
+        ),
       ],
     );
   }

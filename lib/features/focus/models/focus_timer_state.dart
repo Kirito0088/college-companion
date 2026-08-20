@@ -4,7 +4,6 @@ enum FocusTimerStatus { idle, running, paused, breakMode }
 
 @immutable
 class FocusSession {
-
   const FocusSession({
     required this.id,
     required this.subject,
@@ -13,27 +12,26 @@ class FocusSession {
   });
 
   factory FocusSession.fromJson(Map<String, dynamic> json) => FocusSession(
-        id: json['id'] as String,
-        subject: json['subject'] as String,
-        durationMinutes: json['durationMinutes'] as int,
-        completedAt: DateTime.parse(json['completedAt'] as String),
-      );
+    id: json['id'] as String,
+    subject: json['subject'] as String,
+    durationMinutes: json['durationMinutes'] as int,
+    completedAt: DateTime.parse(json['completedAt'] as String),
+  );
   final String id;
   final String subject;
   final int durationMinutes;
   final DateTime completedAt;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'subject': subject,
-        'durationMinutes': durationMinutes,
-        'completedAt': completedAt.toIso8601String(),
-      };
+    'id': id,
+    'subject': subject,
+    'durationMinutes': durationMinutes,
+    'completedAt': completedAt.toIso8601String(),
+  };
 }
 
 @immutable
 class FocusTimerState {
-
   const FocusTimerState({
     this.status = FocusTimerStatus.idle,
     this.remainingSeconds = 25 * 60,
@@ -71,7 +69,9 @@ class FocusTimerState {
     return (elapsed / totalSeconds).clamp(0.0, 1.0);
   }
 
-  bool get isRunning => status == FocusTimerStatus.running || status == FocusTimerStatus.breakMode;
+  bool get isRunning =>
+      status == FocusTimerStatus.running ||
+      status == FocusTimerStatus.breakMode;
   bool get isPaused => status == FocusTimerStatus.paused;
   bool get isBreak => status == FocusTimerStatus.breakMode;
 
@@ -95,12 +95,15 @@ class FocusTimerState {
       totalSeconds: totalSeconds ?? this.totalSeconds,
       workDurationMinutes: workDurationMinutes ?? this.workDurationMinutes,
       breakDurationMinutes: breakDurationMinutes ?? this.breakDurationMinutes,
-      completedSessionsToday: completedSessionsToday ?? this.completedSessionsToday,
+      completedSessionsToday:
+          completedSessionsToday ?? this.completedSessionsToday,
       selectedPreset: selectedPreset ?? this.selectedPreset,
       currentSubject: currentSubject ?? this.currentSubject,
       dndEnabled: dndEnabled ?? this.dndEnabled,
       history: history ?? this.history,
-      completionAlertMessage: clearAlert ? null : (completionAlertMessage ?? this.completionAlertMessage),
+      completionAlertMessage: clearAlert
+          ? null
+          : (completionAlertMessage ?? this.completionAlertMessage),
     );
   }
 }

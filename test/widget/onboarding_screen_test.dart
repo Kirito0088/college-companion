@@ -11,10 +11,7 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.darkTheme,
-          home: const OnboardingScreen(),
-        ),
+        MaterialApp(theme: AppTheme.darkTheme, home: const OnboardingScreen()),
       );
 
       await tester.pumpAndSettle();
@@ -25,10 +22,7 @@ void main() {
 
     testWidgets('Next button advances page view', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.darkTheme,
-          home: const OnboardingScreen(),
-        ),
+        MaterialApp(theme: AppTheme.darkTheme, home: const OnboardingScreen()),
       );
 
       await tester.pumpAndSettle();

@@ -29,10 +29,7 @@ class ResourcesRepository {
   }
 
   /// Watches resources belonging to a specific subject.
-  Stream<List<ResourceEntity>> watchBySubject(
-    String userId,
-    String subjectId,
-  ) {
+  Stream<List<ResourceEntity>> watchBySubject(String userId, String subjectId) {
     try {
       return (_database.select(_database.resources)
             ..where(
@@ -44,15 +41,15 @@ class ResourcesRepository {
             ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
           .watch();
     } catch (e) {
-      throw DatabaseException('Failed to watch resources for subject: $subjectId', e);
+      throw DatabaseException(
+        'Failed to watch resources for subject: $subjectId',
+        e,
+      );
     }
   }
 
   /// Watches resources of a specific category (e.g. past_papers, notes, syllabus).
-  Stream<List<ResourceEntity>> watchByCategory(
-    String userId,
-    String category,
-  ) {
+  Stream<List<ResourceEntity>> watchByCategory(String userId, String category) {
     try {
       return (_database.select(_database.resources)
             ..where(
@@ -64,7 +61,10 @@ class ResourcesRepository {
             ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
           .watch();
     } catch (e) {
-      throw DatabaseException('Failed to watch resources for category: $category', e);
+      throw DatabaseException(
+        'Failed to watch resources for category: $category',
+        e,
+      );
     }
   }
 
@@ -101,8 +101,9 @@ class ResourcesRepository {
   /// Creates a new resource. Returns the new row's ID.
   Future<String> create(ResourcesCompanion data) async {
     try {
-      final result =
-          await _database.into(_database.resources).insertReturning(data);
+      final result = await _database
+          .into(_database.resources)
+          .insertReturning(data);
       await _syncQueueRepository?.enqueue(
         targetTable: 'resources',
         recordId: result.id,
@@ -115,15 +116,11 @@ class ResourcesRepository {
   }
 
   /// Updates an existing resource.
-  Future<void> update(
-    String userId,
-    String id,
-    ResourcesCompanion data,
-  ) async {
+  Future<void> update(String userId, String id, ResourcesCompanion data) async {
     try {
-      await (_database.update(_database.resources)
-            ..where((t) => t.userId.equals(userId) & t.id.equals(id)))
-          .write(data);
+      await (_database.update(
+        _database.resources,
+      )..where((t) => t.userId.equals(userId) & t.id.equals(id))).write(data);
       await _syncQueueRepository?.enqueue(
         targetTable: 'resources',
         recordId: id,
@@ -137,13 +134,13 @@ class ResourcesRepository {
   /// Soft-deletes a resource.
   Future<void> delete(String userId, String id) async {
     try {
-      await (_database.update(_database.resources)
-            ..where((t) => t.userId.equals(userId) & t.id.equals(id)))
-          .write(
-            ResourcesCompanion(
-              deletedAt: Value(DateTime.now().toUtc().toIso8601String()),
-            ),
-          );
+      await (_database.update(
+        _database.resources,
+      )..where((t) => t.userId.equals(userId) & t.id.equals(id))).write(
+        ResourcesCompanion(
+          deletedAt: Value(DateTime.now().toUtc().toIso8601String()),
+        ),
+      );
       await _syncQueueRepository?.enqueue(
         targetTable: 'resources',
         recordId: id,

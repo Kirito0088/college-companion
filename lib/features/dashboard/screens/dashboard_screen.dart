@@ -113,7 +113,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
-    final userId = authState is AuthAuthenticated && authState.user.uid.isNotEmpty
+    final userId =
+        authState is AuthAuthenticated && authState.user.uid.isNotEmpty
         ? authState.user.uid
         : 'default_user';
 
@@ -209,13 +210,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
               child: QuickActionsSection(
                 onTimetablePressed: () => context.push(RoutePaths.calendar),
                 onAttendancePressed: () => context.push(RoutePaths.attendance),
-                onAssignmentsPressed: () => context.push(RoutePaths.assignments),
+                onAssignmentsPressed: () =>
+                    context.push(RoutePaths.assignments),
                 onFocusPressed: () => context.push(RoutePaths.focusMode),
               ),
             ),
           ),
           const SizedBox(height: SpacingTokens.xxl),
-          
+
           // Upcoming Assignments
           FadeTransition(
             opacity: _snapshotOpacity, // Reusing snapshot animation timing
@@ -230,5 +232,3 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     );
   }
 }
-
-

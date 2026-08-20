@@ -23,7 +23,8 @@ class TodayOverviewSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateProvider);
     final userId = authState is AuthAuthenticated ? authState.user.uid : '';
-    final snapshot = ref.watch(dashboardSnapshotProvider(userId)).valueOrNull ??
+    final snapshot =
+        ref.watch(dashboardSnapshotProvider(userId)).valueOrNull ??
         DashboardSnapshot.empty();
     final theme = Theme.of(context);
     final events = snapshot.timelineEvents;

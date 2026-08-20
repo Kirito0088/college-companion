@@ -18,14 +18,13 @@ final assignmentRepositoryProvider = Provider<AssignmentRepository>((ref) {
 /// Watches all non-deleted assignments for a user.
 final assignmentsStreamProvider =
     StreamProvider.family<List<AssignmentEntity>, String>((ref, userId) {
-  final repo = ref.watch(assignmentRepositoryProvider);
-  return repo.watchAll(userId);
-});
+      final repo = ref.watch(assignmentRepositoryProvider);
+      return repo.watchAll(userId);
+    });
 
 /// Watches pending assignments for a user.
 final pendingAssignmentsStreamProvider =
     StreamProvider.family<List<AssignmentEntity>, String>((ref, userId) {
-  final repo = ref.watch(assignmentRepositoryProvider);
-  return repo.watchPending(userId);
-});
-
+      final repo = ref.watch(assignmentRepositoryProvider);
+      return repo.watchPending(userId);
+    });

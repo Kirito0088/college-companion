@@ -37,7 +37,8 @@ class FocusTimerNotifier extends StateNotifier<FocusTimerState> {
   }
 
   void start() {
-    if (state.status == FocusTimerStatus.running || state.status == FocusTimerStatus.breakMode) {
+    if (state.status == FocusTimerStatus.running ||
+        state.status == FocusTimerStatus.breakMode) {
       return;
     }
 
@@ -52,7 +53,8 @@ class FocusTimerNotifier extends StateNotifier<FocusTimerState> {
   }
 
   void pause() {
-    if (state.status == FocusTimerStatus.running || state.status == FocusTimerStatus.breakMode) {
+    if (state.status == FocusTimerStatus.running ||
+        state.status == FocusTimerStatus.breakMode) {
       _prePauseStatus = state.status;
       _timer?.cancel();
       state = state.copyWith(status: FocusTimerStatus.paused);
@@ -69,7 +71,11 @@ class FocusTimerNotifier extends StateNotifier<FocusTimerState> {
     );
   }
 
-  void setPreset(String preset, {required int workMinutes, required int breakMinutes}) {
+  void setPreset(
+    String preset, {
+    required int workMinutes,
+    required int breakMinutes,
+  }) {
     _timer?.cancel();
     final totalSecs = workMinutes * 60;
     state = state.copyWith(
@@ -116,9 +122,10 @@ class FocusTimerNotifier extends StateNotifier<FocusTimerState> {
 
       await _repository.addSession(session);
       final updatedHistory = [session, ...state.history];
-      
+
       final newCompletedSessions = state.completedSessionsToday + 1;
-      final isLongBreak = newCompletedSessions > 0 && newCompletedSessions % 4 == 0;
+      final isLongBreak =
+          newCompletedSessions > 0 && newCompletedSessions % 4 == 0;
       final breakMinutes = isLongBreak ? 15 : state.breakDurationMinutes;
       final breakSeconds = breakMinutes * 60;
 
@@ -140,7 +147,8 @@ class FocusTimerNotifier extends StateNotifier<FocusTimerState> {
         status: FocusTimerStatus.idle,
         totalSeconds: workSeconds,
         remainingSeconds: workSeconds,
-        completionAlertMessage: 'Break completed! Ready to start your next focus session?',
+        completionAlertMessage:
+            'Break completed! Ready to start your next focus session?',
       );
     }
   }
@@ -152,7 +160,8 @@ class FocusTimerNotifier extends StateNotifier<FocusTimerState> {
   }
 }
 
-final focusTimerProvider = StateNotifierProvider<FocusTimerNotifier, FocusTimerState>((ref) {
-  final repository = ref.watch(focusRepositoryProvider);
-  return FocusTimerNotifier(repository);
-});
+final focusTimerProvider =
+    StateNotifierProvider<FocusTimerNotifier, FocusTimerState>((ref) {
+      final repository = ref.watch(focusRepositoryProvider);
+      return FocusTimerNotifier(repository);
+    });

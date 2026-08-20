@@ -20,7 +20,9 @@ class SyncQueueRepository {
     required String operation,
   }) async {
     final now = DateTime.now().toUtc().toIso8601String();
-    return _database.into(_database.syncQueueItems).insert(
+    return _database
+        .into(_database.syncQueueItems)
+        .insert(
           SyncQueueItemsCompanion.insert(
             targetTable: targetTable,
             recordId: recordId,
@@ -43,27 +45,27 @@ class SyncQueueRepository {
   Future<void> markSynced(int id) {
     return (_database.update(_database.syncQueueItems)
           ..where((t) => t.id.equals(id)))
-        .write(const SyncQueueItemsCompanion(
-      isSynced: Value(true),
-    ));
+        .write(const SyncQueueItemsCompanion(isSynced: Value(true)));
   }
 
   /// Increments retry count and records error message for a failed sync item.
   Future<void> recordFailure(int id, String errorMessage, int currentRetries) {
     final now = DateTime.now().toUtc().toIso8601String();
-    return (_database.update(_database.syncQueueItems)
-          ..where((t) => t.id.equals(id)))
-        .write(SyncQueueItemsCompanion(
-      retryCount: Value(currentRetries + 1),
-      lastAttempt: Value(now),
-      error: Value(errorMessage),
-    ));
+    return (_database.update(
+      _database.syncQueueItems,
+    )..where((t) => t.id.equals(id))).write(
+      SyncQueueItemsCompanion(
+        retryCount: Value(currentRetries + 1),
+        lastAttempt: Value(now),
+        error: Value(errorMessage),
+      ),
+    );
   }
 
   /// Deletes synced items older than a specified date to keep queue table lean.
   Future<int> purgeSyncedItems() {
-    return (_database.delete(_database.syncQueueItems)
-          ..where((t) => t.isSynced.equals(true)))
-        .go();
+    return (_database.delete(
+      _database.syncQueueItems,
+    )..where((t) => t.isSynced.equals(true))).go();
   }
 }

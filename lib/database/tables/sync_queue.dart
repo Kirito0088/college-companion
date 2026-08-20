@@ -55,6 +55,4 @@ class SyncQueueItems extends Table {
 
   /// Whether the operation has been synced.
   BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
-
-
 }

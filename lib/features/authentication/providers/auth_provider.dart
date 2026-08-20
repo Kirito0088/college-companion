@@ -47,7 +47,9 @@ class AuthStateNotifier extends Notifier<AuthState> {
     final authService = ref.watch(authServiceProvider);
 
     _authSubscription?.cancel();
-    _authSubscription = authService.authStateChanges.listen(_onAuthStateChanged);
+    _authSubscription = authService.authStateChanges.listen(
+      _onAuthStateChanged,
+    );
 
     ref.onDispose(() {
       _authSubscription?.cancel();

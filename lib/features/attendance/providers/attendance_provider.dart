@@ -4,10 +4,17 @@
 library;
 
 import 'package:college_companion/database/app_database.dart';
+import 'package:college_companion/database/daos/attendance_dao.dart';
 import 'package:college_companion/features/attendance/repositories/attendance_repository.dart';
 import 'package:college_companion/features/subjects/providers/subjects_provider.dart';
 import 'package:college_companion/providers/app_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+/// Provides the [AttendanceDao] instance.
+final attendanceDaoProvider = Provider<AttendanceDao>((ref) {
+  final database = ref.watch(databaseProvider);
+  return AttendanceDao(database);
+});
 
 /// Provides the [AttendanceRepository] instance.
 final attendanceRepositoryProvider = Provider<AttendanceRepository>((ref) {
@@ -84,8 +91,10 @@ class SafeBunkCalculator {
 }
 
 /// Stream provider for user attendance safe bunk calculation.
-final safeBunkStreamProvider =
-    StreamProvider.family<SafeBunkResult, String>((ref, userId) {
+final safeBunkStreamProvider = StreamProvider.family<SafeBunkResult, String>((
+  ref,
+  userId,
+) {
   final repo = ref.watch(attendanceRepositoryProvider);
   return repo.watchAll(userId).map((list) {
     int attended = 0;
@@ -124,74 +133,86 @@ class AttendanceInsights {
 /// Watches all non-deleted attendance records for a user.
 final attendanceRecordsStreamProvider =
     StreamProvider.family<List<AttendanceEntity>, String>((ref, userId) {
-  final repo = ref.watch(attendanceRepositoryProvider);
-  return repo.watchAll(userId);
-});
+      final repo = ref.watch(attendanceRepositoryProvider);
+      return repo.watchAll(userId);
+    });
 
 /// Computes attendance insights based on records and subjects.
 final attendanceInsightsProvider =
     Provider.family<AsyncValue<AttendanceInsights>, String>((ref, userId) {
-  final subjectsAsync = ref.watch(subjectsStreamProvider(userId));
-  final recordsAsync = ref.watch(attendanceRecordsStreamProvider(userId));
+      final subjectsAsync = ref.watch(subjectsStreamProvider(userId));
+      final recordsAsync = ref.watch(attendanceRecordsStreamProvider(userId));
 
-  if (subjectsAsync.isLoading || recordsAsync.isLoading) {
-    return const AsyncLoading();
-  }
+      if (subjectsAsync.isLoading || recordsAsync.isLoading) {
+        return const AsyncLoading();
+      }
 
-  if (subjectsAsync.hasError) {
-    return AsyncError(subjectsAsync.error!, subjectsAsync.stackTrace!);
-  }
-  if (recordsAsync.hasError) {
-    return AsyncError(recordsAsync.error!, recordsAsync.stackTrace!);
-  }
+      if (subjectsAsync.hasError) {
+        return AsyncError(subjectsAsync.error!, subjectsAsync.stackTrace!);
+      }
+      if (recordsAsync.hasError) {
+        return AsyncError(recordsAsync.error!, recordsAsync.stackTrace!);
+      }
 
-  final subjects = subjectsAsync.value ?? [];
-  final records = recordsAsync.value ?? [];
+      final subjects = subjectsAsync.value ?? [];
+      final records = recordsAsync.value ?? [];
 
-  if (subjects.isEmpty) {
-    return const AsyncData(AttendanceInsights(
-      highestSubject: 'N/A',
-      lowestSubject: 'N/A',
-      highestPercentage: 0.0,
-      lowestPercentage: 0.0,
-      subjectsBelowTarget: 0,
-      averagePercentage: 0.0,
-    ));
-  }
+      if (subjects.isEmpty) {
+        return const AsyncData(
+          AttendanceInsights(
+            highestSubject: 'N/A',
+            lowestSubject: 'N/A',
+            highestPercentage: 0.0,
+            lowestPercentage: 0.0,
+            subjectsBelowTarget: 0,
+            averagePercentage: 0.0,
+          ),
+        );
+      }
 
-  String highestSubject = 'N/A';
-  String lowestSubject = 'N/A';
-  double highestPercentage = -1.0;
-  double lowestPercentage = 101.0;
-  int subjectsBelowTarget = 0;
-  double totalPercentage = 0.0;
+      String highestSubject = 'N/A';
+      String lowestSubject = 'N/A';
+      double highestPercentage = -1.0;
+      double lowestPercentage = 101.0;
+      int subjectsBelowTarget = 0;
+      double totalPercentage = 0.0;
 
-  for (final subject in subjects) {
-    final subjRecords = records.where((r) => r.subjectId == subject.id).toList();
-    final present = subjRecords.where((x) => x.primaryStatus == 'present').length;
-    final total = subjRecords.length;
-    
-    final pct = total > 0 ? (present / total) * 100 : 0.0;
-    if (pct > highestPercentage) {
-      highestPercentage = pct;
-      highestSubject = subject.name;
-    }
-    if (pct < lowestPercentage) {
-      lowestPercentage = pct;
-      lowestSubject = subject.name;
-    }
-    if (pct < 75.0) {
-      subjectsBelowTarget++;
-    }
-    totalPercentage += pct;
-  }
+      for (final subject in subjects) {
+        final subjRecords = records
+            .where((r) => r.subjectId == subject.id)
+            .toList();
+        final present = subjRecords
+            .where((x) => x.primaryStatus == 'present')
+            .length;
+        final total = subjRecords.length;
 
-  return AsyncData(AttendanceInsights(
-    highestSubject: highestSubject,
-    lowestSubject: lowestSubject,
-    highestPercentage: highestPercentage == -1.0 ? 0.0 : highestPercentage,
-    lowestPercentage: lowestPercentage == 101.0 ? 0.0 : lowestPercentage,
-    subjectsBelowTarget: subjectsBelowTarget,
-    averagePercentage: subjects.isNotEmpty ? totalPercentage / subjects.length : 0.0,
-  ));
-});
+        final pct = total > 0 ? (present / total) * 100 : 0.0;
+        if (pct > highestPercentage) {
+          highestPercentage = pct;
+          highestSubject = subject.name;
+        }
+        if (pct < lowestPercentage) {
+          lowestPercentage = pct;
+          lowestSubject = subject.name;
+        }
+        if (pct < 75.0) {
+          subjectsBelowTarget++;
+        }
+        totalPercentage += pct;
+      }
+
+      return AsyncData(
+        AttendanceInsights(
+          highestSubject: highestSubject,
+          lowestSubject: lowestSubject,
+          highestPercentage: highestPercentage == -1.0
+              ? 0.0
+              : highestPercentage,
+          lowestPercentage: lowestPercentage == 101.0 ? 0.0 : lowestPercentage,
+          subjectsBelowTarget: subjectsBelowTarget,
+          averagePercentage: subjects.isNotEmpty
+              ? totalPercentage / subjects.length
+              : 0.0,
+        ),
+      );
+    });

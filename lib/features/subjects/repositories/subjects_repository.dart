@@ -44,7 +44,10 @@ class SubjectRepository {
             ..orderBy([(t) => OrderingTerm.asc(t.name)]))
           .watch();
     } catch (e) {
-      throw DatabaseException('Failed to watch subjects for semester: $semesterId', e);
+      throw DatabaseException(
+        'Failed to watch subjects for semester: $semesterId',
+        e,
+      );
     }
   }
 
@@ -64,7 +67,10 @@ class SubjectRepository {
             ..orderBy([(t) => OrderingTerm.asc(t.name)]))
           .get();
     } catch (e) {
-      throw DatabaseException('Failed to fetch subjects for semester: $semesterId', e);
+      throw DatabaseException(
+        'Failed to fetch subjects for semester: $semesterId',
+        e,
+      );
     }
   }
 
@@ -101,8 +107,9 @@ class SubjectRepository {
   /// Creates a new subject. Returns the new row's ID.
   Future<String> create(SubjectsCompanion data) async {
     try {
-      final result =
-          await _database.into(_database.subjects).insertReturning(data);
+      final result = await _database
+          .into(_database.subjects)
+          .insertReturning(data);
       await _syncQueueRepository?.enqueue(
         targetTable: 'subjects',
         recordId: result.id,
@@ -115,15 +122,11 @@ class SubjectRepository {
   }
 
   /// Updates an existing subject.
-  Future<void> update(
-    String userId,
-    String id,
-    SubjectsCompanion data,
-  ) async {
+  Future<void> update(String userId, String id, SubjectsCompanion data) async {
     try {
-      await (_database.update(_database.subjects)
-            ..where((t) => t.userId.equals(userId) & t.id.equals(id)))
-          .write(data);
+      await (_database.update(
+        _database.subjects,
+      )..where((t) => t.userId.equals(userId) & t.id.equals(id))).write(data);
       await _syncQueueRepository?.enqueue(
         targetTable: 'subjects',
         recordId: id,
@@ -142,9 +145,8 @@ class SubjectRepository {
       final now = DateTime.now().toUtc().toIso8601String();
       await _database.transaction(() async {
         // 1. Soft-delete subject
-        await (_database.update(_database.subjects)..where(
-              (t) => t.userId.equals(userId) & t.id.equals(id),
-            ))
+        await (_database.update(_database.subjects)
+              ..where((t) => t.userId.equals(userId) & t.id.equals(id)))
             .write(SubjectsCompanion(deletedAt: Value(now)));
 
         // 2. Soft-delete related timetable entries

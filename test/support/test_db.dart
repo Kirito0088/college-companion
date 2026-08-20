@@ -27,7 +27,8 @@ class Backend {
   }
 
   /// Builds a backend over a fresh in-memory database.
-  factory Backend.memory() => Backend(AppDatabase.forTesting(NativeDatabase.memory()));
+  factory Backend.memory() =>
+      Backend(AppDatabase.forTesting(NativeDatabase.memory()));
 
   final AppDatabase db;
   final LectureRecordDao lectureDao;
@@ -56,48 +57,56 @@ Future<SeededGraph> seedGraph(
   String timetableId = 'timetable-1',
 }) async {
   final nowIso = DateTime.now().toUtc().toIso8601String();
-  await db.into(db.users).insert(
-    UsersCompanion.insert(
-      id: userId,
-      name: 'Test Student',
-      email: 'test@example.com',
-      createdAt: nowIso,
-      updatedAt: nowIso,
-    ),
-  );
-  await db.into(db.semesters).insert(
-    SemestersCompanion.insert(
-      id: semesterId,
-      userId: userId,
-      name: 'Semester 5',
-      workingDays: '[0,1,2,3,4]',
-      createdAt: nowIso,
-      updatedAt: nowIso,
-    ),
-  );
-  await db.into(db.subjects).insert(
-    SubjectsCompanion.insert(
-      id: subjectId,
-      userId: userId,
-      semesterId: semesterId,
-      name: 'Data Structures',
-      type: const Value('theory'),
-      createdAt: nowIso,
-      updatedAt: nowIso,
-    ),
-  );
-  await db.into(db.timetable).insert(
-    TimetableCompanion.insert(
-      id: timetableId,
-      userId: userId,
-      subjectId: subjectId,
-      dayOfWeek: 0,
-      startTime: '09:00',
-      endTime: '10:00',
-      createdAt: nowIso,
-      updatedAt: nowIso,
-    ),
-  );
+  await db
+      .into(db.users)
+      .insert(
+        UsersCompanion.insert(
+          id: userId,
+          name: 'Test Student',
+          email: 'test@example.com',
+          createdAt: nowIso,
+          updatedAt: nowIso,
+        ),
+      );
+  await db
+      .into(db.semesters)
+      .insert(
+        SemestersCompanion.insert(
+          id: semesterId,
+          userId: userId,
+          name: 'Semester 5',
+          workingDays: '[0,1,2,3,4]',
+          createdAt: nowIso,
+          updatedAt: nowIso,
+        ),
+      );
+  await db
+      .into(db.subjects)
+      .insert(
+        SubjectsCompanion.insert(
+          id: subjectId,
+          userId: userId,
+          semesterId: semesterId,
+          name: 'Data Structures',
+          type: const Value('theory'),
+          createdAt: nowIso,
+          updatedAt: nowIso,
+        ),
+      );
+  await db
+      .into(db.timetable)
+      .insert(
+        TimetableCompanion.insert(
+          id: timetableId,
+          userId: userId,
+          subjectId: subjectId,
+          dayOfWeek: 0,
+          startTime: '09:00',
+          endTime: '10:00',
+          createdAt: nowIso,
+          updatedAt: nowIso,
+        ),
+      );
   return SeededGraph(
     userId: userId,
     semesterId: semesterId,

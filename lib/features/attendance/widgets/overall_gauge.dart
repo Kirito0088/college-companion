@@ -18,14 +18,16 @@ class OverallGauge extends StatelessWidget {
     final pct = safeBunk != null ? safeBunk!.currentPercentage : 82.0;
     final progress = (pct / 100.0).clamp(0.0, 1.0);
     final pctText = '${pct.round()}%';
-    final isSafe = safeBunk == null || safeBunk!.currentPercentage >= safeBunk!.targetPercentage;
+    final isSafe =
+        safeBunk == null ||
+        safeBunk!.currentPercentage >= safeBunk!.targetPercentage;
     final badgeColor = isSafe ? ColorTokens.success : ColorTokens.error;
     final badgeText = safeBunk != null
         ? (safeBunk!.safeBunks > 0
-            ? 'You can miss ${safeBunk!.safeBunks} lectures'
-            : (safeBunk!.mustAttend > 0
-                ? 'Must attend ${safeBunk!.mustAttend} lectures'
-                : 'On target (${safeBunk!.targetPercentage.round()}%)'))
+              ? 'You can miss ${safeBunk!.safeBunks} lectures'
+              : (safeBunk!.mustAttend > 0
+                    ? 'Must attend ${safeBunk!.mustAttend} lectures'
+                    : 'On target (${safeBunk!.targetPercentage.round()}%)'))
         : 'You can miss 12 lectures';
 
     return Padding(

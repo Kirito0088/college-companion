@@ -18,6 +18,6 @@ final resourcesRepositoryProvider = Provider<ResourcesRepository>((ref) {
 /// Watches all non-deleted resources for a user.
 final resourcesStreamProvider =
     StreamProvider.family<List<ResourceEntity>, String>((ref, userId) {
-  final repo = ref.watch(resourcesRepositoryProvider);
-  return repo.watchAll(userId);
-});
+      final repo = ref.watch(resourcesRepositoryProvider);
+      return repo.watchAll(userId);
+    });

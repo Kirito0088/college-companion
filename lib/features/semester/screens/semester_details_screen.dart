@@ -3,7 +3,6 @@ import 'package:college_companion/features/authentication/models/auth_state.dart
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/features/semester/providers/semester_provider.dart';
 import 'package:college_companion/features/subjects/providers/subjects_provider.dart';
-import 'package:college_companion/routing/app_router.dart';
 import 'package:college_companion/shared/widgets/dialogs/cc_dialogs.dart';
 import 'package:college_companion/shared/widgets/empty_states/cc_empty_states.dart';
 import 'package:college_companion/shared/widgets/errors/cc_errors.dart';
@@ -30,7 +29,6 @@ class SemesterDetailsScreen extends ConsumerStatefulWidget {
 }
 
 class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -40,12 +38,18 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
     }
     final userId = authState.user.uid;
 
-    final semesterAsync = ref.watch(semesterByIdStreamProvider(
-      (userId: userId, semesterId: widget.semesterId),
-    ));
-    final subjectsAsync = ref.watch(subjectsBySemesterStreamProvider(
-      (userId: userId, semesterId: widget.semesterId),
-    ));
+    final semesterAsync = ref.watch(
+      semesterByIdStreamProvider((
+        userId: userId,
+        semesterId: widget.semesterId,
+      )),
+    );
+    final subjectsAsync = ref.watch(
+      subjectsBySemesterStreamProvider((
+        userId: userId,
+        semesterId: widget.semesterId,
+      )),
+    );
 
     return semesterAsync.when(
       data: (semester) {
@@ -57,12 +61,17 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Symbols.school, size: 64, color: ColorTokens.onSurfaceVariant),
+                  const Icon(
+                    Symbols.school,
+                    size: 64,
+                    color: ColorTokens.onSurfaceVariant,
+                  ),
                   const SizedBox(height: SpacingTokens.md),
                   Text(
                     'Semester not found',
-                    style: theme.textTheme.titleMedium
-                        ?.copyWith(color: ColorTokens.onSurfaceVariant),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: ColorTokens.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -109,9 +118,12 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
         appBar: _buildAppBar(theme, 'Error'),
         body: Center(
           child: NetworkErrorWidget(
-            onRetry: () => ref.invalidate(semesterByIdStreamProvider(
-              (userId: userId, semesterId: widget.semesterId),
-            )),
+            onRetry: () => ref.invalidate(
+              semesterByIdStreamProvider((
+                userId: userId,
+                semesterId: widget.semesterId,
+              )),
+            ),
           ),
         ),
       ),
@@ -181,7 +193,9 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
             borderRadius: RadiusTokens.borderRadiusSm,
           ),
           child: Text(
-            semester.isCurrent ? 'ACTIVE' : (semester.isArchived ? 'ARCHIVED' : 'INACTIVE'),
+            semester.isCurrent
+                ? 'ACTIVE'
+                : (semester.isArchived ? 'ARCHIVED' : 'INACTIVE'),
             style: theme.textTheme.labelSmall?.copyWith(
               color: semester.isCurrent
                   ? ColorTokens.onPrimaryContainer
@@ -221,12 +235,18 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
           const SizedBox(height: SpacingTokens.lg),
           Row(
             children: [
-              Expanded(child: _buildOverviewStat(theme, '$subjectCount', 'Subjects')),
-              Expanded(child: _buildOverviewStat(
-                theme,
-                semester.isCurrent ? 'Active' : (semester.isArchived ? 'Archived' : 'Inactive'),
-                'Status',
-              )),
+              Expanded(
+                child: _buildOverviewStat(theme, '$subjectCount', 'Subjects'),
+              ),
+              Expanded(
+                child: _buildOverviewStat(
+                  theme,
+                  semester.isCurrent
+                      ? 'Active'
+                      : (semester.isArchived ? 'Archived' : 'Inactive'),
+                  'Status',
+                ),
+              ),
             ],
           ),
         ],
@@ -285,7 +305,9 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
                 label: const Text('Add'),
                 style: TextButton.styleFrom(
                   foregroundColor: ColorTokens.primary,
-                  padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SpacingTokens.sm,
+                  ),
                 ),
               ),
             ],
@@ -305,7 +327,9 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
                     Icon(
                       Symbols.menu_book,
                       size: 48,
-                      color: ColorTokens.onSurfaceVariant.withValues(alpha: 0.5),
+                      color: ColorTokens.onSurfaceVariant.withValues(
+                        alpha: 0.5,
+                      ),
                     ),
                     const SizedBox(height: SpacingTokens.md),
                     Text(
@@ -318,7 +342,9 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
                     Text(
                       'Add subjects to start tracking this semester',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: ColorTokens.onSurfaceVariant.withValues(alpha: 0.7),
+                        color: ColorTokens.onSurfaceVariant.withValues(
+                          alpha: 0.7,
+                        ),
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -352,7 +378,11 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
     );
   }
 
-  Widget _buildSubjectCard(ThemeData theme, SubjectEntity subject, String userId) {
+  Widget _buildSubjectCard(
+    ThemeData theme,
+    SubjectEntity subject,
+    String userId,
+  ) {
     final typeLabel = subject.type[0].toUpperCase() + subject.type.substring(1);
 
     return Material(
@@ -361,7 +391,7 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
       elevation: 0,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => context.push(RoutePaths.subjectDetails),
+        onTap: () => context.push('/subject-details/${subject.id}'),
         onLongPress: () => _showSubjectOptions(context, subject, userId),
         child: Padding(
           padding: const EdgeInsets.all(LayoutTokens.cardPadding),
@@ -387,7 +417,9 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: ColorTokens.primaryContainer.withValues(alpha: 0.5),
+                            color: ColorTokens.primaryContainer.withValues(
+                              alpha: 0.5,
+                            ),
                             borderRadius: RadiusTokens.borderRadiusSm,
                           ),
                           child: Text(
@@ -398,7 +430,8 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
                             ),
                           ),
                         ),
-                        if (subject.faculty != null && subject.faculty!.isNotEmpty) ...[
+                        if (subject.faculty != null &&
+                            subject.faculty!.isNotEmpty) ...[
                           const SizedBox(width: SpacingTokens.sm),
                           Flexible(
                             child: Text(
@@ -499,13 +532,17 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
                 ),
               ],
             ),
-          ]
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildActionsSection(ThemeData theme, SemesterEntity semester, String userId) {
+  Widget _buildActionsSection(
+    ThemeData theme,
+    SemesterEntity semester,
+    String userId,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -527,7 +564,9 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
             padding: const EdgeInsets.only(bottom: SpacingTokens.md),
             child: OutlinedButton.icon(
               onPressed: () async {
-                await ref.read(semesterRepositoryProvider).setCurrent(userId, semester.id);
+                await ref
+                    .read(semesterRepositoryProvider)
+                    .setCurrent(userId, semester.id);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -543,7 +582,9 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
                 foregroundColor: ColorTokens.primary,
                 side: const BorderSide(color: ColorTokens.primary),
                 padding: const EdgeInsets.symmetric(vertical: SpacingTokens.md),
-                shape: const RoundedRectangleBorder(borderRadius: RadiusTokens.borderRadiusMd),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: RadiusTokens.borderRadiusMd,
+                ),
               ),
             ),
           ),
@@ -557,7 +598,9 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
               foregroundColor: ColorTokens.onSurface,
               side: const BorderSide(color: ColorTokens.outlineVariant),
               padding: const EdgeInsets.symmetric(vertical: SpacingTokens.md),
-              shape: const RoundedRectangleBorder(borderRadius: RadiusTokens.borderRadiusMd),
+              shape: const RoundedRectangleBorder(
+                borderRadius: RadiusTokens.borderRadiusMd,
+              ),
             ),
           ),
         ),
@@ -570,7 +613,9 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
                   'Are you sure you want to delete "${semester.name}"? All subjects, attendance, and assignments in this semester will also be deleted.',
             );
             if (confirm == true && mounted) {
-              await ref.read(semesterRepositoryProvider).delete(userId, semester.id);
+              await ref
+                  .read(semesterRepositoryProvider)
+                  .delete(userId, semester.id);
               if (mounted) context.pop();
             }
           },
@@ -580,7 +625,9 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
             foregroundColor: ColorTokens.error,
             side: const BorderSide(color: ColorTokens.error),
             padding: const EdgeInsets.symmetric(vertical: SpacingTokens.md),
-            shape: const RoundedRectangleBorder(borderRadius: RadiusTokens.borderRadiusMd),
+            shape: const RoundedRectangleBorder(
+              borderRadius: RadiusTokens.borderRadiusMd,
+            ),
           ),
         ),
       ],
@@ -620,7 +667,9 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: ColorTokens.onSurfaceVariant.withValues(alpha: 0.3),
+                        color: ColorTokens.onSurfaceVariant.withValues(
+                          alpha: 0.3,
+                        ),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -629,9 +678,9 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
                   Text(
                     'Add Subject',
                     style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: ColorTokens.onSurface,
-                        ),
+                      fontWeight: FontWeight.bold,
+                      color: ColorTokens.onSurface,
+                    ),
                   ),
                   const SizedBox(height: SpacingTokens.lg),
                   TextField(
@@ -642,7 +691,9 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
                       hintText: 'e.g. Data Structures',
                       filled: true,
                       fillColor: ColorTokens.surfaceVariant,
-                      border: OutlineInputBorder(borderRadius: RadiusTokens.borderRadiusMd),
+                      border: OutlineInputBorder(
+                        borderRadius: RadiusTokens.borderRadiusMd,
+                      ),
                     ),
                   ),
                   const SizedBox(height: SpacingTokens.md),
@@ -653,22 +704,27 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
                       hintText: 'e.g. Prof. Smith',
                       filled: true,
                       fillColor: ColorTokens.surfaceVariant,
-                      border: OutlineInputBorder(borderRadius: RadiusTokens.borderRadiusMd),
+                      border: OutlineInputBorder(
+                        borderRadius: RadiusTokens.borderRadiusMd,
+                      ),
                     ),
                   ),
                   const SizedBox(height: SpacingTokens.md),
                   Text(
                     'Subject Type',
                     style: Theme.of(ctx).textTheme.labelLarge?.copyWith(
-                          color: ColorTokens.onSurface,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      color: ColorTokens.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: SpacingTokens.sm),
                   SegmentedButton<String>(
                     segments: const [
                       ButtonSegment(value: 'theory', label: Text('Theory')),
-                      ButtonSegment(value: 'practical', label: Text('Practical')),
+                      ButtonSegment(
+                        value: 'practical',
+                        label: Text('Practical'),
+                      ),
                       ButtonSegment(value: 'tutorial', label: Text('Tutorial')),
                     ],
                     selected: {selectedType},
@@ -688,7 +744,9 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
 
                       final now = DateTime.now().toUtc().toIso8601String();
                       final faculty = facultyCtrl.text.trim();
-                      await ref.read(subjectRepositoryProvider).create(
+                      await ref
+                          .read(subjectRepositoryProvider)
+                          .create(
                             SubjectsCompanion(
                               id: Value(const Uuid().v4()),
                               userId: Value(userId),
@@ -705,8 +763,12 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
                     style: FilledButton.styleFrom(
                       backgroundColor: ColorTokens.primary,
                       foregroundColor: ColorTokens.onPrimary,
-                      padding: const EdgeInsets.symmetric(vertical: SpacingTokens.md),
-                      shape: const RoundedRectangleBorder(borderRadius: RadiusTokens.borderRadiusMd),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: SpacingTokens.md,
+                      ),
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: RadiusTokens.borderRadiusMd,
+                      ),
                     ),
                     child: const Text('Add Subject'),
                   ),
@@ -732,7 +794,11 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
     );
   }
 
-  void _showSubjectOptions(BuildContext context, SubjectEntity subject, String userId) {
+  void _showSubjectOptions(
+    BuildContext context,
+    SubjectEntity subject,
+    String userId,
+  ) {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: ColorTokens.surfaceContainer,
@@ -757,18 +823,23 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
               ),
               const SizedBox(height: SpacingTokens.md),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: LayoutTokens.screenPadding),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: LayoutTokens.screenPadding,
+                ),
                 child: Text(
                   subject.name,
                   style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: ColorTokens.onSurface,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: ColorTokens.onSurface,
+                  ),
                 ),
               ),
               const SizedBox(height: SpacingTokens.md),
               ListTile(
-                leading: const Icon(Symbols.edit, color: ColorTokens.onSurfaceVariant),
+                leading: const Icon(
+                  Symbols.edit,
+                  color: ColorTokens.onSurfaceVariant,
+                ),
                 title: const Text('Edit Subject'),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -790,7 +861,9 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
                         'Are you sure you want to delete "${subject.name}"? This action cannot be undone.',
                   );
                   if (confirm == true && mounted) {
-                    await ref.read(subjectRepositoryProvider).delete(userId, subject.id);
+                    await ref
+                        .read(subjectRepositoryProvider)
+                        .delete(userId, subject.id);
                   }
                 },
               ),
@@ -802,7 +875,11 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
     );
   }
 
-  void _showEditSubjectDialog(BuildContext context, SubjectEntity subject, String userId) {
+  void _showEditSubjectDialog(
+    BuildContext context,
+    SubjectEntity subject,
+    String userId,
+  ) {
     final nameCtrl = TextEditingController(text: subject.name);
     final facultyCtrl = TextEditingController(text: subject.faculty ?? '');
     String selectedType = subject.type;
@@ -833,7 +910,9 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: ColorTokens.onSurfaceVariant.withValues(alpha: 0.3),
+                        color: ColorTokens.onSurfaceVariant.withValues(
+                          alpha: 0.3,
+                        ),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -842,9 +921,9 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
                   Text(
                     'Edit Subject',
                     style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: ColorTokens.onSurface,
-                        ),
+                      fontWeight: FontWeight.bold,
+                      color: ColorTokens.onSurface,
+                    ),
                   ),
                   const SizedBox(height: SpacingTokens.lg),
                   TextField(
@@ -853,7 +932,9 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
                       labelText: 'Subject Name *',
                       filled: true,
                       fillColor: ColorTokens.surfaceVariant,
-                      border: OutlineInputBorder(borderRadius: RadiusTokens.borderRadiusMd),
+                      border: OutlineInputBorder(
+                        borderRadius: RadiusTokens.borderRadiusMd,
+                      ),
                     ),
                   ),
                   const SizedBox(height: SpacingTokens.md),
@@ -863,22 +944,27 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
                       labelText: 'Faculty (Optional)',
                       filled: true,
                       fillColor: ColorTokens.surfaceVariant,
-                      border: OutlineInputBorder(borderRadius: RadiusTokens.borderRadiusMd),
+                      border: OutlineInputBorder(
+                        borderRadius: RadiusTokens.borderRadiusMd,
+                      ),
                     ),
                   ),
                   const SizedBox(height: SpacingTokens.md),
                   Text(
                     'Subject Type',
                     style: Theme.of(ctx).textTheme.labelLarge?.copyWith(
-                          color: ColorTokens.onSurface,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      color: ColorTokens.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: SpacingTokens.sm),
                   SegmentedButton<String>(
                     segments: const [
                       ButtonSegment(value: 'theory', label: Text('Theory')),
-                      ButtonSegment(value: 'practical', label: Text('Practical')),
+                      ButtonSegment(
+                        value: 'practical',
+                        label: Text('Practical'),
+                      ),
                       ButtonSegment(value: 'tutorial', label: Text('Tutorial')),
                     ],
                     selected: {selectedType},
@@ -897,14 +983,18 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
                       if (name.isEmpty) return;
 
                       final faculty = facultyCtrl.text.trim();
-                      await ref.read(subjectRepositoryProvider).update(
+                      await ref
+                          .read(subjectRepositoryProvider)
+                          .update(
                             userId,
                             subject.id,
                             SubjectsCompanion(
                               name: Value(name),
                               faculty: Value(faculty.isEmpty ? null : faculty),
                               type: Value(selectedType),
-                              updatedAt: Value(DateTime.now().toUtc().toIso8601String()),
+                              updatedAt: Value(
+                                DateTime.now().toUtc().toIso8601String(),
+                              ),
                             ),
                           );
                       if (ctx.mounted) Navigator.pop(ctx);
@@ -912,8 +1002,12 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
                     style: FilledButton.styleFrom(
                       backgroundColor: ColorTokens.primary,
                       foregroundColor: ColorTokens.onPrimary,
-                      padding: const EdgeInsets.symmetric(vertical: SpacingTokens.md),
-                      shape: const RoundedRectangleBorder(borderRadius: RadiusTokens.borderRadiusMd),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: SpacingTokens.md,
+                      ),
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: RadiusTokens.borderRadiusMd,
+                      ),
                     ),
                     child: const Text('Save Changes'),
                   ),
@@ -946,8 +1040,12 @@ class _EditSemesterSheetState extends ConsumerState<_EditSemesterSheet> {
   void initState() {
     super.initState();
     _nameCtrl = TextEditingController(text: widget.semester.name);
-    _startDate = widget.semester.startDate != null ? DateTime.tryParse(widget.semester.startDate!) : null;
-    _expectedCompletionDate = widget.semester.expectedCompletionDate != null ? DateTime.tryParse(widget.semester.expectedCompletionDate!) : null;
+    _startDate = widget.semester.startDate != null
+        ? DateTime.tryParse(widget.semester.startDate!)
+        : null;
+    _expectedCompletionDate = widget.semester.expectedCompletionDate != null
+        ? DateTime.tryParse(widget.semester.expectedCompletionDate!)
+        : null;
   }
 
   @override
@@ -957,10 +1055,10 @@ class _EditSemesterSheetState extends ConsumerState<_EditSemesterSheet> {
   }
 
   Future<void> _selectDate(BuildContext context, bool isStart) async {
-    final initialDate = isStart 
-        ? (_startDate ?? DateTime.now()) 
+    final initialDate = isStart
+        ? (_startDate ?? DateTime.now())
         : (_expectedCompletionDate ?? _startDate ?? DateTime.now());
-        
+
     final picked = await showDatePicker(
       context: context,
       initialDate: initialDate,
@@ -1054,18 +1152,31 @@ class _EditSemesterSheetState extends ConsumerState<_EditSemesterSheet> {
                       color: ColorTokens.surfaceContainerHigh,
                       borderRadius: RadiusTokens.borderRadiusLg,
                       border: Border.all(
-                        color: _startDate != null ? ColorTokens.primary : Colors.transparent,
+                        color: _startDate != null
+                            ? ColorTokens.primary
+                            : Colors.transparent,
                       ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Start Date', style: theme.textTheme.labelMedium?.copyWith(color: ColorTokens.onSurfaceVariant)),
+                        Text(
+                          'Start Date',
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: ColorTokens.onSurfaceVariant,
+                          ),
+                        ),
                         const SizedBox(height: SpacingTokens.xs),
                         Text(
-                          _startDate != null ? '${_startDate!.year}-${_startDate!.month.toString().padLeft(2, '0')}-${_startDate!.day.toString().padLeft(2, '0')}' : 'Select',
+                          _startDate != null
+                              ? '${_startDate!.year}-${_startDate!.month.toString().padLeft(2, '0')}-${_startDate!.day.toString().padLeft(2, '0')}'
+                              : 'Select',
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: _startDate != null ? ColorTokens.onSurface : ColorTokens.onSurfaceVariant.withValues(alpha: 0.5),
+                            color: _startDate != null
+                                ? ColorTokens.onSurface
+                                : ColorTokens.onSurfaceVariant.withValues(
+                                    alpha: 0.5,
+                                  ),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -1085,18 +1196,31 @@ class _EditSemesterSheetState extends ConsumerState<_EditSemesterSheet> {
                       color: ColorTokens.surfaceContainerHigh,
                       borderRadius: RadiusTokens.borderRadiusLg,
                       border: Border.all(
-                        color: _expectedCompletionDate != null ? ColorTokens.primary : Colors.transparent,
+                        color: _expectedCompletionDate != null
+                            ? ColorTokens.primary
+                            : Colors.transparent,
                       ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('End Date', style: theme.textTheme.labelMedium?.copyWith(color: ColorTokens.onSurfaceVariant)),
+                        Text(
+                          'End Date',
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: ColorTokens.onSurfaceVariant,
+                          ),
+                        ),
                         const SizedBox(height: SpacingTokens.xs),
                         Text(
-                          _expectedCompletionDate != null ? '${_expectedCompletionDate!.year}-${_expectedCompletionDate!.month.toString().padLeft(2, '0')}-${_expectedCompletionDate!.day.toString().padLeft(2, '0')}' : 'Select',
+                          _expectedCompletionDate != null
+                              ? '${_expectedCompletionDate!.year}-${_expectedCompletionDate!.month.toString().padLeft(2, '0')}-${_expectedCompletionDate!.day.toString().padLeft(2, '0')}'
+                              : 'Select',
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: _expectedCompletionDate != null ? ColorTokens.onSurface : ColorTokens.onSurfaceVariant.withValues(alpha: 0.5),
+                            color: _expectedCompletionDate != null
+                                ? ColorTokens.onSurface
+                                : ColorTokens.onSurfaceVariant.withValues(
+                                    alpha: 0.5,
+                                  ),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -1114,9 +1238,17 @@ class _EditSemesterSheetState extends ConsumerState<_EditSemesterSheet> {
                 child: TextButton(
                   onPressed: () => Navigator.pop(context),
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: SpacingTokens.md),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: SpacingTokens.md,
+                    ),
                   ),
-                  child: const Text('Cancel', style: TextStyle(color: ColorTokens.onSurfaceVariant, fontWeight: FontWeight.w600)),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: ColorTokens.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: SpacingTokens.md),
@@ -1133,8 +1265,17 @@ class _EditSemesterSheetState extends ConsumerState<_EditSemesterSheet> {
                         SemestersCompanion(
                           name: Value(name),
                           updatedAt: Value(now),
-                          startDate: _startDate != null ? Value(_startDate!.toUtc().toIso8601String()) : const Value<String>.absent(),
-                          expectedCompletionDate: _expectedCompletionDate != null ? Value(_expectedCompletionDate!.toUtc().toIso8601String()) : const Value<String>.absent(),
+                          startDate: _startDate != null
+                              ? Value(_startDate!.toUtc().toIso8601String())
+                              : const Value<String>.absent(),
+                          expectedCompletionDate:
+                              _expectedCompletionDate != null
+                              ? Value(
+                                  _expectedCompletionDate!
+                                      .toUtc()
+                                      .toIso8601String(),
+                                )
+                              : const Value<String>.absent(),
                         ),
                       );
                     }
@@ -1142,7 +1283,9 @@ class _EditSemesterSheetState extends ConsumerState<_EditSemesterSheet> {
                   },
                   style: FilledButton.styleFrom(
                     backgroundColor: ColorTokens.primary,
-                    padding: const EdgeInsets.symmetric(vertical: SpacingTokens.md),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: SpacingTokens.md,
+                    ),
                   ),
                   child: const Text('Save'),
                 ),

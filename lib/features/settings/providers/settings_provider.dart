@@ -13,6 +13,6 @@ export 'package:college_companion/providers/app_providers.dart'
 /// Watches user settings for a given user.
 final userSettingsStreamProvider =
     StreamProvider.family<UserSettingsEntity?, String>((ref, userId) {
-  final repo = ref.watch(userSettingsRepositoryProvider);
-  return repo.watchByUserId(userId);
-});
+      final repo = ref.watch(userSettingsRepositoryProvider);
+      return repo.watchByUserId(userId);
+    });

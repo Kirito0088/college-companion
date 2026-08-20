@@ -108,7 +108,8 @@ class AgendaCard extends StatelessWidget {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            if (event.description != null && event.description!.isNotEmpty) ...[
+                            if (event.description != null &&
+                                event.description!.isNotEmpty) ...[
                               const SizedBox(width: SpacingTokens.sm),
                               Container(
                                 width: 3,

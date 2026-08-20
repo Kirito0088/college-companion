@@ -62,7 +62,11 @@ class EventDetailsScreen extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Symbols.event_busy, size: 64, color: ColorTokens.onSurfaceVariant),
+                  const Icon(
+                    Symbols.event_busy,
+                    size: 64,
+                    color: ColorTokens.onSurfaceVariant,
+                  ),
                   const SizedBox(height: SpacingTokens.md),
                   Text(
                     'Event not found',
@@ -127,7 +131,9 @@ class EventDetailsScreen extends ConsumerWidget {
                             vertical: SpacingTokens.xs,
                           ),
                           decoration: BoxDecoration(
-                            color: _eventTypeColor(event.eventType).withValues(alpha: 0.1),
+                            color: _eventTypeColor(
+                              event.eventType,
+                            ).withValues(alpha: 0.1),
                             borderRadius: RadiusTokens.borderRadiusSm,
                           ),
                           child: Text(
@@ -144,19 +150,37 @@ class EventDetailsScreen extends ConsumerWidget {
                   _buildInfoCard(
                     theme: theme,
                     children: [
-                      _buildInfoRow(theme: theme, icon: Symbols.calendar_today, label: 'Date', value: dateStr),
-                      const Divider(height: SpacingTokens.lg, color: ColorTokens.surfaceVariant),
-                      _buildInfoRow(theme: theme, icon: Symbols.schedule, label: 'Time', value: timeStr),
+                      _buildInfoRow(
+                        theme: theme,
+                        icon: Symbols.calendar_today,
+                        label: 'Date',
+                        value: dateStr,
+                      ),
+                      const Divider(
+                        height: SpacingTokens.lg,
+                        color: ColorTokens.surfaceVariant,
+                      ),
+                      _buildInfoRow(
+                        theme: theme,
+                        icon: Symbols.schedule,
+                        label: 'Time',
+                        value: timeStr,
+                      ),
                     ],
                   ),
-                  if (event.description != null && event.description!.isNotEmpty) ...[
+                  if (event.description != null &&
+                      event.description!.isNotEmpty) ...[
                     const SizedBox(height: SpacingTokens.lg),
                     _buildInfoCard(
                       theme: theme,
                       children: [
                         Row(
                           children: [
-                            const Icon(Symbols.notes, size: 20, color: ColorTokens.onSurfaceVariant),
+                            const Icon(
+                              Symbols.notes,
+                              size: 20,
+                              color: ColorTokens.onSurfaceVariant,
+                            ),
                             const SizedBox(width: SpacingTokens.md),
                             Text(
                               'Description',
@@ -184,7 +208,8 @@ class EventDetailsScreen extends ConsumerWidget {
                       final confirm = await CCDialogs.showDeleteConfirmation(
                         context,
                         title: 'Delete Event',
-                        message: 'Are you sure you want to delete "${event.title}"? This action cannot be undone.',
+                        message:
+                            'Are you sure you want to delete "${event.title}"? This action cannot be undone.',
                       );
                       if (confirm == true && context.mounted) {
                         await repo.delete(userId, eventId);
@@ -194,8 +219,12 @@ class EventDetailsScreen extends ConsumerWidget {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: ColorTokens.error,
                       side: const BorderSide(color: ColorTokens.error),
-                      padding: const EdgeInsets.symmetric(vertical: SpacingTokens.md),
-                      shape: const RoundedRectangleBorder(borderRadius: RadiusTokens.borderRadiusMd),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: SpacingTokens.md,
+                      ),
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: RadiusTokens.borderRadiusMd,
+                      ),
                     ),
                     icon: const Icon(Symbols.delete, size: 18),
                     label: const Text('Delete Event'),
@@ -220,9 +249,13 @@ class EventDetailsScreen extends ConsumerWidget {
     };
   }
 
-  String _capitalizeFirst(String s) => s.isEmpty ? s : '${s[0].toUpperCase()}${s.substring(1)}';
+  String _capitalizeFirst(String s) =>
+      s.isEmpty ? s : '${s[0].toUpperCase()}${s.substring(1)}';
 
-  Widget _buildInfoCard({required ThemeData theme, required List<Widget> children}) {
+  Widget _buildInfoCard({
+    required ThemeData theme,
+    required List<Widget> children,
+  }) {
     return Container(
       padding: const EdgeInsets.all(SpacingTokens.lg),
       decoration: BoxDecoration(
@@ -230,11 +263,19 @@ class EventDetailsScreen extends ConsumerWidget {
         borderRadius: RadiusTokens.borderRadiusLg,
         border: Border.all(color: ColorTokens.surfaceVariant),
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: children,
+      ),
     );
   }
 
-  Widget _buildInfoRow({required ThemeData theme, required IconData icon, required String label, required String value}) {
+  Widget _buildInfoRow({
+    required ThemeData theme,
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -244,9 +285,20 @@ class EventDetailsScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: theme.textTheme.labelMedium?.copyWith(color: ColorTokens.onSurfaceVariant)),
+              Text(
+                label,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: ColorTokens.onSurfaceVariant,
+                ),
+              ),
               const SizedBox(height: SpacingTokens.xxs),
-              Text(value, style: theme.textTheme.bodyLarge?.copyWith(color: ColorTokens.onSurface, fontWeight: FontWeight.w500)),
+              Text(
+                value,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: ColorTokens.onSurface,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ],
           ),
         ),

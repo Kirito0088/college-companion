@@ -19,22 +19,28 @@ class UserSettingsRepository {
   /// Watches user settings for a given [userId].
   Stream<UserSettingsEntity?> watchByUserId(String userId) {
     try {
-      return (_database.select(_database.userSettings)
-            ..where((t) => t.userId.equals(userId)))
-          .watchSingleOrNull();
+      return (_database.select(
+        _database.userSettings,
+      )..where((t) => t.userId.equals(userId))).watchSingleOrNull();
     } catch (e) {
-      throw DatabaseException('Failed to watch user settings for user: $userId', e);
+      throw DatabaseException(
+        'Failed to watch user settings for user: $userId',
+        e,
+      );
     }
   }
 
   /// Gets user settings for a given [userId] (one-time fetch).
   Future<UserSettingsEntity?> getByUserId(String userId) async {
     try {
-      return await (_database.select(_database.userSettings)
-            ..where((t) => t.userId.equals(userId)))
-          .getSingleOrNull();
+      return await (_database.select(
+        _database.userSettings,
+      )..where((t) => t.userId.equals(userId))).getSingleOrNull();
     } catch (e) {
-      throw DatabaseException('Failed to get user settings for user: $userId', e);
+      throw DatabaseException(
+        'Failed to get user settings for user: $userId',
+        e,
+      );
     }
   }
 
@@ -60,12 +66,11 @@ class UserSettingsRepository {
   Future<void> updateTheme(String userId, String theme) async {
     try {
       final now = DateTime.now().toUtc().toIso8601String();
-      await (_database.update(_database.userSettings)
-            ..where((t) => t.userId.equals(userId)))
-          .write(UserSettingsCompanion(
-            theme: Value(theme),
-            updatedAt: Value(now),
-          ));
+      await (_database.update(
+        _database.userSettings,
+      )..where((t) => t.userId.equals(userId))).write(
+        UserSettingsCompanion(theme: Value(theme), updatedAt: Value(now)),
+      );
       final existing = await getByUserId(userId);
       if (existing != null) {
         await _syncQueueRepository?.enqueue(
@@ -83,12 +88,14 @@ class UserSettingsRepository {
   Future<void> updateNotificationsEnabled(String userId, bool enabled) async {
     try {
       final now = DateTime.now().toUtc().toIso8601String();
-      await (_database.update(_database.userSettings)
-            ..where((t) => t.userId.equals(userId)))
-          .write(UserSettingsCompanion(
-            notificationsEnabled: Value(enabled),
-            updatedAt: Value(now),
-          ));
+      await (_database.update(
+        _database.userSettings,
+      )..where((t) => t.userId.equals(userId))).write(
+        UserSettingsCompanion(
+          notificationsEnabled: Value(enabled),
+          updatedAt: Value(now),
+        ),
+      );
       final existing = await getByUserId(userId);
       if (existing != null) {
         await _syncQueueRepository?.enqueue(
@@ -106,15 +113,20 @@ class UserSettingsRepository {
   }
 
   /// Updates lecture reminders enabled state for a user.
-  Future<void> updateLectureRemindersEnabled(String userId, bool enabled) async {
+  Future<void> updateLectureRemindersEnabled(
+    String userId,
+    bool enabled,
+  ) async {
     try {
       final now = DateTime.now().toUtc().toIso8601String();
-      await (_database.update(_database.userSettings)
-            ..where((t) => t.userId.equals(userId)))
-          .write(UserSettingsCompanion(
-            lectureRemindersEnabled: Value(enabled),
-            updatedAt: Value(now),
-          ));
+      await (_database.update(
+        _database.userSettings,
+      )..where((t) => t.userId.equals(userId))).write(
+        UserSettingsCompanion(
+          lectureRemindersEnabled: Value(enabled),
+          updatedAt: Value(now),
+        ),
+      );
       final existing = await getByUserId(userId);
       if (existing != null) {
         await _syncQueueRepository?.enqueue(

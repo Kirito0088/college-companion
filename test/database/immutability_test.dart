@@ -29,12 +29,15 @@ void main() {
   tearDown(() => backend.close());
 
   group('Layer 1 Immutability', () {
-    test('LectureRecordRepository exposes no public update or delete methods', () async {
-      final rec = await backend.lectureRecords.getById(g.userId, recordId);
-      expect(rec, isNotNull);
-      expect(rec?.statusText, 'present');
-      expect(rec?.note, 'original');
-    });
+    test(
+      'LectureRecordRepository exposes no public update or delete methods',
+      () async {
+        final rec = await backend.lectureRecords.getById(g.userId, recordId);
+        expect(rec, isNotNull);
+        expect(rec?.statusText, 'present');
+        expect(rec?.note, 'original');
+      },
+    );
   });
 
   group('Layer 2 Sync State Bookkeeping', () {

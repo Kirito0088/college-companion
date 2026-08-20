@@ -28,7 +28,10 @@ void main() {
     assignmentRepository = AssignmentRepository(database, syncQueueRepository);
     attendanceRepository = AttendanceRepository(database, syncQueueRepository);
     timetableRepository = TimetableRepository(database, syncQueueRepository);
-    internalMarksRepository = InternalMarksRepository(database, syncQueueRepository);
+    internalMarksRepository = InternalMarksRepository(
+      database,
+      syncQueueRepository,
+    );
     resourcesRepository = ResourcesRepository(database, syncQueueRepository);
   });
 
@@ -39,16 +42,18 @@ void main() {
   test('create and getById subject with sync queue integration', () async {
     final now = DateTime.now().toUtc().toIso8601String();
 
-    final id = await repository.create(SubjectsCompanion(
-      id: const Value('subj_1'),
-      userId: const Value('user_1'),
-      semesterId: const Value('sem_1'),
-      name: const Value('Data Structures'),
-      faculty: const Value('Dr. Smith'),
-      type: const Value('theory'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+    final id = await repository.create(
+      SubjectsCompanion(
+        id: const Value('subj_1'),
+        userId: const Value('user_1'),
+        semesterId: const Value('sem_1'),
+        name: const Value('Data Structures'),
+        faculty: const Value('Dr. Smith'),
+        type: const Value('theory'),
+        createdAt: Value(now),
+        updatedAt: Value(now),
+      ),
+    );
 
     expect(id, 'subj_1');
 
@@ -68,15 +73,17 @@ void main() {
   test('update subject modifies fields and enqueues sync UPDATE', () async {
     final now = DateTime.now().toUtc().toIso8601String();
 
-    await repository.create(SubjectsCompanion(
-      id: const Value('subj_1'),
-      userId: const Value('user_1'),
-      semesterId: const Value('sem_1'),
-      name: const Value('Initial Subject'),
-      type: const Value('theory'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+    await repository.create(
+      SubjectsCompanion(
+        id: const Value('subj_1'),
+        userId: const Value('user_1'),
+        semesterId: const Value('sem_1'),
+        name: const Value('Initial Subject'),
+        type: const Value('theory'),
+        createdAt: Value(now),
+        updatedAt: Value(now),
+      ),
+    );
 
     await repository.update(
       'user_1',
@@ -96,70 +103,83 @@ void main() {
     expect(pendingSync.last.operation, 'UPDATE');
   });
 
-  test('watchAll, watchBySemester, and getBySemester filter and order correctly', () async {
-    final now = DateTime.now().toUtc().toIso8601String();
+  test(
+    'watchAll, watchBySemester, and getBySemester filter and order correctly',
+    () async {
+      final now = DateTime.now().toUtc().toIso8601String();
 
-    await repository.create(SubjectsCompanion(
-      id: const Value('subj_b'),
-      userId: const Value('user_1'),
-      semesterId: const Value('sem_1'),
-      name: const Value('B Science'),
-      type: const Value('theory'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+      await repository.create(
+        SubjectsCompanion(
+          id: const Value('subj_b'),
+          userId: const Value('user_1'),
+          semesterId: const Value('sem_1'),
+          name: const Value('B Science'),
+          type: const Value('theory'),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+        ),
+      );
 
-    await repository.create(SubjectsCompanion(
-      id: const Value('subj_a'),
-      userId: const Value('user_1'),
-      semesterId: const Value('sem_1'),
-      name: const Value('A Math'),
-      type: const Value('theory'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+      await repository.create(
+        SubjectsCompanion(
+          id: const Value('subj_a'),
+          userId: const Value('user_1'),
+          semesterId: const Value('sem_1'),
+          name: const Value('A Math'),
+          type: const Value('theory'),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+        ),
+      );
 
-    await repository.create(SubjectsCompanion(
-      id: const Value('subj_other_sem'),
-      userId: const Value('user_1'),
-      semesterId: const Value('sem_2'),
-      name: const Value('C English'),
-      type: const Value('theory'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+      await repository.create(
+        SubjectsCompanion(
+          id: const Value('subj_other_sem'),
+          userId: const Value('user_1'),
+          semesterId: const Value('sem_2'),
+          name: const Value('C English'),
+          type: const Value('theory'),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+        ),
+      );
 
-    // watchAll returns all user_1 subjects sorted by name ASC
-    final allList = await repository.watchAll('user_1').first;
-    expect(allList.length, 3);
-    expect(allList[0].name, 'A Math');
-    expect(allList[1].name, 'B Science');
-    expect(allList[2].name, 'C English');
+      // watchAll returns all user_1 subjects sorted by name ASC
+      final allList = await repository.watchAll('user_1').first;
+      expect(allList.length, 3);
+      expect(allList[0].name, 'A Math');
+      expect(allList[1].name, 'B Science');
+      expect(allList[2].name, 'C English');
 
-    // watchBySemester returns only sem_1 subjects sorted by name ASC
-    final sem1List = await repository.watchBySemester('user_1', 'sem_1').first;
-    expect(sem1List.length, 2);
-    expect(sem1List[0].name, 'A Math');
-    expect(sem1List[1].name, 'B Science');
+      // watchBySemester returns only sem_1 subjects sorted by name ASC
+      final sem1List = await repository
+          .watchBySemester('user_1', 'sem_1')
+          .first;
+      expect(sem1List.length, 2);
+      expect(sem1List[0].name, 'A Math');
+      expect(sem1List[1].name, 'B Science');
 
-    // getBySemester returns sem_1 list one-time
-    final getSem1 = await repository.getBySemester('user_1', 'sem_1');
-    expect(getSem1.length, 2);
-    expect(getSem1.first.name, 'A Math');
-  });
+      // getBySemester returns sem_1 list one-time
+      final getSem1 = await repository.getBySemester('user_1', 'sem_1');
+      expect(getSem1.length, 2);
+      expect(getSem1.first.name, 'A Math');
+    },
+  );
 
   test('watchById streams single subject', () async {
     final now = DateTime.now().toUtc().toIso8601String();
 
-    await repository.create(SubjectsCompanion(
-      id: const Value('subj_1'),
-      userId: const Value('user_1'),
-      semesterId: const Value('sem_1'),
-      name: const Value('Algorithms'),
-      type: const Value('theory'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+    await repository.create(
+      SubjectsCompanion(
+        id: const Value('subj_1'),
+        userId: const Value('user_1'),
+        semesterId: const Value('sem_1'),
+        name: const Value('Algorithms'),
+        type: const Value('theory'),
+        createdAt: Value(now),
+        updatedAt: Value(now),
+      ),
+    );
 
     final stream = repository.watchById('user_1', 'subj_1');
     final entity = await stream.first;
@@ -168,94 +188,112 @@ void main() {
     expect(entity?.name, 'Algorithms');
   });
 
-  test('delete subject cascade soft-deletes assignments, attendance, timetable, marks, resources', () async {
-    final now = DateTime.now().toUtc().toIso8601String();
+  test(
+    'delete subject cascade soft-deletes assignments, attendance, timetable, marks, resources',
+    () async {
+      final now = DateTime.now().toUtc().toIso8601String();
 
-    await repository.create(SubjectsCompanion(
-      id: const Value('subj_1'),
-      userId: const Value('user_1'),
-      semesterId: const Value('sem_1'),
-      name: const Value('Algorithms'),
-      type: const Value('theory'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+      await repository.create(
+        SubjectsCompanion(
+          id: const Value('subj_1'),
+          userId: const Value('user_1'),
+          semesterId: const Value('sem_1'),
+          name: const Value('Algorithms'),
+          type: const Value('theory'),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+        ),
+      );
 
-    await assignmentRepository.create(AssignmentsCompanion(
-      id: const Value('asgn_1'),
-      userId: const Value('user_1'),
-      subjectId: const Value('subj_1'),
-      title: const Value('Homework 1'),
-      dueDate: const Value('2026-09-01'),
-      status: const Value('pending'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+      await assignmentRepository.create(
+        AssignmentsCompanion(
+          id: const Value('asgn_1'),
+          userId: const Value('user_1'),
+          subjectId: const Value('subj_1'),
+          title: const Value('Homework 1'),
+          dueDate: const Value('2026-09-01'),
+          status: const Value('pending'),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+        ),
+      );
 
-    await attendanceRepository.create(AttendanceCompanion(
-      id: const Value('att_1'),
-      userId: const Value('user_1'),
-      subjectId: const Value('subj_1'),
-      date: const Value('2026-08-01'),
-      primaryStatus: const Value('present'),
-      lectureType: const Value('theory'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+      await attendanceRepository.create(
+        AttendanceCompanion(
+          id: const Value('att_1'),
+          userId: const Value('user_1'),
+          subjectId: const Value('subj_1'),
+          date: const Value('2026-08-01'),
+          primaryStatus: const Value('present'),
+          lectureType: const Value('theory'),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+        ),
+      );
 
-    await timetableRepository.create(TimetableCompanion(
-      id: const Value('tt_1'),
-      userId: const Value('user_1'),
-      subjectId: const Value('subj_1'),
-      dayOfWeek: const Value(0),
-      startTime: const Value('09:00:00'),
-      endTime: const Value('10:00:00'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+      await timetableRepository.create(
+        TimetableCompanion(
+          id: const Value('tt_1'),
+          userId: const Value('user_1'),
+          subjectId: const Value('subj_1'),
+          dayOfWeek: const Value(0),
+          startTime: const Value('09:00:00'),
+          endTime: const Value('10:00:00'),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+        ),
+      );
 
-    await internalMarksRepository.create(InternalMarksCompanion(
-      id: const Value('mark_1'),
-      userId: const Value('user_1'),
-      subjectId: const Value('subj_1'),
-      examName: const Value('Quiz 1'),
-      marksObtained: const Value(15.0),
-      maxMarks: const Value(20.0),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+      await internalMarksRepository.create(
+        InternalMarksCompanion(
+          id: const Value('mark_1'),
+          userId: const Value('user_1'),
+          subjectId: const Value('subj_1'),
+          examName: const Value('Quiz 1'),
+          marksObtained: const Value(15.0),
+          maxMarks: const Value(20.0),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+        ),
+      );
 
-    await resourcesRepository.create(ResourcesCompanion(
-      id: const Value('res_1'),
-      userId: const Value('user_1'),
-      subjectId: const Value('subj_1'),
-      title: const Value('Notes Chapter 1'),
-      url: const Value('https://example.com/notes.pdf'),
-      category: const Value('notes'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+      await resourcesRepository.create(
+        ResourcesCompanion(
+          id: const Value('res_1'),
+          userId: const Value('user_1'),
+          subjectId: const Value('subj_1'),
+          title: const Value('Notes Chapter 1'),
+          url: const Value('https://example.com/notes.pdf'),
+          category: const Value('notes'),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+        ),
+      );
 
-    expect(await repository.getById('user_1', 'subj_1'), isNotNull);
-    expect(await assignmentRepository.getById('user_1', 'asgn_1'), isNotNull);
-    expect(await attendanceRepository.getById('user_1', 'att_1'), isNotNull);
-    expect(await timetableRepository.getById('user_1', 'tt_1'), isNotNull);
-    expect(await internalMarksRepository.getById('user_1', 'mark_1'), isNotNull);
-    expect(await resourcesRepository.getById('user_1', 'res_1'), isNotNull);
+      expect(await repository.getById('user_1', 'subj_1'), isNotNull);
+      expect(await assignmentRepository.getById('user_1', 'asgn_1'), isNotNull);
+      expect(await attendanceRepository.getById('user_1', 'att_1'), isNotNull);
+      expect(await timetableRepository.getById('user_1', 'tt_1'), isNotNull);
+      expect(
+        await internalMarksRepository.getById('user_1', 'mark_1'),
+        isNotNull,
+      );
+      expect(await resourcesRepository.getById('user_1', 'res_1'), isNotNull);
 
-    await repository.delete('user_1', 'subj_1');
+      await repository.delete('user_1', 'subj_1');
 
-    expect(await repository.getById('user_1', 'subj_1'), isNull);
-    expect(await assignmentRepository.getById('user_1', 'asgn_1'), isNull);
-    expect(await attendanceRepository.getById('user_1', 'att_1'), isNull);
-    expect(await timetableRepository.getById('user_1', 'tt_1'), isNull);
-    expect(await internalMarksRepository.getById('user_1', 'mark_1'), isNull);
-    expect(await resourcesRepository.getById('user_1', 'res_1'), isNull);
+      expect(await repository.getById('user_1', 'subj_1'), isNull);
+      expect(await assignmentRepository.getById('user_1', 'asgn_1'), isNull);
+      expect(await attendanceRepository.getById('user_1', 'att_1'), isNull);
+      expect(await timetableRepository.getById('user_1', 'tt_1'), isNull);
+      expect(await internalMarksRepository.getById('user_1', 'mark_1'), isNull);
+      expect(await resourcesRepository.getById('user_1', 'res_1'), isNull);
 
-    final pendingSync = await syncQueueRepository.getPendingItems();
-    expect(pendingSync.last.targetTable, 'subjects');
-    expect(pendingSync.last.operation, 'DELETE');
-  });
+      final pendingSync = await syncQueueRepository.getPendingItems();
+      expect(pendingSync.last.targetTable, 'subjects');
+      expect(pendingSync.last.operation, 'DELETE');
+    },
+  );
 
   test('wraps database errors in DatabaseException', () async {
     expect(

@@ -760,7 +760,7 @@ class _FolderIcon extends StatelessWidget {
 // -----------------------------------------------------------------------------
 class _ReadyPage extends StatelessWidget {
   const _ReadyPage({required this.onFinish});
-  
+
   final VoidCallback onFinish;
 
   @override

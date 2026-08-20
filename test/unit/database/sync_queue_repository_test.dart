@@ -44,40 +44,46 @@ void main() {
     expect(pending.last.operation, 'UPDATE');
   });
 
-  test('markSynced marks item synced and purgeSyncedItems removes it', () async {
-    final id = await repository.enqueue(
-      targetTable: 'subjects',
-      recordId: 'rec_200',
-      operation: 'UPDATE',
-    );
+  test(
+    'markSynced marks item synced and purgeSyncedItems removes it',
+    () async {
+      final id = await repository.enqueue(
+        targetTable: 'subjects',
+        recordId: 'rec_200',
+        operation: 'UPDATE',
+      );
 
-    await repository.markSynced(id);
+      await repository.markSynced(id);
 
-    final pending = await repository.getPendingItems();
-    expect(pending.isEmpty, true);
+      final pending = await repository.getPendingItems();
+      expect(pending.isEmpty, true);
 
-    final purgedCount = await repository.purgeSyncedItems();
-    expect(purgedCount, 1);
-  });
+      final purgedCount = await repository.purgeSyncedItems();
+      expect(purgedCount, 1);
+    },
+  );
 
-  test('recordFailure increments retry count, updates error, and sets lastAttempt', () async {
-    final id = await repository.enqueue(
-      targetTable: 'attendance',
-      recordId: 'rec_300',
-      operation: 'DELETE',
-    );
+  test(
+    'recordFailure increments retry count, updates error, and sets lastAttempt',
+    () async {
+      final id = await repository.enqueue(
+        targetTable: 'attendance',
+        recordId: 'rec_300',
+        operation: 'DELETE',
+      );
 
-    await repository.recordFailure(id, 'Network timeout', 0);
+      await repository.recordFailure(id, 'Network timeout', 0);
 
-    var pending = await repository.getPendingItems();
-    expect(pending.first.retryCount, 1);
-    expect(pending.first.error, 'Network timeout');
-    expect(pending.first.lastAttempt, isNotNull);
+      var pending = await repository.getPendingItems();
+      expect(pending.first.retryCount, 1);
+      expect(pending.first.error, 'Network timeout');
+      expect(pending.first.lastAttempt, isNotNull);
 
-    await repository.recordFailure(id, 'Server 500 error', 1);
+      await repository.recordFailure(id, 'Server 500 error', 1);
 
-    pending = await repository.getPendingItems();
-    expect(pending.first.retryCount, 2);
-    expect(pending.first.error, 'Server 500 error');
-  });
+      pending = await repository.getPendingItems();
+      expect(pending.first.retryCount, 2);
+      expect(pending.first.error, 'Server 500 error');
+    },
+  );
 }

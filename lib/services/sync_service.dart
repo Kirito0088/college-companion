@@ -23,8 +23,8 @@ class SyncService {
     required this.database,
     SupabaseClient? supabaseClient,
     ConnectivityService? connectivityService,
-  })  : _syncSupabaseClient = supabaseClient,
-        _connectivityService = connectivityService ?? ConnectivityService() {
+  }) : _syncSupabaseClient = supabaseClient,
+       _connectivityService = connectivityService ?? ConnectivityService() {
     _initConnectivityListener();
   }
 
@@ -47,14 +47,14 @@ class SyncService {
   bool get isSyncing => _isSyncing;
 
   void _initConnectivityListener() {
-    _connectivitySubscription = _connectivityService.onStatusChange.listen(
-      (status) {
-        if (status == InternetStatus.connected) {
-          AppLogger.info('Connectivity restored, triggering sync', tag: _tag);
-          unawaited(syncPendingMutations());
-        }
-      },
-    );
+    _connectivitySubscription = _connectivityService.onStatusChange.listen((
+      status,
+    ) {
+      if (status == InternetStatus.connected) {
+        AppLogger.info('Connectivity restored, triggering sync', tag: _tag);
+        unawaited(syncPendingMutations());
+      }
+    });
   }
 
   /// Cancels subscriptions when disposing.
@@ -160,75 +160,75 @@ class SyncService {
 
     switch (targetTable) {
       case 'semesters':
-        final entity = await (database.select(database.semesters)
-              ..where((t) => t.id.equals(recordId)))
-            .getSingleOrNull();
+        final entity = await (database.select(
+          database.semesters,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
         if (entity != null) jsonMap = entity.toJson();
         break;
       case 'subjects':
-        final entity = await (database.select(database.subjects)
-              ..where((t) => t.id.equals(recordId)))
-            .getSingleOrNull();
+        final entity = await (database.select(
+          database.subjects,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
         if (entity != null) jsonMap = entity.toJson();
         break;
       case 'attendance':
-        final entity = await (database.select(database.attendance)
-              ..where((t) => t.id.equals(recordId)))
-            .getSingleOrNull();
+        final entity = await (database.select(
+          database.attendance,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
         if (entity != null) jsonMap = entity.toJson();
         break;
       case 'timetable':
-        final entity = await (database.select(database.timetable)
-              ..where((t) => t.id.equals(recordId)))
-            .getSingleOrNull();
+        final entity = await (database.select(
+          database.timetable,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
         if (entity != null) jsonMap = entity.toJson();
         break;
       case 'assignments':
-        final entity = await (database.select(database.assignments)
-              ..where((t) => t.id.equals(recordId)))
-            .getSingleOrNull();
+        final entity = await (database.select(
+          database.assignments,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
         if (entity != null) jsonMap = entity.toJson();
         break;
       case 'calendar_events':
-        final entity = await (database.select(database.calendarEvents)
-              ..where((t) => t.id.equals(recordId)))
-            .getSingleOrNull();
+        final entity = await (database.select(
+          database.calendarEvents,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
         if (entity != null) jsonMap = entity.toJson();
         break;
       case 'resources':
-        final entity = await (database.select(database.resources)
-              ..where((t) => t.id.equals(recordId)))
-            .getSingleOrNull();
+        final entity = await (database.select(
+          database.resources,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
         if (entity != null) jsonMap = entity.toJson();
         break;
       case 'internal_marks':
-        final entity = await (database.select(database.internalMarks)
-              ..where((t) => t.id.equals(recordId)))
-            .getSingleOrNull();
+        final entity = await (database.select(
+          database.internalMarks,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
         if (entity != null) jsonMap = entity.toJson();
         break;
       case 'users':
-        final entity = await (database.select(database.users)
-              ..where((t) => t.id.equals(recordId)))
-            .getSingleOrNull();
+        final entity = await (database.select(
+          database.users,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
         if (entity != null) jsonMap = entity.toJson();
         break;
       case 'user_settings':
-        final entity = await (database.select(database.userSettings)
-              ..where((t) => t.id.equals(recordId)))
-            .getSingleOrNull();
+        final entity = await (database.select(
+          database.userSettings,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
         if (entity != null) jsonMap = entity.toJson();
         break;
       case 'lecture_records':
-        final entity = await (database.select(database.lectureRecords)
-              ..where((t) => t.id.equals(recordId)))
-            .getSingleOrNull();
+        final entity = await (database.select(
+          database.lectureRecords,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
         if (entity != null) jsonMap = entity.toJson();
         break;
       case 'notifications':
-        final entity = await (database.select(database.notifications)
-              ..where((t) => t.id.equals(recordId)))
-            .getSingleOrNull();
+        final entity = await (database.select(
+          database.notifications,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
         if (entity != null) jsonMap = entity.toJson();
         break;
       default:

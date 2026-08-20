@@ -31,7 +31,8 @@ class LectureRecordScreen extends ConsumerStatefulWidget {
   final String? subjectId;
 
   @override
-  ConsumerState<LectureRecordScreen> createState() => _LectureRecordScreenState();
+  ConsumerState<LectureRecordScreen> createState() =>
+      _LectureRecordScreenState();
 }
 
 class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
@@ -628,28 +629,42 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
                   : () async {
                       final repo = ref.read(attendanceRepositoryProvider);
                       final now = DateTime.now().toUtc();
-                      
+
                       final authState = ref.read(authStateProvider);
-                      final activeUserId = authState is AuthAuthenticated && authState.user.uid.isNotEmpty
+                      final activeUserId =
+                          authState is AuthAuthenticated &&
+                              authState.user.uid.isNotEmpty
                           ? authState.user.uid
                           : 'default_user';
 
-                      await repo.create(AttendanceCompanion(
-                        id: drift.Value(const Uuid().v4()),
-                        userId: drift.Value(activeUserId),
-                        subjectId: drift.Value(widget.subjectId ?? 'default_subject'),
-                        date: drift.Value(now.toIso8601String().split('T')[0]),
-                        primaryStatus: drift.Value(_primaryStatus!.name),
-                        secondaryStatus: drift.Value(_secondaryStatus?.name),
-                        lectureType: const drift.Value('theory'),
-                        notes: drift.Value(_noteController.text.isNotEmpty ? _noteController.text : null),
-                        createdAt: drift.Value(now.toIso8601String()),
-                        updatedAt: drift.Value(now.toIso8601String()),
-                      ));
+                      await repo.create(
+                        AttendanceCompanion(
+                          id: drift.Value(const Uuid().v4()),
+                          userId: drift.Value(activeUserId),
+                          subjectId: drift.Value(
+                            widget.subjectId ?? 'default_subject',
+                          ),
+                          date: drift.Value(
+                            now.toIso8601String().split('T')[0],
+                          ),
+                          primaryStatus: drift.Value(_primaryStatus!.name),
+                          secondaryStatus: drift.Value(_secondaryStatus?.name),
+                          lectureType: const drift.Value('theory'),
+                          notes: drift.Value(
+                            _noteController.text.isNotEmpty
+                                ? _noteController.text
+                                : null,
+                          ),
+                          createdAt: drift.Value(now.toIso8601String()),
+                          updatedAt: drift.Value(now.toIso8601String()),
+                        ),
+                      );
 
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Lecture Record saved.')),
+                          const SnackBar(
+                            content: Text('Lecture Record saved.'),
+                          ),
                         );
                         context.pop();
                       }

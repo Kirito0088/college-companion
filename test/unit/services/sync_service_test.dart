@@ -75,11 +75,13 @@ class FakeSupabaseQueryBuilder extends Fake implements SupabaseQueryBuilder {
   @override
   PostgrestFilterBuilder<dynamic> delete({String? count}) {
     if (client.shouldThrow) throw Exception('Supabase connection error');
-    return FakePostgrestFilterBuilder(onEq: (column, value) {
-      if (column == 'id') {
-        client.deletedIds.putIfAbsent(table, () => []).add(value.toString());
-      }
-    });
+    return FakePostgrestFilterBuilder(
+      onEq: (column, value) {
+        if (column == 'id') {
+          client.deletedIds.putIfAbsent(table, () => []).add(value.toString());
+        }
+      },
+    );
   }
 }
 
@@ -170,153 +172,174 @@ void main() {
       syncService.dispose();
     });
 
-    test('SyncQueue state transition (pending -> failed with incremented retry count on network error)', () async {
-      final now = DateTime.now().toUtc().toIso8601String();
-      await database.into(database.semesters).insert(
-            SemestersCompanion.insert(
-              id: 'rec_999',
-              userId: 'user_1',
-              name: 'Semester Test',
-              workingDays: '[0,1,2,3,4]',
-              createdAt: now,
-              updatedAt: now,
-            ),
-          );
+    test(
+      'SyncQueue state transition (pending -> failed with incremented retry count on network error)',
+      () async {
+        final now = DateTime.now().toUtc().toIso8601String();
+        await database
+            .into(database.semesters)
+            .insert(
+              SemestersCompanion.insert(
+                id: 'rec_999',
+                userId: 'user_1',
+                name: 'Semester Test',
+                workingDays: '[0,1,2,3,4]',
+                createdAt: now,
+                updatedAt: now,
+              ),
+            );
 
-      await syncQueueRepository.enqueue(
-        targetTable: 'semesters',
-        recordId: 'rec_999',
-        operation: 'INSERT',
-      );
+        await syncQueueRepository.enqueue(
+          targetTable: 'semesters',
+          recordId: 'rec_999',
+          operation: 'INSERT',
+        );
 
-      // Verify initial pending state
-      var pending = await syncQueueRepository.getPendingItems();
-      expect(pending.length, 1);
-      expect(pending.first.retryCount, 0);
-      expect(pending.first.isSynced, false);
+        // Verify initial pending state
+        var pending = await syncQueueRepository.getPendingItems();
+        expect(pending.length, 1);
+        expect(pending.first.retryCount, 0);
+        expect(pending.first.isSynced, false);
 
-      supabaseClient.shouldThrow = true;
+        supabaseClient.shouldThrow = true;
 
-      final syncService = SyncService(
-        syncQueueRepository: syncQueueRepository,
-        database: database,
-        supabaseClient: supabaseClient,
-        connectivityService: connectivityService,
-      );
+        final syncService = SyncService(
+          syncQueueRepository: syncQueueRepository,
+          database: database,
+          supabaseClient: supabaseClient,
+          connectivityService: connectivityService,
+        );
 
-      await syncService.syncPendingMutations();
+        await syncService.syncPendingMutations();
 
-      pending = await syncQueueRepository.getPendingItems();
-      expect(pending.length, 1);
-      expect(pending.first.retryCount, 1);
-      expect(pending.first.error, contains('Supabase connection error'));
+        pending = await syncQueueRepository.getPendingItems();
+        expect(pending.length, 1);
+        expect(pending.first.retryCount, 1);
+        expect(pending.first.error, contains('Supabase connection error'));
 
-      syncService.dispose();
-    });
+        syncService.dispose();
+      },
+    );
 
-    test('Exponential backoff retry math formula verification (pow(2, retryCount) * 500ms)', () {
-      for (var retryCount = 0; retryCount < 5; retryCount++) {
-        final expectedDelayMs = pow(2, retryCount).toInt() * 500;
+    test(
+      'Exponential backoff retry math formula verification (pow(2, retryCount) * 500ms)',
+      () {
+        for (var retryCount = 0; retryCount < 5; retryCount++) {
+          final expectedDelayMs = pow(2, retryCount).toInt() * 500;
 
-        switch (retryCount) {
-          case 0:
-            expect(expectedDelayMs, 500);
-            break;
-          case 1:
-            expect(expectedDelayMs, 1000);
-            break;
-          case 2:
-            expect(expectedDelayMs, 2000);
-            break;
-          case 3:
-            expect(expectedDelayMs, 4000);
-            break;
-          case 4:
-            expect(expectedDelayMs, 8000);
-            break;
+          switch (retryCount) {
+            case 0:
+              expect(expectedDelayMs, 500);
+              break;
+            case 1:
+              expect(expectedDelayMs, 1000);
+              break;
+            case 2:
+              expect(expectedDelayMs, 2000);
+              break;
+            case 3:
+              expect(expectedDelayMs, 4000);
+              break;
+            case 4:
+              expect(expectedDelayMs, 8000);
+              break;
+          }
         }
-      }
-    });
+      },
+    );
 
-    test('Automatic queue flushing on network reconnection (ConnectivityService.onStatusChange)', () async {
-      connectivityService.isConnected = false;
+    test(
+      'Automatic queue flushing on network reconnection (ConnectivityService.onStatusChange)',
+      () async {
+        connectivityService.isConnected = false;
 
-      final syncService = SyncService(
-        syncQueueRepository: syncQueueRepository,
-        database: database,
-        supabaseClient: supabaseClient,
-        connectivityService: connectivityService,
-      );
+        final syncService = SyncService(
+          syncQueueRepository: syncQueueRepository,
+          database: database,
+          supabaseClient: supabaseClient,
+          connectivityService: connectivityService,
+        );
 
-      await syncQueueRepository.enqueue(
-        targetTable: 'assignments',
-        recordId: 'asgn_offline_1',
-        operation: 'INSERT',
-      );
+        await syncQueueRepository.enqueue(
+          targetTable: 'assignments',
+          recordId: 'asgn_offline_1',
+          operation: 'INSERT',
+        );
 
-      var pending = await syncQueueRepository.getPendingItems();
-      expect(pending.length, 1);
+        var pending = await syncQueueRepository.getPendingItems();
+        expect(pending.length, 1);
 
-      connectivityService.emitStatus(InternetStatus.connected);
+        connectivityService.emitStatus(InternetStatus.connected);
 
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+        await Future<void>.delayed(const Duration(milliseconds: 100));
 
-      pending = await syncQueueRepository.getPendingItems();
-      expect(pending.isEmpty, true);
+        pending = await syncQueueRepository.getPendingItems();
+        expect(pending.isEmpty, true);
 
-      syncService.dispose();
-    });
+        syncService.dispose();
+      },
+    );
 
-    test('Offline mutation queueing when network drops and subsequent flush', () async {
-      connectivityService.isConnected = false;
+    test(
+      'Offline mutation queueing when network drops and subsequent flush',
+      () async {
+        connectivityService.isConnected = false;
 
-      final semestersRepo = SemesterRepository(database, syncQueueRepository);
-      final assignmentsRepo = AssignmentRepository(database, syncQueueRepository);
+        final semestersRepo = SemesterRepository(database, syncQueueRepository);
+        final assignmentsRepo = AssignmentRepository(
+          database,
+          syncQueueRepository,
+        );
 
-      final now = DateTime.now().toUtc().toIso8601String();
+        final now = DateTime.now().toUtc().toIso8601String();
 
-      await semestersRepo.create(SemestersCompanion(
-        id: const Value('sem_offline'),
-        userId: const Value('user_1'),
-        name: const Value('Offline Semester'),
-        workingDays: const Value('[0,1,2,3,4]'),
-        createdAt: Value(now),
-        updatedAt: Value(now),
-      ));
+        await semestersRepo.create(
+          SemestersCompanion(
+            id: const Value('sem_offline'),
+            userId: const Value('user_1'),
+            name: const Value('Offline Semester'),
+            workingDays: const Value('[0,1,2,3,4]'),
+            createdAt: Value(now),
+            updatedAt: Value(now),
+          ),
+        );
 
-      await assignmentsRepo.create(AssignmentsCompanion(
-        id: const Value('asgn_offline'),
-        userId: const Value('user_1'),
-        subjectId: const Value('sub_1'),
-        title: const Value('Offline Homework'),
-        dueDate: const Value('2026-09-01'),
-        status: const Value('pending'),
-        createdAt: Value(now),
-        updatedAt: Value(now),
-      ));
+        await assignmentsRepo.create(
+          AssignmentsCompanion(
+            id: const Value('asgn_offline'),
+            userId: const Value('user_1'),
+            subjectId: const Value('sub_1'),
+            title: const Value('Offline Homework'),
+            dueDate: const Value('2026-09-01'),
+            status: const Value('pending'),
+            createdAt: Value(now),
+            updatedAt: Value(now),
+          ),
+        );
 
-      var pending = await syncQueueRepository.getPendingItems();
-      expect(pending.length, 2);
-      expect(pending[0].targetTable, 'semesters');
-      expect(pending[1].targetTable, 'assignments');
+        var pending = await syncQueueRepository.getPendingItems();
+        expect(pending.length, 2);
+        expect(pending[0].targetTable, 'semesters');
+        expect(pending[1].targetTable, 'assignments');
 
-      final syncService = SyncService(
-        syncQueueRepository: syncQueueRepository,
-        database: database,
-        supabaseClient: supabaseClient,
-        connectivityService: connectivityService,
-      );
+        final syncService = SyncService(
+          syncQueueRepository: syncQueueRepository,
+          database: database,
+          supabaseClient: supabaseClient,
+          connectivityService: connectivityService,
+        );
 
-      connectivityService.emitStatus(InternetStatus.connected);
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+        connectivityService.emitStatus(InternetStatus.connected);
+        await Future<void>.delayed(const Duration(milliseconds: 100));
 
-      pending = await syncQueueRepository.getPendingItems();
-      expect(pending.isEmpty, true);
-      expect(supabaseClient.upsertedPayloads['semesters'], isNotNull);
-      expect(supabaseClient.upsertedPayloads['assignments'], isNotNull);
+        pending = await syncQueueRepository.getPendingItems();
+        expect(pending.isEmpty, true);
+        expect(supabaseClient.upsertedPayloads['semesters'], isNotNull);
+        expect(supabaseClient.upsertedPayloads['assignments'], isNotNull);
 
-      syncService.dispose();
-    });
+        syncService.dispose();
+      },
+    );
 
     test('SyncService processes DELETE operation on Supabase table', () async {
       await syncQueueRepository.enqueue(
@@ -341,49 +364,53 @@ void main() {
       syncService.dispose();
     });
 
-    test('SyncService fetches row payload and maps camelCase to snake_case for all Drift tables', () async {
-      final now = DateTime.now().toUtc().toIso8601String();
+    test(
+      'SyncService fetches row payload and maps camelCase to snake_case for all Drift tables',
+      () async {
+        final now = DateTime.now().toUtc().toIso8601String();
 
-      await database.into(database.attendance).insert(
-            AttendanceCompanion.insert(
-              id: 'att_101',
-              userId: 'user_1',
-              subjectId: 'sub_1',
-              date: '2026-07-24',
-              primaryStatus: 'present',
-              lectureType: 'theory',
-              createdAt: now,
-              updatedAt: now,
-            ),
-          );
+        await database
+            .into(database.attendance)
+            .insert(
+              AttendanceCompanion.insert(
+                id: 'att_101',
+                userId: 'user_1',
+                subjectId: 'sub_1',
+                date: '2026-07-24',
+                primaryStatus: 'present',
+                lectureType: 'theory',
+                createdAt: now,
+                updatedAt: now,
+              ),
+            );
 
-      await syncQueueRepository.enqueue(
-        targetTable: 'attendance',
-        recordId: 'att_101',
-        operation: 'UPDATE',
-      );
+        await syncQueueRepository.enqueue(
+          targetTable: 'attendance',
+          recordId: 'att_101',
+          operation: 'UPDATE',
+        );
 
-      final syncService = SyncService(
-        syncQueueRepository: syncQueueRepository,
-        database: database,
-        supabaseClient: supabaseClient,
-        connectivityService: connectivityService,
-      );
+        final syncService = SyncService(
+          syncQueueRepository: syncQueueRepository,
+          database: database,
+          supabaseClient: supabaseClient,
+          connectivityService: connectivityService,
+        );
 
-      await syncService.syncPendingMutations();
+        await syncService.syncPendingMutations();
 
-      final pending = await syncQueueRepository.getPendingItems();
-      expect(pending.isEmpty, true);
+        final pending = await syncQueueRepository.getPendingItems();
+        expect(pending.isEmpty, true);
 
-      final payloads = supabaseClient.upsertedPayloads['attendance'];
-      expect(payloads, isNotNull);
-      expect(payloads!.first['user_id'], 'user_1');
-      expect(payloads.first['subject_id'], 'sub_1');
-      expect(payloads.first['primary_status'], 'present');
-      expect(payloads.first['lecture_type'], 'theory');
+        final payloads = supabaseClient.upsertedPayloads['attendance'];
+        expect(payloads, isNotNull);
+        expect(payloads!.first['user_id'], 'user_1');
+        expect(payloads.first['subject_id'], 'sub_1');
+        expect(payloads.first['primary_status'], 'present');
+        expect(payloads.first['lecture_type'], 'theory');
 
-      syncService.dispose();
-    });
+        syncService.dispose();
+      },
+    );
   });
 }
-

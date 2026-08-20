@@ -55,7 +55,8 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
-    final userId = authState is AuthAuthenticated && authState.user.uid.isNotEmpty
+    final userId =
+        authState is AuthAuthenticated && authState.user.uid.isNotEmpty
         ? authState.user.uid
         : 'default_user';
 
@@ -84,8 +85,10 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
                             _buildSearchBar(context),
                             const SizedBox(height: SpacingTokens.lg),
                             resourcesAsync.maybeWhen(
-                              data: (list) => _buildRecentResources(context, list),
-                              orElse: () => _buildRecentResources(context, const []),
+                              data: (list) =>
+                                  _buildRecentResources(context, list),
+                              orElse: () =>
+                                  _buildRecentResources(context, const []),
                             ),
                             _buildCategories(context),
                             const SizedBox(height: SpacingTokens.xl),
@@ -190,7 +193,10 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
           hintStyle: theme.textTheme.bodyMedium?.copyWith(
             color: ColorTokens.onSurfaceVariant,
           ),
-          prefixIcon: const Icon(Symbols.search, color: ColorTokens.onSurfaceVariant),
+          prefixIcon: const Icon(
+            Symbols.search,
+            color: ColorTokens.onSurfaceVariant,
+          ),
           border: InputBorder.none,
           isDense: true,
         ),
@@ -204,46 +210,46 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
         scrollDirection: Axis.horizontal,
         clipBehavior: Clip.none,
         child: Row(
-        children: _categories.map((category) {
-          final isSelected = _selectedCategory == category;
-          return Padding(
-            padding: const EdgeInsets.only(right: SpacingTokens.sm),
-            child: FilterChip(
-              label: Text(category),
-              selected: isSelected,
-              onSelected: (selected) {
-                setState(() {
-                  _selectedCategory = category;
-                });
-              },
-              backgroundColor: ColorTokens.surfaceContainer,
-              selectedColor: ColorTokens.primaryContainer,
-              checkmarkColor: ColorTokens.onPrimaryContainer,
-              labelStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: isSelected
-                    ? ColorTokens.onPrimaryContainer
-                    : ColorTokens.onSurfaceVariant,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: RadiusTokens.borderRadiusLg,
-                side: BorderSide(
+          children: _categories.map((category) {
+            final isSelected = _selectedCategory == category;
+            return Padding(
+              padding: const EdgeInsets.only(right: SpacingTokens.sm),
+              child: FilterChip(
+                label: Text(category),
+                selected: isSelected,
+                onSelected: (selected) {
+                  setState(() {
+                    _selectedCategory = category;
+                  });
+                },
+                backgroundColor: ColorTokens.surfaceContainer,
+                selectedColor: ColorTokens.primaryContainer,
+                checkmarkColor: ColorTokens.onPrimaryContainer,
+                labelStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: isSelected
-                      ? Colors.transparent
-                      : ColorTokens.outlineVariant.withValues(alpha: 0.5),
+                      ? ColorTokens.onPrimaryContainer
+                      : ColorTokens.onSurfaceVariant,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: RadiusTokens.borderRadiusLg,
+                  side: BorderSide(
+                    color: isSelected
+                        ? Colors.transparent
+                        : ColorTokens.outlineVariant.withValues(alpha: 0.5),
+                  ),
+                ),
+                showCheckmark: false,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingTokens.md,
+                  vertical: SpacingTokens.sm,
                 ),
               ),
-              showCheckmark: false,
-              padding: const EdgeInsets.symmetric(
-                horizontal: SpacingTokens.md,
-                vertical: SpacingTokens.sm,
-              ),
-            ),
-          );
-        }).toList(),
+            );
+          }).toList(),
+        ),
       ),
-    ),
-  );
+    );
   }
 
   Widget _buildResourcesList(
@@ -255,9 +261,7 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
       loading: () => const SliverFillRemaining(
         hasScrollBody: false,
         child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: LayoutTokens.screenPadding,
-          ),
+          padding: EdgeInsets.symmetric(horizontal: LayoutTokens.screenPadding),
           child: SkeletonList(),
         ),
       ),
@@ -275,14 +279,19 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
           if (_selectedCategory == 'Favorites') {
             if (!r.category.toLowerCase().contains('fav')) return false;
           } else if (_selectedCategory != 'All') {
-            if (!r.category.toLowerCase().contains(_selectedCategory.toLowerCase())) {
+            if (!r.category.toLowerCase().contains(
+              _selectedCategory.toLowerCase(),
+            )) {
               return false;
             }
           }
           // Search filter
           if (_searchQuery.isNotEmpty) {
             if (!r.title.toLowerCase().contains(_searchQuery.toLowerCase()) &&
-                !(r.subjectId?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false)) {
+                !(r.subjectId?.toLowerCase().contains(
+                      _searchQuery.toLowerCase(),
+                    ) ??
+                    false)) {
               return false;
             }
           }
@@ -301,42 +310,43 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
             horizontal: LayoutTokens.screenPadding,
           ),
           sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final r = filtered[index];
-                final isPdf = r.url.toLowerCase().contains('pdf') ||
-                    r.category.toLowerCase().contains('notes') ||
-                    r.category.toLowerCase().contains('paper');
-                final icon = isPdf ? Symbols.picture_as_pdf : Symbols.description;
-                final iconColor = isPdf ? Colors.redAccent : Colors.blueAccent;
-                final isFav = r.category.toLowerCase().contains('fav');
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final r = filtered[index];
+              final isPdf =
+                  r.url.toLowerCase().contains('pdf') ||
+                  r.category.toLowerCase().contains('notes') ||
+                  r.category.toLowerCase().contains('paper');
+              final icon = isPdf ? Symbols.picture_as_pdf : Symbols.description;
+              final iconColor = isPdf ? Colors.redAccent : Colors.blueAccent;
+              final isFav = r.category.toLowerCase().contains('fav');
 
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: SpacingTokens.md),
-                  child: _buildResourceCard(
-                    context,
-                    icon: icon,
-                    title: r.title,
-                    subject: r.subjectId ?? 'General',
-                    fileType: isPdf ? 'PDF' : 'DOC',
-                    fileSize: '2.4 MB',
-                    lastModified: r.updatedAt.length > 10
-                        ? r.updatedAt.substring(0, 10)
-                        : r.updatedAt,
-                    iconColor: iconColor,
-                    isFavorite: isFav,
-                  ),
-                );
-              },
-              childCount: filtered.length,
-            ),
+              return Padding(
+                padding: const EdgeInsets.only(bottom: SpacingTokens.md),
+                child: _buildResourceCard(
+                  context,
+                  icon: icon,
+                  title: r.title,
+                  subject: r.subjectId ?? 'General',
+                  fileType: isPdf ? 'PDF' : 'DOC',
+                  fileSize: '2.4 MB',
+                  lastModified: r.updatedAt.length > 10
+                      ? r.updatedAt.substring(0, 10)
+                      : r.updatedAt,
+                  iconColor: iconColor,
+                  isFavorite: isFav,
+                ),
+              );
+            }, childCount: filtered.length),
           ),
         );
       },
     );
   }
 
-  Widget _buildRecentResources(BuildContext context, List<ResourceEntity> list) {
+  Widget _buildRecentResources(
+    BuildContext context,
+    List<ResourceEntity> list,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -355,16 +365,21 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
             child: Row(
               children: list.isNotEmpty
                   ? list.take(3).map((r) {
-                      final isPdf = r.url.toLowerCase().contains('pdf') ||
+                      final isPdf =
+                          r.url.toLowerCase().contains('pdf') ||
                           r.category.toLowerCase().contains('notes');
                       return Padding(
                         padding: const EdgeInsets.only(right: SpacingTokens.md),
                         child: _buildRecentResourceCard(
                           context,
-                          icon: isPdf ? Symbols.picture_as_pdf : Symbols.description,
+                          icon: isPdf
+                              ? Symbols.picture_as_pdf
+                              : Symbols.description,
                           title: r.title,
                           subject: r.subjectId ?? 'General',
-                          timeAgo: r.updatedAt.length > 10 ? r.updatedAt.substring(0, 10) : 'Recent',
+                          timeAgo: r.updatedAt.length > 10
+                              ? r.updatedAt.substring(0, 10)
+                              : 'Recent',
                           color: isPdf ? Colors.redAccent : Colors.blueAccent,
                         ),
                       );
@@ -579,4 +594,3 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
     );
   }
 }
-

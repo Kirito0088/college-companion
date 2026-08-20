@@ -73,8 +73,8 @@ class CalendarMonthView extends StatelessWidget {
             final displayDate = isCurrentMonth
                 ? dayNum
                 : (dayNum < 1
-                    ? DateTime(now.year, now.month, dayNum).day
-                    : dayNum - daysInMonth);
+                      ? DateTime(now.year, now.month, dayNum).day
+                      : dayNum - daysInMonth);
 
             final isSelected = isCurrentMonth && displayDate == selectedDate;
             final isToday = isCurrentMonth && displayDate == todayDay;

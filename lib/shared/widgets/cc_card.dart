@@ -43,13 +43,9 @@ class CCCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: RadiusTokens.borderRadiusMd,
-        border: Border.all(
-          color: ColorTokens.outlineVariant,
-          width: 1,
-        ),
+        border: Border.all(color: ColorTokens.outlineVariant, width: 1),
       ),
       child: child,
     );
   }
 }
-

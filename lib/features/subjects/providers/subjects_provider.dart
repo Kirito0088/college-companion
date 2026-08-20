@@ -18,14 +18,17 @@ final subjectRepositoryProvider = Provider<SubjectRepository>((ref) {
 /// Watches all active subjects for a user.
 final subjectsStreamProvider =
     StreamProvider.family<List<SubjectEntity>, String>((ref, userId) {
-  final repo = ref.watch(subjectRepositoryProvider);
-  return repo.watchAll(userId);
-});
+      final repo = ref.watch(subjectRepositoryProvider);
+      return repo.watchAll(userId);
+    });
 
 /// Watches subjects for a specific semester.
 /// Parameter format: 'userId:semesterId'
 final subjectsBySemesterStreamProvider =
-    StreamProvider.family<List<SubjectEntity>, ({String userId, String semesterId})>((ref, params) {
-  final repo = ref.watch(subjectRepositoryProvider);
-  return repo.watchBySemester(params.userId, params.semesterId);
-});
+    StreamProvider.family<
+      List<SubjectEntity>,
+      ({String userId, String semesterId})
+    >((ref, params) {
+      final repo = ref.watch(subjectRepositoryProvider);
+      return repo.watchBySemester(params.userId, params.semesterId);
+    });

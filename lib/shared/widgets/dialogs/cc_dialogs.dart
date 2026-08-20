@@ -84,7 +84,9 @@ class CCDialogs {
               ),
               const SizedBox(height: SpacingTokens.lg),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.xl),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingTokens.xl,
+                ),
                 child: Text(
                   title,
                   textAlign: TextAlign.center,
@@ -96,7 +98,9 @@ class CCDialogs {
               ),
               const SizedBox(height: SpacingTokens.sm),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.xl),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingTokens.xl,
+                ),
                 child: Text(
                   message,
                   textAlign: TextAlign.center,
@@ -108,14 +112,18 @@ class CCDialogs {
               ),
               const SizedBox(height: SpacingTokens.xxl),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.xl),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingTokens.xl,
+                ),
                 child: Row(
                   children: [
                     Expanded(
                       child: TextButton(
                         onPressed: () => Navigator.of(context).pop(false),
                         style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: SpacingTokens.md),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: SpacingTokens.md,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -136,7 +144,9 @@ class CCDialogs {
                         style: FilledButton.styleFrom(
                           backgroundColor: ColorTokens.error,
                           foregroundColor: ColorTokens.onError,
-                          padding: const EdgeInsets.symmetric(vertical: SpacingTokens.md),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: SpacingTokens.md,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -151,7 +161,10 @@ class CCDialogs {
                   ],
                 ),
               ),
-              SizedBox(height: MediaQuery.of(context).padding.bottom + SpacingTokens.xl),
+              SizedBox(
+                height:
+                    MediaQuery.of(context).padding.bottom + SpacingTokens.xl,
+              ),
             ],
           ),
         );

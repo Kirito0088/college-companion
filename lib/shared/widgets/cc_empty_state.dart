@@ -85,3 +85,6 @@ class CCEmptyState extends StatelessWidget {
     );
   }
 }
+
+/// Alias for [CCEmptyState] to support both pascal case variants.
+typedef CcEmptyState = CCEmptyState;

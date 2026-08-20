@@ -18,20 +18,23 @@ final semesterRepositoryProvider = Provider<SemesterRepository>((ref) {
 /// Watches all active semesters for a user.
 final semestersStreamProvider =
     StreamProvider.family<List<SemesterEntity>, String>((ref, userId) {
-  final repo = ref.watch(semesterRepositoryProvider);
-  return repo.watchAll(userId);
-});
+      final repo = ref.watch(semesterRepositoryProvider);
+      return repo.watchAll(userId);
+    });
 
 /// Watches a single semester by ID.
 final semesterByIdStreamProvider =
-    StreamProvider.family<SemesterEntity?, ({String userId, String semesterId})>((ref, params) {
-  final repo = ref.watch(semesterRepositoryProvider);
-  return repo.watchById(params.userId, params.semesterId);
-});
+    StreamProvider.family<
+      SemesterEntity?,
+      ({String userId, String semesterId})
+    >((ref, params) {
+      final repo = ref.watch(semesterRepositoryProvider);
+      return repo.watchById(params.userId, params.semesterId);
+    });
 
 /// Watches the current active semester for a user.
 final currentSemesterStreamProvider =
     StreamProvider.family<SemesterEntity?, String>((ref, userId) {
-  final repo = ref.watch(semesterRepositoryProvider);
-  return repo.watchCurrent(userId);
-});
+      final repo = ref.watch(semesterRepositoryProvider);
+      return repo.watchCurrent(userId);
+    });

@@ -10,12 +10,21 @@ import 'package:drift/drift.dart';
 enum PrimaryStatus { present, absent, cancelled }
 
 /// Secondary attendance context.
-enum SecondaryStatus { facultyAbsent, holiday, practicalCancelled, extraLecture, other }
+enum SecondaryStatus {
+  facultyAbsent,
+  holiday,
+  practicalCancelled,
+  extraLecture,
+  other,
+}
 
 /// An attendance record.
 ///
 /// Matches Supabase schema in supabase/migrations/00001_mvp_foundation.sql
-@TableIndex(name: 'idx_attendance_user_date', columns: {#userId, #date, #deletedAt})
+@TableIndex(
+  name: 'idx_attendance_user_date',
+  columns: {#userId, #date, #deletedAt},
+)
 @TableIndex(name: 'idx_attendance_subject', columns: {#subjectId})
 @DataClassName('AttendanceEntity')
 class Attendance extends Table {

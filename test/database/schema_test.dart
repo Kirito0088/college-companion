@@ -25,9 +25,7 @@ void main() {
 
   group('1. Database startup', () {
     test('database opens and executes a query', () async {
-      final row = await backend.db
-          .customSelect('SELECT 1 AS ok')
-          .getSingle();
+      final row = await backend.db.customSelect('SELECT 1 AS ok').getSingle();
       expect(row.data['ok'], 1);
     });
 

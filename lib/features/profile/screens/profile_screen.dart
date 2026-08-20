@@ -25,7 +25,9 @@ class ProfileScreen extends ConsumerWidget {
     String name = profile.displayName;
     String email = profile.email;
     if (authState is AuthAuthenticated) {
-      name = authState.user.displayName.isNotEmpty ? authState.user.displayName : name;
+      name = authState.user.displayName.isNotEmpty
+          ? authState.user.displayName
+          : name;
       email = authState.user.email.isNotEmpty ? authState.user.email : email;
     }
 
@@ -128,9 +130,7 @@ class _LogoutButton extends ConsumerWidget {
         hoverColor: ColorTokens.surfaceContainerHigh,
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(
-            vertical: SpacingTokens.base,
-          ),
+          padding: const EdgeInsets.symmetric(vertical: SpacingTokens.base),
           decoration: BoxDecoration(
             border: Border.all(
               color: ColorTokens.outlineVariant.withValues(alpha: 0.2),

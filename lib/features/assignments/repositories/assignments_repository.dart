@@ -26,7 +26,10 @@ class AssignmentRepository {
             ..orderBy([(t) => OrderingTerm.asc(t.dueDate)]))
           .watch();
     } catch (e) {
-      throw DatabaseException('Failed to watch assignments for user: $userId', e);
+      throw DatabaseException(
+        'Failed to watch assignments for user: $userId',
+        e,
+      );
     }
   }
 
@@ -115,7 +118,10 @@ class AssignmentRepository {
             ..orderBy([(t) => OrderingTerm.asc(t.dueDate)]))
           .watch();
     } catch (e) {
-      throw DatabaseException('Failed to watch assignments for subject: $subjectId', e);
+      throw DatabaseException(
+        'Failed to watch assignments for subject: $subjectId',
+        e,
+      );
     }
   }
 
@@ -152,8 +158,9 @@ class AssignmentRepository {
   /// Creates a new assignment. Returns the new row's ID.
   Future<String> create(AssignmentsCompanion data) async {
     try {
-      final result =
-          await _database.into(_database.assignments).insertReturning(data);
+      final result = await _database
+          .into(_database.assignments)
+          .insertReturning(data);
       await _syncQueueRepository?.enqueue(
         targetTable: 'assignments',
         recordId: result.id,
@@ -172,9 +179,9 @@ class AssignmentRepository {
     AssignmentsCompanion data,
   ) async {
     try {
-      await (_database.update(_database.assignments)
-            ..where((t) => t.userId.equals(userId) & t.id.equals(id)))
-          .write(data);
+      await (_database.update(
+        _database.assignments,
+      )..where((t) => t.userId.equals(userId) & t.id.equals(id))).write(data);
       await _syncQueueRepository?.enqueue(
         targetTable: 'assignments',
         recordId: id,
@@ -188,14 +195,14 @@ class AssignmentRepository {
   /// Marks an assignment as completed now.
   Future<void> markCompleted(String userId, String id) async {
     try {
-      await (_database.update(_database.assignments)
-            ..where((t) => t.userId.equals(userId) & t.id.equals(id)))
-          .write(
-            AssignmentsCompanion(
-              status: Value(AssignmentStatus.completed.name),
-              completedAt: Value(DateTime.now().toUtc().toIso8601String()),
-            ),
-          );
+      await (_database.update(
+        _database.assignments,
+      )..where((t) => t.userId.equals(userId) & t.id.equals(id))).write(
+        AssignmentsCompanion(
+          status: Value(AssignmentStatus.completed.name),
+          completedAt: Value(DateTime.now().toUtc().toIso8601String()),
+        ),
+      );
       await _syncQueueRepository?.enqueue(
         targetTable: 'assignments',
         recordId: id,
@@ -209,13 +216,13 @@ class AssignmentRepository {
   /// Soft-deletes an assignment.
   Future<void> delete(String userId, String id) async {
     try {
-      await (_database.update(_database.assignments)
-            ..where((t) => t.userId.equals(userId) & t.id.equals(id)))
-          .write(
-            AssignmentsCompanion(
-              deletedAt: Value(DateTime.now().toUtc().toIso8601String()),
-            ),
-          );
+      await (_database.update(
+        _database.assignments,
+      )..where((t) => t.userId.equals(userId) & t.id.equals(id))).write(
+        AssignmentsCompanion(
+          deletedAt: Value(DateTime.now().toUtc().toIso8601String()),
+        ),
+      );
       await _syncQueueRepository?.enqueue(
         targetTable: 'assignments',
         recordId: id,

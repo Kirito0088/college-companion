@@ -16,10 +16,7 @@ void main() {
     });
 
     test('progress calculates correctly during timer tick', () {
-      const state = FocusTimerState(
-        totalSeconds: 100,
-        remainingSeconds: 25,
-      );
+      const state = FocusTimerState(totalSeconds: 100, remainingSeconds: 25);
       expect(state.progress, equals(0.75));
       expect(state.formattedTime, equals('00:25'));
     });
@@ -30,12 +27,15 @@ void main() {
       SharedPreferences.setMockInitialValues({});
     });
 
-    test('loads default initial session history if preferences empty', () async {
-      final repo = FocusRepository();
-      final history = await repo.loadSessions();
-      expect(history.length, equals(3));
-      expect(history.first.subject, equals('Mathematics'));
-    });
+    test(
+      'loads default initial session history if preferences empty',
+      () async {
+        final repo = FocusRepository();
+        final history = await repo.loadSessions();
+        expect(history.length, equals(3));
+        expect(history.first.subject, equals('Mathematics'));
+      },
+    );
 
     test('adds new session and persists to SharedPreferences', () async {
       final repo = FocusRepository();

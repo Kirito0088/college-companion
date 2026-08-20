@@ -6,15 +6,49 @@ library;
 import 'package:college_companion/core/errors/exceptions.dart';
 import 'package:college_companion/core/repositories/sync_queue_repository.dart';
 import 'package:college_companion/database/app_database.dart';
+import 'package:college_companion/database/daos/lectures_dao.dart';
+import 'package:college_companion/features/timetable/models/lecture_schedule_item.dart';
 import 'package:drift/drift.dart';
 
 /// Repository for timetable operations.
 class TimetableRepository {
-  /// Creates a [TimetableRepository] with the given [database] and optional [syncQueueRepository].
-  TimetableRepository(this._database, [this._syncQueueRepository]);
+  /// Creates a [TimetableRepository] with the given [database] and optional [syncQueueRepository] and [lecturesDao].
+  TimetableRepository(
+    this._database, [
+    this._syncQueueRepository,
+    LecturesDao? lecturesDao,
+  ]) : _lecturesDao = lecturesDao ?? LecturesDao(_database);
 
   final AppDatabase _database;
   final SyncQueueRepository? _syncQueueRepository;
+  final LecturesDao _lecturesDao;
+
+  /// Watches all non-deleted timetable entries joined with subject details for a given day of week.
+  Stream<List<LectureScheduleItem>> watchLecturesForDay(
+    String userId,
+    int dayOfWeek,
+  ) {
+    try {
+      return _lecturesDao.watchLecturesForDay(userId, dayOfWeek);
+    } catch (e) {
+      throw DatabaseException(
+        'Failed to watch lecture schedule for day: $dayOfWeek',
+        e,
+      );
+    }
+  }
+
+  /// Watches all weekly timetable entries joined with subject details.
+  Stream<List<LectureScheduleItem>> watchAllWeeklyLectures(String userId) {
+    try {
+      return _lecturesDao.watchAllWeeklyLectures(userId);
+    } catch (e) {
+      throw DatabaseException(
+        'Failed to watch all weekly lectures for user: $userId',
+        e,
+      );
+    }
+  }
 
   /// Watches all non-deleted timetable entries for the given user,
   /// ordered by day of week then start time.
@@ -46,7 +80,10 @@ class TimetableRepository {
             ..orderBy([(t) => OrderingTerm.asc(t.startTime)]))
           .watch();
     } catch (e) {
-      throw DatabaseException('Failed to watch timetable for day: $dayOfWeek', e);
+      throw DatabaseException(
+        'Failed to watch timetable for day: $dayOfWeek',
+        e,
+      );
     }
   }
 
@@ -69,7 +106,10 @@ class TimetableRepository {
             ]))
           .watch();
     } catch (e) {
-      throw DatabaseException('Failed to watch timetable for subject: $subjectId', e);
+      throw DatabaseException(
+        'Failed to watch timetable for subject: $subjectId',
+        e,
+      );
     }
   }
 
@@ -106,8 +146,9 @@ class TimetableRepository {
   /// Creates a new timetable entry. Returns the new row's ID.
   Future<String> create(TimetableCompanion data) async {
     try {
-      final result =
-          await _database.into(_database.timetable).insertReturning(data);
+      final result = await _database
+          .into(_database.timetable)
+          .insertReturning(data);
       await _syncQueueRepository?.enqueue(
         targetTable: 'timetable',
         recordId: result.id,
@@ -120,15 +161,11 @@ class TimetableRepository {
   }
 
   /// Updates an existing timetable entry.
-  Future<void> update(
-    String userId,
-    String id,
-    TimetableCompanion data,
-  ) async {
+  Future<void> update(String userId, String id, TimetableCompanion data) async {
     try {
-      await (_database.update(_database.timetable)
-            ..where((t) => t.userId.equals(userId) & t.id.equals(id)))
-          .write(data);
+      await (_database.update(
+        _database.timetable,
+      )..where((t) => t.userId.equals(userId) & t.id.equals(id))).write(data);
       await _syncQueueRepository?.enqueue(
         targetTable: 'timetable',
         recordId: id,
@@ -142,13 +179,13 @@ class TimetableRepository {
   /// Soft-deletes a timetable entry.
   Future<void> delete(String userId, String id) async {
     try {
-      await (_database.update(_database.timetable)
-            ..where((t) => t.userId.equals(userId) & t.id.equals(id)))
-          .write(
-            TimetableCompanion(
-              deletedAt: Value(DateTime.now().toUtc().toIso8601String()),
-            ),
-          );
+      await (_database.update(
+        _database.timetable,
+      )..where((t) => t.userId.equals(userId) & t.id.equals(id))).write(
+        TimetableCompanion(
+          deletedAt: Value(DateTime.now().toUtc().toIso8601String()),
+        ),
+      );
       await _syncQueueRepository?.enqueue(
         targetTable: 'timetable',
         recordId: id,

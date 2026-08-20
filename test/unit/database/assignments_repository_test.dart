@@ -55,16 +55,18 @@ void main() {
   test('update assignment modifies title and enqueues sync update', () async {
     final now = DateTime.now().toUtc().toIso8601String();
 
-    await repository.create(AssignmentsCompanion(
-      id: const Value('asgn_1'),
-      userId: const Value('user_1'),
-      subjectId: const Value('sub_1'),
-      title: const Value('Initial Title'),
-      dueDate: const Value('2026-08-01'),
-      status: const Value('pending'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+    await repository.create(
+      AssignmentsCompanion(
+        id: const Value('asgn_1'),
+        userId: const Value('user_1'),
+        subjectId: const Value('sub_1'),
+        title: const Value('Initial Title'),
+        dueDate: const Value('2026-08-01'),
+        status: const Value('pending'),
+        createdAt: Value(now),
+        updatedAt: Value(now),
+      ),
+    );
 
     await repository.update(
       'user_1',
@@ -83,40 +85,47 @@ void main() {
     expect(pendingSync.last.operation, 'UPDATE');
   });
 
-  test('markCompleted sets status to completed and sets completedAt timestamp', () async {
-    final now = DateTime.now().toUtc().toIso8601String();
+  test(
+    'markCompleted sets status to completed and sets completedAt timestamp',
+    () async {
+      final now = DateTime.now().toUtc().toIso8601String();
 
-    await repository.create(AssignmentsCompanion(
-      id: const Value('asgn_1'),
-      userId: const Value('user_1'),
-      subjectId: const Value('sub_1'),
-      title: const Value('Physics Lab Report'),
-      dueDate: const Value('2026-08-01'),
-      status: const Value('pending'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+      await repository.create(
+        AssignmentsCompanion(
+          id: const Value('asgn_1'),
+          userId: const Value('user_1'),
+          subjectId: const Value('sub_1'),
+          title: const Value('Physics Lab Report'),
+          dueDate: const Value('2026-08-01'),
+          status: const Value('pending'),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+        ),
+      );
 
-    await repository.markCompleted('user_1', 'asgn_1');
+      await repository.markCompleted('user_1', 'asgn_1');
 
-    final completed = await repository.getById('user_1', 'asgn_1');
-    expect(completed?.status, 'completed');
-    expect(completed?.completedAt, isNotNull);
-  });
+      final completed = await repository.getById('user_1', 'asgn_1');
+      expect(completed?.status, 'completed');
+      expect(completed?.completedAt, isNotNull);
+    },
+  );
 
   test('delete soft-deletes assignment and enqueues sync delete', () async {
     final now = DateTime.now().toUtc().toIso8601String();
 
-    await repository.create(AssignmentsCompanion(
-      id: const Value('asgn_1'),
-      userId: const Value('user_1'),
-      subjectId: const Value('sub_1'),
-      title: const Value('Essay'),
-      dueDate: const Value('2026-08-01'),
-      status: const Value('pending'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+    await repository.create(
+      AssignmentsCompanion(
+        id: const Value('asgn_1'),
+        userId: const Value('user_1'),
+        subjectId: const Value('sub_1'),
+        title: const Value('Essay'),
+        dueDate: const Value('2026-08-01'),
+        status: const Value('pending'),
+        createdAt: Value(now),
+        updatedAt: Value(now),
+      ),
+    );
 
     await repository.delete('user_1', 'asgn_1');
 
@@ -127,107 +136,127 @@ void main() {
     expect(pendingSync.last.operation, 'DELETE');
   });
 
-  test('watchAll filters by user and excludes soft-deleted assignments', () async {
-    final now = DateTime.now().toUtc().toIso8601String();
+  test(
+    'watchAll filters by user and excludes soft-deleted assignments',
+    () async {
+      final now = DateTime.now().toUtc().toIso8601String();
 
-    await repository.create(AssignmentsCompanion(
-      id: const Value('asgn_1'),
-      userId: const Value('user_1'),
-      subjectId: const Value('sub_1'),
-      title: const Value('Task 1'),
-      dueDate: const Value('2026-08-01'),
-      status: const Value('pending'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+      await repository.create(
+        AssignmentsCompanion(
+          id: const Value('asgn_1'),
+          userId: const Value('user_1'),
+          subjectId: const Value('sub_1'),
+          title: const Value('Task 1'),
+          dueDate: const Value('2026-08-01'),
+          status: const Value('pending'),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+        ),
+      );
 
-    await repository.create(AssignmentsCompanion(
-      id: const Value('asgn_2'),
-      userId: const Value('user_1'),
-      subjectId: const Value('sub_1'),
-      title: const Value('Deleted Task'),
-      dueDate: const Value('2026-08-02'),
-      status: const Value('pending'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-      deletedAt: Value(now),
-    ));
+      await repository.create(
+        AssignmentsCompanion(
+          id: const Value('asgn_2'),
+          userId: const Value('user_1'),
+          subjectId: const Value('sub_1'),
+          title: const Value('Deleted Task'),
+          dueDate: const Value('2026-08-02'),
+          status: const Value('pending'),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+          deletedAt: Value(now),
+        ),
+      );
 
-    await repository.create(AssignmentsCompanion(
-      id: const Value('asgn_3'),
-      userId: const Value('user_2'),
-      subjectId: const Value('sub_1'),
-      title: const Value('Other User Task'),
-      dueDate: const Value('2026-08-01'),
-      status: const Value('pending'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+      await repository.create(
+        AssignmentsCompanion(
+          id: const Value('asgn_3'),
+          userId: const Value('user_2'),
+          subjectId: const Value('sub_1'),
+          title: const Value('Other User Task'),
+          dueDate: const Value('2026-08-01'),
+          status: const Value('pending'),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+        ),
+      );
 
-    final list = await repository.watchAll('user_1').first;
-    expect(list.length, 1);
-    expect(list.first.id, 'asgn_1');
-  });
+      final list = await repository.watchAll('user_1').first;
+      expect(list.length, 1);
+      expect(list.first.id, 'asgn_1');
+    },
+  );
 
-  test('watchPending and watchCompleted stream correct assignment statuses', () async {
-    final now = DateTime.now().toUtc().toIso8601String();
+  test(
+    'watchPending and watchCompleted stream correct assignment statuses',
+    () async {
+      final now = DateTime.now().toUtc().toIso8601String();
 
-    await repository.create(AssignmentsCompanion(
-      id: const Value('asgn_pending'),
-      userId: const Value('user_1'),
-      subjectId: const Value('sub_1'),
-      title: const Value('Pending Assignment'),
-      dueDate: const Value('2026-08-01'),
-      status: const Value('pending'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+      await repository.create(
+        AssignmentsCompanion(
+          id: const Value('asgn_pending'),
+          userId: const Value('user_1'),
+          subjectId: const Value('sub_1'),
+          title: const Value('Pending Assignment'),
+          dueDate: const Value('2026-08-01'),
+          status: const Value('pending'),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+        ),
+      );
 
-    await repository.create(AssignmentsCompanion(
-      id: const Value('asgn_completed'),
-      userId: const Value('user_1'),
-      subjectId: const Value('sub_1'),
-      title: const Value('Completed Assignment'),
-      dueDate: const Value('2026-07-20'),
-      status: const Value('completed'),
-      completedAt: Value(now),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+      await repository.create(
+        AssignmentsCompanion(
+          id: const Value('asgn_completed'),
+          userId: const Value('user_1'),
+          subjectId: const Value('sub_1'),
+          title: const Value('Completed Assignment'),
+          dueDate: const Value('2026-07-20'),
+          status: const Value('completed'),
+          completedAt: Value(now),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+        ),
+      );
 
-    final pendingList = await repository.watchPending('user_1').first;
-    expect(pendingList.length, 1);
-    expect(pendingList.first.id, 'asgn_pending');
+      final pendingList = await repository.watchPending('user_1').first;
+      expect(pendingList.length, 1);
+      expect(pendingList.first.id, 'asgn_pending');
 
-    final completedList = await repository.watchCompleted('user_1').first;
-    expect(completedList.length, 1);
-    expect(completedList.first.id, 'asgn_completed');
-  });
+      final completedList = await repository.watchCompleted('user_1').first;
+      expect(completedList.length, 1);
+      expect(completedList.first.id, 'asgn_completed');
+    },
+  );
 
   test('watchDueOn and watchUpcoming filter by due date correctly', () async {
     final now = DateTime.now().toUtc().toIso8601String();
 
-    await repository.create(AssignmentsCompanion(
-      id: const Value('asgn_due_today'),
-      userId: const Value('user_1'),
-      subjectId: const Value('sub_1'),
-      title: const Value('Due Today'),
-      dueDate: const Value('2026-08-10'),
-      status: const Value('pending'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+    await repository.create(
+      AssignmentsCompanion(
+        id: const Value('asgn_due_today'),
+        userId: const Value('user_1'),
+        subjectId: const Value('sub_1'),
+        title: const Value('Due Today'),
+        dueDate: const Value('2026-08-10'),
+        status: const Value('pending'),
+        createdAt: Value(now),
+        updatedAt: Value(now),
+      ),
+    );
 
-    await repository.create(AssignmentsCompanion(
-      id: const Value('asgn_due_later'),
-      userId: const Value('user_1'),
-      subjectId: const Value('sub_1'),
-      title: const Value('Due Later'),
-      dueDate: const Value('2026-08-20'),
-      status: const Value('pending'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+    await repository.create(
+      AssignmentsCompanion(
+        id: const Value('asgn_due_later'),
+        userId: const Value('user_1'),
+        subjectId: const Value('sub_1'),
+        title: const Value('Due Later'),
+        dueDate: const Value('2026-08-20'),
+        status: const Value('pending'),
+        createdAt: Value(now),
+        updatedAt: Value(now),
+      ),
+    );
 
     final targetDate = DateTime(2026, 8, 10);
     final dueOnList = await repository.watchDueOn('user_1', targetDate).first;
@@ -235,7 +264,9 @@ void main() {
     expect(dueOnList.first.id, 'asgn_due_today');
 
     final upcomingCutoff = DateTime(2026, 8, 15);
-    final upcomingList = await repository.watchUpcoming('user_1', upcomingCutoff).first;
+    final upcomingList = await repository
+        .watchUpcoming('user_1', upcomingCutoff)
+        .first;
     expect(upcomingList.length, 1);
     expect(upcomingList.first.id, 'asgn_due_today');
   });
@@ -243,27 +274,31 @@ void main() {
   test('watchBySubject and watchById filter correctly', () async {
     final now = DateTime.now().toUtc().toIso8601String();
 
-    await repository.create(AssignmentsCompanion(
-      id: const Value('asgn_subj_1'),
-      userId: const Value('user_1'),
-      subjectId: const Value('sub_A'),
-      title: const Value('Sub A Assignment'),
-      dueDate: const Value('2026-08-01'),
-      status: const Value('pending'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+    await repository.create(
+      AssignmentsCompanion(
+        id: const Value('asgn_subj_1'),
+        userId: const Value('user_1'),
+        subjectId: const Value('sub_A'),
+        title: const Value('Sub A Assignment'),
+        dueDate: const Value('2026-08-01'),
+        status: const Value('pending'),
+        createdAt: Value(now),
+        updatedAt: Value(now),
+      ),
+    );
 
-    await repository.create(AssignmentsCompanion(
-      id: const Value('asgn_subj_2'),
-      userId: const Value('user_1'),
-      subjectId: const Value('sub_B'),
-      title: const Value('Sub B Assignment'),
-      dueDate: const Value('2026-08-01'),
-      status: const Value('pending'),
-      createdAt: Value(now),
-      updatedAt: Value(now),
-    ));
+    await repository.create(
+      AssignmentsCompanion(
+        id: const Value('asgn_subj_2'),
+        userId: const Value('user_1'),
+        subjectId: const Value('sub_B'),
+        title: const Value('Sub B Assignment'),
+        dueDate: const Value('2026-08-01'),
+        status: const Value('pending'),
+        createdAt: Value(now),
+        updatedAt: Value(now),
+      ),
+    );
 
     final subAList = await repository.watchBySubject('user_1', 'sub_A').first;
     expect(subAList.length, 1);

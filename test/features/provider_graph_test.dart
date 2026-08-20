@@ -23,9 +23,7 @@ void main() {
   setUp(() {
     db = AppDatabase.forTesting(NativeDatabase.memory());
     container = ProviderContainer(
-      overrides: [
-        databaseProvider.overrideWithValue(db),
-      ],
+      overrides: [databaseProvider.overrideWithValue(db)],
     );
   });
 
@@ -40,27 +38,48 @@ void main() {
     });
 
     test('syncQueueRepositoryProvider resolves to SyncQueueRepository', () {
-      expect(container.read(syncQueueRepositoryProvider), isA<SyncQueueRepository>());
+      expect(
+        container.read(syncQueueRepositoryProvider),
+        isA<SyncQueueRepository>(),
+      );
     });
 
-    test('userSettingsRepositoryProvider resolves to UserSettingsRepository', () {
-      expect(container.read(userSettingsRepositoryProvider), isA<UserSettingsRepository>());
-    });
+    test(
+      'userSettingsRepositoryProvider resolves to UserSettingsRepository',
+      () {
+        expect(
+          container.read(userSettingsRepositoryProvider),
+          isA<UserSettingsRepository>(),
+        );
+      },
+    );
 
     test('assignmentRepositoryProvider resolves to AssignmentRepository', () {
-      expect(container.read(assignmentRepositoryProvider), isA<AssignmentRepository>());
+      expect(
+        container.read(assignmentRepositoryProvider),
+        isA<AssignmentRepository>(),
+      );
     });
 
     test('attendanceRepositoryProvider resolves to AttendanceRepository', () {
-      expect(container.read(attendanceRepositoryProvider), isA<AttendanceRepository>());
+      expect(
+        container.read(attendanceRepositoryProvider),
+        isA<AttendanceRepository>(),
+      );
     });
 
     test('calendarRepositoryProvider resolves to CalendarRepository', () {
-      expect(container.read(calendarRepositoryProvider), isA<CalendarRepository>());
+      expect(
+        container.read(calendarRepositoryProvider),
+        isA<CalendarRepository>(),
+      );
     });
 
     test('resourcesRepositoryProvider resolves to ResourcesRepository', () {
-      expect(container.read(resourcesRepositoryProvider), isA<ResourcesRepository>());
+      expect(
+        container.read(resourcesRepositoryProvider),
+        isA<ResourcesRepository>(),
+      );
     });
 
     test('stream providers instantiate cleanly from graph', () {

@@ -43,8 +43,8 @@ import 'package:college_companion/features/settings/screens/privacy_policy_scree
 import 'package:college_companion/features/settings/screens/settings_screen.dart';
 import 'package:college_companion/features/settings/screens/terms_conditions_screen.dart';
 import 'package:college_companion/features/subjects/screens/subject_details_screen.dart';
+import 'package:college_companion/features/timetable/screens/timetable_screen.dart';
 import 'package:college_companion/routing/scaffold_with_nav_bar.dart';
-import 'package:college_companion/shared/widgets/placeholder_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -81,7 +81,8 @@ abstract final class RoutePaths {
   static const String about = '/about';
   static const String accountInformation = '/account-information';
   static const String focusMode = '/profile/focus';
-  static const String subjectDetails = '/subject-details';
+  static const String subjectDetails = '/subject-details/:id';
+  static const String subjectDetailsLegacy = '/subject-details';
   static const String resources = '/resources';
   static const String resourceDetails = '/resource-details';
   static const String assignmentDetails = '/assignment-details/:id';
@@ -179,7 +180,9 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
       }
 
       // Authenticated user on non-onboarding route without having completed onboarding.
-      if (isAuthenticated && !hasCompletedOnboarding && currentPath != RoutePaths.onboarding) {
+      if (isAuthenticated &&
+          !hasCompletedOnboarding &&
+          currentPath != RoutePaths.onboarding) {
         return RoutePaths.onboarding;
       }
 
@@ -285,8 +288,7 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
         path: RoutePaths.timetable,
         name: RouteNames.timetable,
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) =>
-            const PlaceholderScreen(title: 'Timetable'),
+        builder: (context, state) => const TimetableScreen(),
       ),
       GoRoute(
         path: RoutePaths.internalMarks,
@@ -304,9 +306,8 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
         path: RoutePaths.semesterDetails,
         name: RouteNames.semesterDetails,
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => SemesterDetailsScreen(
-          semesterId: state.pathParameters['id']!,
-        ),
+        builder: (context, state) =>
+            SemesterDetailsScreen(semesterId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: RoutePaths.settings,
@@ -349,6 +350,12 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
         path: RoutePaths.subjectDetails,
         name: RouteNames.subjectDetails,
         parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) =>
+            SubjectDetailsScreen(subjectId: state.pathParameters['id'] ?? ''),
+      ),
+      GoRoute(
+        path: RoutePaths.subjectDetailsLegacy,
+        parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const SubjectDetailsScreen(),
       ),
       GoRoute(
@@ -379,9 +386,8 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
         path: RoutePaths.assignmentDetails,
         name: RouteNames.assignmentDetails,
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => AssignmentDetailsScreen(
-          assignmentId: state.pathParameters['id']!,
-        ),
+        builder: (context, state) =>
+            AssignmentDetailsScreen(assignmentId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: RoutePaths.addEditEvent,
@@ -393,9 +399,8 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
         path: RoutePaths.eventDetails,
         name: RouteNames.eventDetails,
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => EventDetailsScreen(
-          eventId: state.pathParameters['id']!,
-        ),
+        builder: (context, state) =>
+            EventDetailsScreen(eventId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: RoutePaths.notifications,

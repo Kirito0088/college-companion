@@ -18,6 +18,6 @@ final calendarRepositoryProvider = Provider<CalendarRepository>((ref) {
 /// Watches all non-deleted calendar events for a user.
 final calendarEventsStreamProvider =
     StreamProvider.family<List<CalendarEventEntity>, String>((ref, userId) {
-  final repo = ref.watch(calendarRepositoryProvider);
-  return repo.watchAll(userId);
-});
+      final repo = ref.watch(calendarRepositoryProvider);
+      return repo.watchAll(userId);
+    });

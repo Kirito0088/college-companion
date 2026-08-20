@@ -76,14 +76,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final authState = ref.watch(authStateProvider);
-    final userId = authState is AuthAuthenticated && authState.user.uid.isNotEmpty
+    final userId =
+        authState is AuthAuthenticated && authState.user.uid.isNotEmpty
         ? authState.user.uid
         : 'default_user';
 
     final settingsAsync = ref.watch(userSettingsStreamProvider(userId));
     final dbSettings = settingsAsync.valueOrNull;
 
-    final pushNotifications = _localPushNotifications ?? (dbSettings?.notificationsEnabled ?? true);
+    final pushNotifications =
+        _localPushNotifications ?? (dbSettings?.notificationsEnabled ?? true);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -146,7 +148,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: const Text('Please enable notifications in system settings.'),
+                              content: const Text(
+                                'Please enable notifications in system settings.',
+                              ),
                               action: SnackBarAction(
                                 label: 'Settings',
                                 onPressed: () => openAppSettings(),
@@ -161,7 +165,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     setState(() {
                       _localPushNotifications = val;
                     });
-                    
+
                     final prefs = await SharedPreferences.getInstance();
                     await prefs.setBool('push_notifications', val);
 
@@ -234,14 +238,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     if (confirmed == true && context.mounted) {
                       final prefs = await SharedPreferences.getInstance();
                       // Remove non-essential keys
-                      final keysToKeep = ['push_notifications', 'last_sync_timestamp'];
+                      final keysToKeep = [
+                        'push_notifications',
+                        'last_sync_timestamp',
+                      ];
                       final allKeys = prefs.getKeys();
                       for (final key in allKeys) {
                         if (!keysToKeep.contains(key)) {
                           await prefs.remove(key);
                         }
                       }
-                      
+
                       try {
                         final tempDir = await getTemporaryDirectory();
                         if (tempDir.existsSync()) {
@@ -254,7 +261,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       } catch (e) {
                         // ignore
                       }
-                      
+
                       await _calculateCacheSize();
 
                       if (context.mounted) {
@@ -476,4 +483,3 @@ class _SettingsSwitchRow extends StatelessWidget {
     );
   }
 }
-

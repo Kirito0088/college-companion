@@ -28,7 +28,10 @@ class AttendanceRepository {
             ]))
           .watch();
     } catch (e) {
-      throw DatabaseException('Failed to watch attendance for user: $userId', e);
+      throw DatabaseException(
+        'Failed to watch attendance for user: $userId',
+        e,
+      );
     }
   }
 
@@ -126,8 +129,9 @@ class AttendanceRepository {
   /// Creates a new attendance record. Returns the new row's ID.
   Future<String> create(AttendanceCompanion data) async {
     try {
-      final result =
-          await _database.into(_database.attendance).insertReturning(data);
+      final result = await _database
+          .into(_database.attendance)
+          .insertReturning(data);
       await _syncQueueRepository?.enqueue(
         targetTable: 'attendance',
         recordId: result.id,
@@ -146,9 +150,9 @@ class AttendanceRepository {
     AttendanceCompanion data,
   ) async {
     try {
-      await (_database.update(_database.attendance)
-            ..where((t) => t.userId.equals(userId) & t.id.equals(id)))
-          .write(data);
+      await (_database.update(
+        _database.attendance,
+      )..where((t) => t.userId.equals(userId) & t.id.equals(id))).write(data);
       await _syncQueueRepository?.enqueue(
         targetTable: 'attendance',
         recordId: id,
@@ -162,20 +166,23 @@ class AttendanceRepository {
   /// Soft-deletes an attendance record.
   Future<void> delete(String userId, String id) async {
     try {
-      await (_database.update(_database.attendance)
-            ..where((t) => t.userId.equals(userId) & t.id.equals(id)))
-          .write(
-            AttendanceCompanion(
-              deletedAt: Value(DateTime.now().toUtc().toIso8601String()),
-            ),
-          );
+      await (_database.update(
+        _database.attendance,
+      )..where((t) => t.userId.equals(userId) & t.id.equals(id))).write(
+        AttendanceCompanion(
+          deletedAt: Value(DateTime.now().toUtc().toIso8601String()),
+        ),
+      );
       await _syncQueueRepository?.enqueue(
         targetTable: 'attendance',
         recordId: id,
         operation: 'DELETE',
       );
     } catch (e) {
-      throw DatabaseException('Failed to soft-delete attendance record: $id', e);
+      throw DatabaseException(
+        'Failed to soft-delete attendance record: $id',
+        e,
+      );
     }
   }
 

@@ -73,10 +73,16 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
               ),
             ),
             Text(
-              timerState.isBreak ? 'Break Time' : 'Stay focused. Study smarter.',
+              timerState.isBreak
+                  ? 'Break Time'
+                  : 'Stay focused. Study smarter.',
               style: theme.textTheme.labelSmall?.copyWith(
-                color: timerState.isBreak ? ColorTokens.tertiary : ColorTokens.onSurfaceVariant,
-                fontWeight: timerState.isBreak ? FontWeight.bold : FontWeight.normal,
+                color: timerState.isBreak
+                    ? ColorTokens.tertiary
+                    : ColorTokens.onSurfaceVariant,
+                fontWeight: timerState.isBreak
+                    ? FontWeight.bold
+                    : FontWeight.normal,
               ),
             ),
           ],
@@ -150,7 +156,9 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                 Text(
                   isBreak ? 'Break Session' : 'Focus Session',
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: isBreak ? ColorTokens.tertiary : ColorTokens.onSurfaceVariant,
+                    color: isBreak
+                        ? ColorTokens.tertiary
+                        : ColorTokens.onSurfaceVariant,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -184,8 +192,12 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     );
   }
 
-  Widget _buildSessionControls(FocusTimerState state, FocusTimerNotifier notifier) {
-    if (state.status == FocusTimerStatus.running || state.status == FocusTimerStatus.breakMode) {
+  Widget _buildSessionControls(
+    FocusTimerState state,
+    FocusTimerNotifier notifier,
+  ) {
+    if (state.status == FocusTimerStatus.running ||
+        state.status == FocusTimerStatus.breakMode) {
       return Row(
         children: [
           Expanded(
@@ -282,7 +294,10 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     );
   }
 
-  Widget _buildSessionPresets(FocusTimerState state, FocusTimerNotifier notifier) {
+  Widget _buildSessionPresets(
+    FocusTimerState state,
+    FocusTimerNotifier notifier,
+  ) {
     final presets = [
       {'label': '25 min', 'work': 25, 'break': 5},
       {'label': '45 min', 'work': 45, 'break': 10},
@@ -416,7 +431,10 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
   }
 
   Widget _buildStatisticsCard(BuildContext context, FocusTimerState state) {
-    final totalMins = state.history.fold<int>(0, (sum, s) => sum + s.durationMinutes);
+    final totalMins = state.history.fold<int>(
+      0,
+      (sum, s) => sum + s.durationMinutes,
+    );
     final hours = totalMins ~/ 60;
     final mins = totalMins % 60;
     final focusTimeString = hours > 0 ? '${hours}h ${mins}m' : '${mins}m';
@@ -426,7 +444,9 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
       title: "Today's Focus",
       child: Row(
         children: [
-          Expanded(child: _buildStatItem(context, 'Focus Time', focusTimeString)),
+          Expanded(
+            child: _buildStatItem(context, 'Focus Time', focusTimeString),
+          ),
           Container(
             width: 1,
             height: 40,
@@ -714,9 +734,15 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
 
   IconData _getSubjectIcon(String subject) {
     final lower = subject.toLowerCase();
-    if (lower.contains('math')) return Symbols.calculate;
-    if (lower.contains('operating') || lower.contains('system')) return Symbols.memory;
-    if (lower.contains('dbms') || lower.contains('data')) return Symbols.database;
+    if (lower.contains('math')) {
+      return Symbols.calculate;
+    }
+    if (lower.contains('operating') || lower.contains('system')) {
+      return Symbols.memory;
+    }
+    if (lower.contains('dbms') || lower.contains('data')) {
+      return Symbols.database;
+    }
     return Symbols.book;
   }
 

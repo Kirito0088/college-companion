@@ -101,7 +101,8 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
 
     try {
       final authState = ref.read(authStateProvider);
-      final userId = authState is AuthAuthenticated && authState.user.uid.isNotEmpty
+      final userId =
+          authState is AuthAuthenticated && authState.user.uid.isNotEmpty
           ? authState.user.uid
           : 'default_user';
 
@@ -153,9 +154,9 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save event: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to save event: $e')));
       }
     } finally {
       if (mounted) {
@@ -168,12 +169,14 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final authState = ref.watch(authStateProvider);
-    final userId = authState is AuthAuthenticated && authState.user.uid.isNotEmpty
+    final userId =
+        authState is AuthAuthenticated && authState.user.uid.isNotEmpty
         ? authState.user.uid
         : 'default_user';
 
     final subjectsAsync = ref.watch(subjectsStreamProvider(userId));
-    final subjectNames = subjectsAsync.valueOrNull?.map((s) => s.name).toList() ??
+    final subjectNames =
+        subjectsAsync.valueOrNull?.map((s) => s.name).toList() ??
         ['Physics 101', 'DBMS', 'Web Technology', 'Computer Science'];
 
     final dateStr = DateFormat('MMM d, yyyy').format(_selectedDate);
@@ -337,7 +340,10 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
                     ? const SizedBox(
                         height: 24,
                         width: 24,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
                       )
                     : const Text('Save Event'),
               ),
@@ -402,7 +408,10 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
     );
   }
 
-  Widget _buildDropdown({required ThemeData theme, required List<String> subjects}) {
+  Widget _buildDropdown({
+    required ThemeData theme,
+    required List<String> subjects,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -417,7 +426,9 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
-              value: subjects.contains(_selectedSubject) ? _selectedSubject : null,
+              value: subjects.contains(_selectedSubject)
+                  ? _selectedSubject
+                  : null,
               hint: Text(
                 'None',
                 style: theme.textTheme.bodyLarge?.copyWith(

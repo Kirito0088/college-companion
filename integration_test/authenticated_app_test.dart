@@ -25,41 +25,42 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Automated Authenticated App Integration Test', () {
-    testWidgets('Bypasses login and navigates authenticated screens on virtual device', (
-      WidgetTester tester,
-    ) async {
-      // Launch app with authenticated state override
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            authStateProvider.overrideWith(_MockAuthenticatedNotifier.new),
-          ],
-          child: const CollegeCompanionApp(),
-        ),
-      );
+    testWidgets(
+      'Bypasses login and navigates authenticated screens on virtual device',
+      (WidgetTester tester) async {
+        // Launch app with authenticated state override
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              authStateProvider.overrideWith(_MockAuthenticatedNotifier.new),
+            ],
+            child: const CollegeCompanionApp(),
+          ),
+        );
 
-      // Wait for router navigation and animations to settle
-      await tester.pumpAndSettle();
-
-      // 1. Verify we bypassed login and landed on DashboardScreen
-      expect(find.byType(DashboardScreen), findsOneWidget);
-
-      // 2. Verify Bottom Navigation Bar is present
-      expect(find.byType(NavigationBar), findsOneWidget);
-
-      // 3. Test tapping Attendance navigation tab
-      final attendanceTab = find.byIcon(Icons.calendar_today_rounded);
-      if (attendanceTab.evaluate().isNotEmpty) {
-        await tester.tap(attendanceTab.first);
+        // Wait for router navigation and animations to settle
         await tester.pumpAndSettle();
-      }
 
-      // 4. Test tapping Profile navigation tab
-      final profileTab = find.byIcon(Icons.person_rounded);
-      if (profileTab.evaluate().isNotEmpty) {
-        await tester.tap(profileTab.first);
-        await tester.pumpAndSettle();
-      }
-    });
+        // 1. Verify we bypassed login and landed on DashboardScreen
+        expect(find.byType(DashboardScreen), findsOneWidget);
+
+        // 2. Verify Bottom Navigation Bar is present
+        expect(find.byType(NavigationBar), findsOneWidget);
+
+        // 3. Test tapping Attendance navigation tab
+        final attendanceTab = find.byIcon(Icons.calendar_today_rounded);
+        if (attendanceTab.evaluate().isNotEmpty) {
+          await tester.tap(attendanceTab.first);
+          await tester.pumpAndSettle();
+        }
+
+        // 4. Test tapping Profile navigation tab
+        final profileTab = find.byIcon(Icons.person_rounded);
+        if (profileTab.evaluate().isNotEmpty) {
+          await tester.tap(profileTab.first);
+          await tester.pumpAndSettle();
+        }
+      },
+    );
   });
 }

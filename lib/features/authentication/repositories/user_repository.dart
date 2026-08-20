@@ -76,8 +76,9 @@ class UserRepository {
   /// Creates a new user row in local SQLite.
   Future<String> create(UsersCompanion data) async {
     try {
-      final result =
-          await _database.into(_database.users).insertReturning(data);
+      final result = await _database
+          .into(_database.users)
+          .insertReturning(data);
       await _syncQueueRepository?.enqueue(
         targetTable: 'users',
         recordId: result.id,
@@ -97,9 +98,9 @@ class UserRepository {
   /// Gets a user profile by ID from local SQLite (one-time fetch).
   Future<UserEntity?> getById(String id) async {
     try {
-      return await (_database.select(_database.users)
-            ..where((t) => t.id.equals(id)))
-          .getSingleOrNull();
+      return await (_database.select(
+        _database.users,
+      )..where((t) => t.id.equals(id))).getSingleOrNull();
     } catch (e) {
       throw DatabaseException('Failed to fetch user by id: $id', e);
     }
@@ -113,9 +114,9 @@ class UserRepository {
   /// Watches a single user profile by ID from local SQLite.
   Stream<UserEntity?> watchById(String id) {
     try {
-      return (_database.select(_database.users)
-            ..where((t) => t.id.equals(id)))
-          .watchSingleOrNull();
+      return (_database.select(
+        _database.users,
+      )..where((t) => t.id.equals(id))).watchSingleOrNull();
     } catch (e) {
       throw DatabaseException('Failed to watch user by id: $id', e);
     }
@@ -124,9 +125,9 @@ class UserRepository {
   /// Watches all user profiles in local SQLite.
   Stream<List<UserEntity>> watchAll() {
     try {
-      return (_database.select(_database.users)
-            ..orderBy([(t) => OrderingTerm.asc(t.name)]))
-          .watch();
+      return (_database.select(
+        _database.users,
+      )..orderBy([(t) => OrderingTerm.asc(t.name)])).watch();
     } catch (e) {
       throw DatabaseException('Failed to watch all users', e);
     }
@@ -135,9 +136,9 @@ class UserRepository {
   /// Updates an existing user profile in local SQLite.
   Future<void> update(String id, UsersCompanion data) async {
     try {
-      await (_database.update(_database.users)
-            ..where((t) => t.id.equals(id)))
-          .write(data);
+      await (_database.update(
+        _database.users,
+      )..where((t) => t.id.equals(id))).write(data);
       await _syncQueueRepository?.enqueue(
         targetTable: 'users',
         recordId: id,
@@ -151,9 +152,9 @@ class UserRepository {
   /// Deletes a user profile from local SQLite.
   Future<void> delete(String id) async {
     try {
-      await (_database.delete(_database.users)
-            ..where((t) => t.id.equals(id)))
-          .go();
+      await (_database.delete(
+        _database.users,
+      )..where((t) => t.id.equals(id))).go();
       await _syncQueueRepository?.enqueue(
         targetTable: 'users',
         recordId: id,

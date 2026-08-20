@@ -18,6 +18,6 @@ final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
 /// Watches all non-deleted notifications for a user.
 final notificationsStreamProvider =
     StreamProvider.family<List<NotificationEntity>, String>((ref, userId) {
-  final repo = ref.watch(notificationRepositoryProvider);
-  return repo.watchAll(userId);
-});
+      final repo = ref.watch(notificationRepositoryProvider);
+      return repo.watchAll(userId);
+    });

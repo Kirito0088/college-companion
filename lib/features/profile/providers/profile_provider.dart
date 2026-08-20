@@ -63,13 +63,16 @@ class UserProfileNotifier extends StateNotifier<UserProfileDetails> {
     state = UserProfileDetails(
       displayName: prefs.getString('profile_displayName') ?? 'Jayesh Patil',
       email: prefs.getString('profile_email') ?? 'jayeshpatil@gmail.com',
-      collegeName: prefs.getString('profile_collegeName') ?? 'ABC College of Engineering',
+      collegeName:
+          prefs.getString('profile_collegeName') ??
+          'ABC College of Engineering',
       branch: prefs.getString('profile_branch') ?? 'Computer Science',
       semester: prefs.getString('profile_semester') ?? '6',
       studentId: prefs.getString('profile_studentId') ?? '12345678',
       university: prefs.getString('profile_university') ?? 'Mumbai University',
       course: prefs.getString('profile_course') ?? 'Bachelor of Engineering',
-      department: prefs.getString('profile_department') ?? 'Computer Science (AI & ML)',
+      department:
+          prefs.getString('profile_department') ?? 'Computer Science (AI & ML)',
       gradYear: prefs.getString('profile_gradYear') ?? '2028',
     );
   }
@@ -90,6 +93,7 @@ class UserProfileNotifier extends StateNotifier<UserProfileDetails> {
   }
 }
 
-final userProfileProvider = StateNotifierProvider<UserProfileNotifier, UserProfileDetails>((ref) {
-  return UserProfileNotifier();
-});
+final userProfileProvider =
+    StateNotifierProvider<UserProfileNotifier, UserProfileDetails>((ref) {
+      return UserProfileNotifier();
+    });

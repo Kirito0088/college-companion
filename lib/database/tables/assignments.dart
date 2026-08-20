@@ -12,7 +12,10 @@ enum AssignmentStatus { pending, completed }
 /// An assignment record.
 ///
 /// Matches Supabase schema in supabase/migrations/00001_mvp_foundation.sql
-@TableIndex(name: 'idx_assignments_user_status', columns: {#userId, #status, #deletedAt})
+@TableIndex(
+  name: 'idx_assignments_user_status',
+  columns: {#userId, #status, #deletedAt},
+)
 @TableIndex(name: 'idx_assignments_subject', columns: {#subjectId})
 @TableIndex(name: 'idx_assignments_due_date', columns: {#dueDate})
 @DataClassName('AssignmentEntity')

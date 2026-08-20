@@ -15,7 +15,8 @@ class AccountInformationScreen extends ConsumerStatefulWidget {
       _AccountInformationScreenState();
 }
 
-class _AccountInformationScreenState extends ConsumerState<AccountInformationScreen> {
+class _AccountInformationScreenState
+    extends ConsumerState<AccountInformationScreen> {
   late final TextEditingController _displayNameController;
   late final TextEditingController _collegeNameController;
   late final TextEditingController _branchController;
@@ -121,7 +122,9 @@ class _AccountInformationScreenState extends ConsumerState<AccountInformationScr
 
   Widget _buildProfileCard(BuildContext context, UserProfileDetails profile) {
     final theme = Theme.of(context);
-    final initial = profile.displayName.isNotEmpty ? profile.displayName[0].toUpperCase() : 'J';
+    final initial = profile.displayName.isNotEmpty
+        ? profile.displayName[0].toUpperCase()
+        : 'J';
 
     return Container(
       padding: const EdgeInsets.all(SpacingTokens.xl),
@@ -398,7 +401,9 @@ class _AccountInformationScreenState extends ConsumerState<AccountInformationScr
         await ref.read(userProfileProvider.notifier).updateProfile(updated);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Account information updated successfully!')),
+            const SnackBar(
+              content: Text('Account information updated successfully!'),
+            ),
           );
         }
       },

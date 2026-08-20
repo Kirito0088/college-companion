@@ -24,7 +24,10 @@ class CalendarRepository {
             ..orderBy([(t) => OrderingTerm.asc(t.startDate)]))
           .watch();
     } catch (e) {
-      throw DatabaseException('Failed to watch calendar events for user: $userId', e);
+      throw DatabaseException(
+        'Failed to watch calendar events for user: $userId',
+        e,
+      );
     }
   }
 
@@ -77,15 +80,15 @@ class CalendarRepository {
             ..orderBy([(t) => OrderingTerm.asc(t.startDate)]))
           .watch();
     } catch (e) {
-      throw DatabaseException('Failed to watch calendar events by date range', e);
+      throw DatabaseException(
+        'Failed to watch calendar events by date range',
+        e,
+      );
     }
   }
 
   /// Watches upcoming calendar events starting on or before [end].
-  Stream<List<CalendarEventEntity>> watchUpcoming(
-    String userId,
-    DateTime end,
-  ) {
+  Stream<List<CalendarEventEntity>> watchUpcoming(String userId, DateTime end) {
     try {
       final endStr = end.toUtc().toIso8601String();
       return (_database.select(_database.calendarEvents)
@@ -105,8 +108,9 @@ class CalendarRepository {
   /// Creates a new calendar event. Returns the new row's ID.
   Future<String> create(CalendarEventsCompanion data) async {
     try {
-      final result =
-          await _database.into(_database.calendarEvents).insertReturning(data);
+      final result = await _database
+          .into(_database.calendarEvents)
+          .insertReturning(data);
       await _syncQueueRepository?.enqueue(
         targetTable: 'calendar_events',
         recordId: result.id,
@@ -125,9 +129,9 @@ class CalendarRepository {
     CalendarEventsCompanion data,
   ) async {
     try {
-      await (_database.update(_database.calendarEvents)
-            ..where((t) => t.userId.equals(userId) & t.id.equals(id)))
-          .write(data);
+      await (_database.update(
+        _database.calendarEvents,
+      )..where((t) => t.userId.equals(userId) & t.id.equals(id))).write(data);
       await _syncQueueRepository?.enqueue(
         targetTable: 'calendar_events',
         recordId: id,
@@ -141,13 +145,13 @@ class CalendarRepository {
   /// Soft-deletes a calendar event.
   Future<void> delete(String userId, String id) async {
     try {
-      await (_database.update(_database.calendarEvents)
-            ..where((t) => t.userId.equals(userId) & t.id.equals(id)))
-          .write(
-            CalendarEventsCompanion(
-              deletedAt: Value(DateTime.now().toUtc().toIso8601String()),
-            ),
-          );
+      await (_database.update(
+        _database.calendarEvents,
+      )..where((t) => t.userId.equals(userId) & t.id.equals(id))).write(
+        CalendarEventsCompanion(
+          deletedAt: Value(DateTime.now().toUtc().toIso8601String()),
+        ),
+      );
       await _syncQueueRepository?.enqueue(
         targetTable: 'calendar_events',
         recordId: id,

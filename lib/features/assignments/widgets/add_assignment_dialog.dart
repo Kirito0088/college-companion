@@ -26,7 +26,8 @@ class AddAssignmentDialog extends ConsumerStatefulWidget {
   }
 
   @override
-  ConsumerState<AddAssignmentDialog> createState() => _AddAssignmentDialogState();
+  ConsumerState<AddAssignmentDialog> createState() =>
+      _AddAssignmentDialogState();
 }
 
 class _AddAssignmentDialogState extends ConsumerState<AddAssignmentDialog> {
@@ -68,7 +69,8 @@ class _AddAssignmentDialogState extends ConsumerState<AddAssignmentDialog> {
 
     try {
       final authState = ref.read(authStateProvider);
-      final userId = authState is AuthAuthenticated && authState.user.uid.isNotEmpty
+      final userId =
+          authState is AuthAuthenticated && authState.user.uid.isNotEmpty
           ? authState.user.uid
           : 'default_user';
 
@@ -80,9 +82,11 @@ class _AddAssignmentDialogState extends ConsumerState<AddAssignmentDialog> {
         userId: Value(userId),
         subjectId: Value(_selectedSubjectId ?? 'General'),
         title: Value(title),
-        description: Value(_descriptionController.text.trim().isNotEmpty
-            ? _descriptionController.text.trim()
-            : null),
+        description: Value(
+          _descriptionController.text.trim().isNotEmpty
+              ? _descriptionController.text.trim()
+              : null,
+        ),
         dueDate: Value(dueStr),
         status: const Value('pending'),
         createdAt: Value(nowIso),
@@ -115,7 +119,8 @@ class _AddAssignmentDialogState extends ConsumerState<AddAssignmentDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final authState = ref.watch(authStateProvider);
-    final userId = authState is AuthAuthenticated && authState.user.uid.isNotEmpty
+    final userId =
+        authState is AuthAuthenticated && authState.user.uid.isNotEmpty
         ? authState.user.uid
         : 'default_user';
 
@@ -183,7 +188,12 @@ class _AddAssignmentDialogState extends ConsumerState<AddAssignmentDialog> {
             ),
             const SizedBox(height: SpacingTokens.md),
             DropdownButtonFormField<String>(
-              initialValue: subjects.any((s) => s.id == _selectedSubjectId || s.name == _selectedSubjectId)
+              initialValue:
+                  subjects.any(
+                    (s) =>
+                        s.id == _selectedSubjectId ||
+                        s.name == _selectedSubjectId,
+                  )
                   ? _selectedSubjectId
                   : null,
               decoration: const InputDecoration(
@@ -195,8 +205,13 @@ class _AddAssignmentDialogState extends ConsumerState<AddAssignmentDialog> {
                 ),
               ),
               items: [
-                const DropdownMenuItem(value: 'General', child: Text('General')),
-                ...subjects.map((s) => DropdownMenuItem(value: s.name, child: Text(s.name))),
+                const DropdownMenuItem(
+                  value: 'General',
+                  child: Text('General'),
+                ),
+                ...subjects.map(
+                  (s) => DropdownMenuItem(value: s.name, child: Text(s.name)),
+                ),
               ],
               onChanged: (val) {
                 setState(() => _selectedSubjectId = val);
@@ -215,7 +230,10 @@ class _AddAssignmentDialogState extends ConsumerState<AddAssignmentDialog> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Symbols.calendar_today, color: ColorTokens.primary),
+                    const Icon(
+                      Symbols.calendar_today,
+                      color: ColorTokens.primary,
+                    ),
                     const SizedBox(width: SpacingTokens.md),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,9 +288,18 @@ class _AddAssignmentDialogState extends ConsumerState<AddAssignmentDialog> {
                     ? const SizedBox(
                         height: 24,
                         width: 24,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
                       )
-                    : const Text('Save Assignment', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    : const Text(
+                        'Save Assignment',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
               ),
             ),
           ],

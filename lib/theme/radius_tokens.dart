@@ -13,6 +13,12 @@ abstract final class RadiusTokens {
   static const double md = 12;
   static const double lg = 16;
   static const double xl = 24;
+
+  /// Softer, larger step — the redesign's default card radius (ADR-011).
+  static const double xxl = 20;
+
+  /// Largest card step — hero/elevated surfaces (ADR-011).
+  static const double xxxl = 26;
   static const double pill = 100;
   static const double circle = 999;
 
@@ -31,6 +37,12 @@ abstract final class RadiusTokens {
   );
   static const BorderRadius borderRadiusXl = BorderRadius.all(
     Radius.circular(xl),
+  );
+  static const BorderRadius borderRadiusXxl = BorderRadius.all(
+    Radius.circular(xxl),
+  );
+  static const BorderRadius borderRadiusXxxl = BorderRadius.all(
+    Radius.circular(xxxl),
   );
   static const BorderRadius borderRadiusPill = BorderRadius.all(
     Radius.circular(pill),

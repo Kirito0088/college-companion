@@ -3,34 +3,41 @@
 /// Single source of truth for all color values in College Companion.
 /// No widget may use hardcoded colors. Reference these tokens instead.
 ///
-/// Issue #21 — De-Vibecode: Distinctive obsidian / electric cobalt palette.
-/// Replaces the generic neon purple vibecoded aesthetic with a sophisticated,
-/// editorial-precision identity grounded in the academic operating system brief.
+/// ADR-011 — Jade redesign: these are the **dark theme, jade accent**
+/// values only — a `static const` fallback for legacy call sites that
+/// haven't migrated to `Theme.of(context)`/[CCTokens] yet, and are not
+/// reactive to the user's light/dark or accent choice. New code should
+/// prefer `Theme.of(context).colorScheme` (for MD3 slots) or
+/// `context.cc`/`CCTokens` (for the redesign's extra semantic slots —
+/// `priSoft`, `warnSoft`, `riskSoft`, `shadow`, `sheen`, `dim`).
 ///
 /// Token Hierarchy: Primitive → Semantic → Component → Screens
 library;
 
 import 'package:flutter/material.dart';
 
-/// Primitive color tokens — the raw palette values.
+/// Primitive color tokens — the raw palette values (dark theme, jade accent).
 ///
-/// Palette overview:
-/// - Foundation: deep obsidian (#0D0F12) with warm graphite containers
-/// - Primary action: electric cobalt (#3B82F6) — purposeful, focused
-/// - Secondary: indigo (#6366F1) — calendar, lectures
-/// - Tertiary: violet (#8B5CF6) — resources, focus
-/// - Semantic: emerald / amber / coral (attendance states)
+/// Palette overview (ADR-011):
+/// - Foundation: deep charcoal (#0E1315) with warm-neutral containers
+/// - Primary action: jade (#6FCFB0) — calm, "you're fine" reassurance
+/// - Secondary/Tertiary: unchanged from the prior palette — the redesign
+///   canvas doesn't define these; not scoped for repointing until the
+///   screens using them (calendar, resources) are re-skinned.
+/// - Semantic: jade / sand / coral (attendance states — warn/risk, ADR-011)
 abstract final class ColorTokens {
   // ── Primary ──────────────────────────────────────────────────────────────
-  /// Electric cobalt — primary action, navigation indicator, links.
-  static const Color primary = Color(0xFF3B82F6);
-  static const Color onPrimary = Color(0xFFFFFFFF);
+  /// Jade — primary action, navigation indicator, links (ADR-011).
+  static const Color primary = Color(0xFF6FCFB0);
+  static const Color onPrimary = Color(0xFF052620);
 
-  /// Deep cobalt container.
-  static const Color primaryContainer = Color(0xFF1A2E4A);
+  /// Deep jade container — derived tint (primary blended over background);
+  /// the canvas only specifies a translucent `priSoft`, not an opaque MD3
+  /// container, so this value is interpolated rather than a literal source.
+  static const Color primaryContainer = Color(0xFF1B2E2A);
 
-  /// Light cobalt — text/icons on primaryContainer.
-  static const Color onPrimaryContainer = Color(0xFFBFDBFE);
+  /// Light jade — text/icons on primaryContainer.
+  static const Color onPrimaryContainer = Color(0xFFBEEBDD);
 
   // ── Secondary ────────────────────────────────────────────────────────────
   /// Indigo — calendar events, lecture slots.
@@ -55,66 +62,73 @@ abstract final class ColorTokens {
   static const Color onTertiaryContainer = Color(0xFFDDD6FE);
 
   // ── Surface ──────────────────────────────────────────────────────────────
-  /// Deep obsidian — screen background.
-  static const Color background = Color(0xFF0D0F12);
+  /// Deep charcoal — screen background (canvas `--bg`, dark).
+  static const Color background = Color(0xFF0E1315);
 
-  /// Dark graphite — scaffold and card surface.
-  static const Color surface = Color(0xFF121518);
+  /// Base raised surface — scaffold and card surface (canvas `--surf`).
+  static const Color surface = Color(0xFF131A1C);
 
-  /// Warm graphite — low elevation containers.
-  static const Color surfaceVariant = Color(0xFF161A1F);
+  /// First elevation step (canvas `--raise`).
+  static const Color surfaceVariant = Color(0xFF182124);
 
-  /// Warm graphite — surfaceContainerLow alias.
-  static const Color surfaceContainerLow = Color(0xFF161A1F);
+  /// First elevation step — surfaceContainerLow alias (canvas `--raise`).
+  static const Color surfaceContainerLow = Color(0xFF182124);
 
-  /// Elevated container.
-  static const Color surfaceContainer = Color(0xFF1A1E24);
+  /// Second elevation step (canvas `--raise2`).
+  static const Color surfaceContainer = Color(0xFF1F292C);
 
-  /// More elevated container.
-  static const Color surfaceContainerHigh = Color(0xFF1E232A);
+  /// More elevated container — derived, one step lighter than
+  /// surfaceContainer (no direct canvas equivalent).
+  static const Color surfaceContainerHigh = Color(0xFF29373A);
 
-  /// Highest elevation container.
-  static const Color surfaceContainerHighest = Color(0xFF252B33);
+  /// Highest elevation container — derived, lighter still.
+  static const Color surfaceContainerHighest = Color(0xFF344347);
 
-  /// Crisp off-white — primary text on surfaces.
-  static const Color onSurface = Color(0xFFF0F2F5);
+  /// Foreground — primary text on surfaces (canvas `--fg`).
+  static const Color onSurface = Color(0xFFE9EEEC);
 
-  /// Subdued — supporting text, icons, metadata.
-  static const Color onSurfaceVariant = Color(0xFF8B909A);
+  /// Muted — supporting text, icons, metadata (canvas `--mut`).
+  static const Color onSurfaceVariant = Color(0xFF93A09C);
 
   // ── Semantic ─────────────────────────────────────────────────────────────
-  /// Emerald — healthy attendance, completed tasks.
-  static const Color success = Color(0xFF10B981);
-  static const Color onSuccess = Color(0xFFFFFFFF);
+  /// Jade — healthy attendance, completed tasks (reuses primary; the
+  /// canvas treats "healthy" and "primary accent" as the same color).
+  static const Color success = Color(0xFF6FCFB0);
+  static const Color onSuccess = Color(0xFF052620);
 
-  /// Amber — at-risk attendance, approaching deadlines.
-  static const Color warning = Color(0xFFF59E0B);
-  static const Color onWarning = Color(0xFF000000);
+  /// Sand — at-risk attendance, approaching deadlines (canvas `--warn`).
+  static const Color warning = Color(0xFFE3B274);
+  static const Color onWarning = Color(0xFF281904);
 
-  /// Coral red — critical attendance, overdue assignments.
-  static const Color error = Color(0xFFEF4444);
-  static const Color onError = Color(0xFFFFFFFF);
+  /// Coral — critical attendance, overdue assignments (canvas `--risk`).
+  static const Color error = Color(0xFFE98A80);
+  static const Color onError = Color(0xFF3A100D);
 
-  /// Cobalt — neutral notifications, informational states.
-  static const Color info = Color(0xFF3B82F6);
-  static const Color onInfo = Color(0xFFFFFFFF);
+  /// Azure — neutral notifications, informational states. Derived: the
+  /// canvas doesn't define an "info" slot, so this borrows the azure
+  /// accent variant to keep informational messaging visually distinct
+  /// from the jade primary and sand/coral warning/risk pair.
+  static const Color info = Color(0xFF7FB8E8);
+  static const Color onInfo = Color(0xFF04202F);
 
   // ── Borders ──────────────────────────────────────────────────────────────
-  /// Subtle border — primary outline for inputs and chips.
-  static const Color outline = Color(0xFF2D3340);
+  /// Emphasised border — inputs, chips, active states (canvas `--line2`
+  /// flattened to an opaque approximation over `background`).
+  static const Color outline = Color(0xFF323638);
 
-  /// Very subtle border — micro-borders for cards (replaces diffuse glows).
-  static const Color outlineVariant = Color(0xFF1F2530);
+  /// Hairline border — micro-borders for cards (canvas `--line` flattened
+  /// to an opaque approximation over `background`).
+  static const Color outlineVariant = Color(0xFF1F2325);
 
   /// Divider — section separators.
-  static const Color divider = Color(0xFF1A1E24);
+  static const Color divider = Color(0xFF1F2325);
 
   // ── Inverse ──────────────────────────────────────────────────────────────
-  static const Color inverseSurface = Color(0xFFF0F2F5);
-  static const Color onInverseSurface = Color(0xFF121518);
+  static const Color inverseSurface = Color(0xFFE9EEEC);
+  static const Color onInverseSurface = Color(0xFF131A1C);
 
-  /// Darker cobalt — inverse primary for light surfaces.
-  static const Color inversePrimary = Color(0xFF1D4ED8);
+  /// Jade (light-theme value) — inverse primary for light/inverse surfaces.
+  static const Color inversePrimary = Color(0xFF1C7A63);
 
   // ── Scrim ────────────────────────────────────────────────────────────────
   static const Color scrim = Color(0xFF000000);
@@ -126,27 +140,27 @@ abstract final class ColorTokens {
 /// These reference primitive tokens and provide contextual meaning.
 abstract final class SemanticColorTokens {
   // ── Attendance ───────────────────────────────────────────────────────────
-  /// Emerald — present / healthy attendance.
+  /// Jade — present / healthy attendance.
   static const Color present = ColorTokens.success;
 
-  /// Coral red — absent / attendance alert.
+  /// Coral — absent / attendance alert.
   static const Color absent = ColorTokens.error;
 
   /// Subdued — cancelled / neutral state.
   static const Color cancelled = ColorTokens.onSurfaceVariant;
 
   // ── Assignments ──────────────────────────────────────────────────────────
-  /// Amber — pending work.
+  /// Sand — pending work.
   static const Color pending = ColorTokens.warning;
 
-  /// Emerald — completed work.
+  /// Jade — completed work.
   static const Color completed = ColorTokens.success;
 
-  /// Coral red — overdue assignment.
+  /// Coral — overdue assignment.
   static const Color overdue = ColorTokens.error;
 
   // ── Calendar ─────────────────────────────────────────────────────────────
-  /// Cobalt — lecture event.
+  /// Jade — lecture event.
   static const Color lecture = ColorTokens.primary;
 
   /// Indigo — practical/lab event.

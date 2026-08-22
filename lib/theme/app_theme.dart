@@ -1,9 +1,11 @@
 /// App Theme Configuration
 ///
-/// Dark mode only. Material Design 3. All values from design tokens.
+/// ADR-011 — user-selectable light/dark theme with a selectable accent
+/// (jade/sand/azure). Material Design 3. All values from design tokens.
 /// No hardcoded colors, spacing, typography, or radii (per 10-rules.md).
 library;
 
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/typography_tokens.dart';
@@ -11,19 +13,28 @@ import 'package:flutter/material.dart';
 
 /// Provides the application's [ThemeData].
 ///
-/// Dark mode only, Material Design 3, Android-first experience.
+/// Material Design 3, Android-first experience.
 abstract final class AppTheme {
-  /// The single dark theme for College Companion.
-  static ThemeData get darkTheme {
-    final colorScheme = _colorScheme;
-    final textTheme = TypographyTokens.textTheme;
+  /// Builds the theme for a given [brightness] and [accent] (ADR-011).
+  ///
+  /// Carries a [CCTokens] extension alongside the MD3 [ColorScheme] so
+  /// widgets can reach either `Theme.of(context).colorScheme` or
+  /// `context.cc` depending on which semantic slot they need.
+  static ThemeData theme(Brightness brightness, Accent accent) {
+    final ccTokens = CCTokens.resolve(brightness, accent);
+    final colorScheme = _colorSchemeFor(brightness, ccTokens);
+    final textTheme = TypographyTokens.textTheme.apply(
+      bodyColor: ccTokens.fg,
+      displayColor: ccTokens.fg,
+    );
 
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
+      brightness: brightness,
       colorScheme: colorScheme,
       textTheme: textTheme,
-      scaffoldBackgroundColor: colorScheme.surface,
+      extensions: [ccTokens],
+      scaffoldBackgroundColor: ccTokens.bg,
 
       // ── App Bar ────────────────────────────────────────────────────────
       appBarTheme: AppBarTheme(
@@ -39,7 +50,7 @@ abstract final class AppTheme {
 
       // ── Navigation Bar (Bottom) ────────────────────────────────────────
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: ColorTokens.surfaceContainer,
+        backgroundColor: ccTokens.raise,
         indicatorColor: colorScheme.primary.withValues(alpha: 0.15),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
@@ -48,16 +59,16 @@ abstract final class AppTheme {
         labelTextStyle: WidgetStatePropertyAll(
           textTheme.labelMedium?.copyWith(color: colorScheme.onSurfaceVariant),
         ),
-        iconTheme: const WidgetStatePropertyAll(
-          IconThemeData(color: ColorTokens.onSurfaceVariant, size: 24),
+        iconTheme: WidgetStatePropertyAll(
+          IconThemeData(color: ccTokens.mut, size: 24),
         ),
       ),
 
       // ── Card ───────────────────────────────────────────────────────────
-      cardTheme: const CardThemeData(
-        color: ColorTokens.surfaceContainer,
+      cardTheme: CardThemeData(
+        color: ccTokens.raise,
         elevation: 0,
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: RadiusTokens.borderRadiusMd,
         ),
         margin: EdgeInsets.zero,
@@ -79,7 +90,7 @@ abstract final class AppTheme {
       // ── Elevated Button ────────────────────────────────────────────────
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: ColorTokens.surfaceContainerHigh,
+          backgroundColor: ccTokens.raise2,
           foregroundColor: colorScheme.onSurface,
           minimumSize: const Size(double.infinity, 48),
           elevation: 0,
@@ -124,7 +135,7 @@ abstract final class AppTheme {
       // ── Input Decoration ───────────────────────────────────────────────
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: ColorTokens.surfaceContainerHigh,
+        fillColor: ccTokens.raise2,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,
@@ -161,7 +172,7 @@ abstract final class AppTheme {
 
       // ── Chip ───────────────────────────────────────────────────────────
       chipTheme: ChipThemeData(
-        backgroundColor: ColorTokens.surfaceContainerHigh,
+        backgroundColor: ccTokens.raise2,
         selectedColor: colorScheme.primary.withValues(alpha: 0.2),
         labelStyle: textTheme.labelMedium,
         shape: const RoundedRectangleBorder(
@@ -171,31 +182,29 @@ abstract final class AppTheme {
       ),
 
       // ── Bottom Sheet ───────────────────────────────────────────────────
-      bottomSheetTheme: const BottomSheetThemeData(
-        backgroundColor: ColorTokens.surfaceContainer,
-        shape: RoundedRectangleBorder(
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: ccTokens.raise,
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
             top: Radius.circular(RadiusTokens.xl),
           ),
         ),
         showDragHandle: true,
-        dragHandleColor: ColorTokens.onSurfaceVariant,
+        dragHandleColor: ccTokens.mut,
       ),
 
       // ── Dialog ─────────────────────────────────────────────────────────
-      dialogTheme: const DialogThemeData(
-        backgroundColor: ColorTokens.surfaceContainerHigh,
-        shape: RoundedRectangleBorder(
+      dialogTheme: DialogThemeData(
+        backgroundColor: ccTokens.raise2,
+        shape: const RoundedRectangleBorder(
           borderRadius: RadiusTokens.borderRadiusXl,
         ),
       ),
 
       // ── Snack Bar ──────────────────────────────────────────────────────
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: ColorTokens.surfaceContainerHighest,
-        contentTextStyle: textTheme.bodyMedium?.copyWith(
-          color: ColorTokens.onSurface,
-        ),
+        backgroundColor: ccTokens.raise2,
+        contentTextStyle: textTheme.bodyMedium?.copyWith(color: ccTokens.fg),
         shape: const RoundedRectangleBorder(
           borderRadius: RadiusTokens.borderRadiusSm,
         ),
@@ -203,8 +212,8 @@ abstract final class AppTheme {
       ),
 
       // ── Divider ────────────────────────────────────────────────────────
-      dividerTheme: const DividerThemeData(
-        color: ColorTokens.divider,
+      dividerTheme: DividerThemeData(
+        color: ccTokens.line,
         thickness: 1,
         space: 1,
       ),
@@ -214,11 +223,11 @@ abstract final class AppTheme {
 
       // ── Tooltip ────────────────────────────────────────────────────────
       tooltipTheme: TooltipThemeData(
-        decoration: const BoxDecoration(
-          color: ColorTokens.surfaceContainerHighest,
+        decoration: BoxDecoration(
+          color: ccTokens.raise2,
           borderRadius: RadiusTokens.borderRadiusSm,
         ),
-        textStyle: textTheme.bodySmall?.copyWith(color: ColorTokens.onSurface),
+        textStyle: textTheme.bodySmall?.copyWith(color: ccTokens.fg),
       ),
 
       // ── Tab Bar ────────────────────────────────────────────────────────
@@ -248,22 +257,38 @@ abstract final class AppTheme {
       ),
 
       // ── List Tile ──────────────────────────────────────────────────────
-      listTileTheme: const ListTileThemeData(
-        contentPadding: EdgeInsets.symmetric(horizontal: 16),
-        iconColor: ColorTokens.onSurfaceVariant,
-        textColor: ColorTokens.onSurface,
-        shape: RoundedRectangleBorder(
+      listTileTheme: ListTileThemeData(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+        iconColor: ccTokens.mut,
+        textColor: ccTokens.fg,
+        shape: const RoundedRectangleBorder(
           borderRadius: RadiusTokens.borderRadiusMd,
         ),
       ),
     );
   }
 
-  /// Dark color scheme derived from [ColorTokens].
-  static ColorScheme get _colorScheme {
-    return const ColorScheme.dark(
-      primary: ColorTokens.primary,
-      onPrimary: ColorTokens.onPrimary,
+  /// The dark theme, jade accent — kept as a stable default for call sites
+  /// that haven't migrated to the reactive [theme] factory yet.
+  static ThemeData get darkTheme => theme(Brightness.dark, Accent.jade);
+
+  /// The light theme, jade accent.
+  static ThemeData get lightTheme => theme(Brightness.light, Accent.jade);
+
+  /// Derives an MD3 [ColorScheme] from [ccTokens] for the given [brightness].
+  ///
+  /// `secondary`/`tertiary` are not yet part of the redesign (the canvas
+  /// doesn't define them) — they keep the prior palette's indigo/violet
+  /// values for both brightnesses until the screens that use them
+  /// (calendar, resources) are re-skinned.
+  static ColorScheme _colorSchemeFor(Brightness brightness, CCTokens cc) {
+    final base = brightness == Brightness.dark
+        ? const ColorScheme.dark()
+        : const ColorScheme.light();
+    return base.copyWith(
+      brightness: brightness,
+      primary: cc.pri,
+      onPrimary: cc.priFg,
       primaryContainer: ColorTokens.primaryContainer,
       onPrimaryContainer: ColorTokens.onPrimaryContainer,
       secondary: ColorTokens.secondary,
@@ -274,23 +299,29 @@ abstract final class AppTheme {
       onTertiary: ColorTokens.onTertiary,
       tertiaryContainer: ColorTokens.tertiaryContainer,
       onTertiaryContainer: ColorTokens.onTertiaryContainer,
-      error: ColorTokens.error,
-      onError: ColorTokens.onError,
-      surface: ColorTokens.surface,
-      onSurface: ColorTokens.onSurface,
-      onSurfaceVariant: ColorTokens.onSurfaceVariant,
-      outline: ColorTokens.outline,
-      outlineVariant: ColorTokens.outlineVariant,
-      inverseSurface: ColorTokens.inverseSurface,
-      onInverseSurface: ColorTokens.onInverseSurface,
-      inversePrimary: ColorTokens.inversePrimary,
-      scrim: ColorTokens.scrim,
-      shadow: ColorTokens.shadow,
-      surfaceContainerHighest: ColorTokens.surfaceContainerHighest,
-      surfaceContainerHigh: ColorTokens.surfaceContainerHigh,
-      surfaceContainer: ColorTokens.surfaceContainer,
-      surfaceContainerLow: ColorTokens.surfaceContainerLow,
-      surfaceContainerLowest: ColorTokens.background,
+      error: cc.risk,
+      onError: cc.bg,
+      surface: cc.surf,
+      onSurface: cc.fg,
+      onSurfaceVariant: cc.mut,
+      // cc.line/line2 are translucent overlays (matching the canvas CSS,
+      // meant to be composited directly onto a surface). Several call
+      // sites below re-apply `.withValues(alpha: ...)` on top, expecting
+      // an opaque base — so flatten them onto `cc.bg` first with
+      // Color.alphaBlend to avoid compounding two alphas into an
+      // almost-invisible border.
+      outline: Color.alphaBlend(cc.line2, cc.bg),
+      outlineVariant: Color.alphaBlend(cc.line, cc.bg),
+      inverseSurface: brightness == Brightness.dark ? cc.fg : cc.bg,
+      onInverseSurface: brightness == Brightness.dark ? cc.bg : cc.fg,
+      inversePrimary: cc.pri,
+      scrim: Colors.black,
+      shadow: Colors.black,
+      surfaceContainerHighest: cc.raise2,
+      surfaceContainerHigh: cc.raise2,
+      surfaceContainer: cc.raise2,
+      surfaceContainerLow: cc.raise,
+      surfaceContainerLowest: cc.bg,
     );
   }
 }

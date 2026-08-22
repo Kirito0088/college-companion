@@ -2,9 +2,9 @@
 ///
 /// The root [MaterialApp] configured with:
 /// - Material Design 3
-/// - Dark theme only
+/// - User-selectable light/dark theme + accent (ADR-011)
 /// - GoRouter navigation
-/// - Inter typography
+/// - Plus Jakarta Sans / Newsreader / IBM Plex Mono typography
 /// - Riverpod-aware routing for authentication redirects
 library;
 
@@ -14,6 +14,7 @@ import 'package:college_companion/features/authentication/providers/auth_provide
 import 'package:college_companion/providers/app_providers.dart';
 import 'package:college_companion/routing/app_router.dart';
 import 'package:college_companion/theme/app_theme.dart';
+import 'package:college_companion/theme/providers/app_theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -63,15 +64,17 @@ class _CollegeCompanionAppState extends ConsumerState<CollegeCompanionApp> {
 
   @override
   Widget build(BuildContext context) {
+    final themePreference = ref.watch(appThemeProvider);
+
     return MaterialApp.router(
       // ── App Identity ─────────────────────────────────────────────────
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
 
-      // ── Theme (Dark only, Material Design 3) ─────────────────────────
-      theme: AppTheme.darkTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.dark,
+      // ── Theme (user-selectable light/dark + accent — ADR-011) ────────
+      theme: AppTheme.theme(Brightness.light, themePreference.accent),
+      darkTheme: AppTheme.theme(Brightness.dark, themePreference.accent),
+      themeMode: themePreference.themeMode,
 
       // ── Routing (GoRouter) ───────────────────────────────────────────
       routerConfig: _router,

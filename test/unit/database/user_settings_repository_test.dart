@@ -107,6 +107,45 @@ void main() {
     },
   );
 
+  test(
+    'updateAccent stores accent inside the preferences JSON and enqueues sync',
+    () async {
+      final now = DateTime.now().toUtc().toIso8601String();
+
+      await repository.saveSettings(
+        UserSettingsCompanion(
+          id: const Value('settings_1'),
+          userId: const Value('user_1'),
+          theme: const Value('dark'),
+          preferences: const Value('{"compactView":true}'),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+        ),
+      );
+
+      await repository.updateAccent('user_1', 'sand');
+
+      final updated = await repository.getByUserId('user_1');
+      expect(updated?.preferences, contains('"accent":"sand"'));
+      // Pre-existing preference keys are preserved, not clobbered.
+      expect(updated?.preferences, contains('"compactView":true'));
+
+      final pendingSync = await syncQueueRepository.getPendingItems();
+      expect(pendingSync.last.targetTable, 'user_settings');
+      expect(pendingSync.last.operation, 'UPDATE');
+    },
+  );
+
+  test(
+    'updateAccent throws DatabaseException when no settings row exists',
+    () async {
+      expect(
+        () async => repository.updateAccent('missing_user', 'azure'),
+        throwsA(isA<DatabaseException>()),
+      );
+    },
+  );
+
   test('wraps database errors in DatabaseException', () async {
     expect(
       () async => repository.saveSettings(const UserSettingsCompanion()),

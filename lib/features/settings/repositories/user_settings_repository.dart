@@ -3,6 +3,8 @@
 /// Handles CRUD and reactive stream operations for user settings in Drift database.
 library;
 
+import 'dart:convert';
+
 import 'package:college_companion/core/errors/exceptions.dart';
 import 'package:college_companion/core/repositories/sync_queue_repository.dart';
 import 'package:college_companion/database/app_database.dart';
@@ -81,6 +83,44 @@ class UserSettingsRepository {
       }
     } catch (e) {
       throw DatabaseException('Failed to update theme for user: $userId', e);
+    }
+  }
+
+  /// Updates the accent color preference for a user (ADR-011).
+  ///
+  /// Stored inside the `preferences` JSONB catch-all column (rather than a
+  /// new dedicated column) since it's exactly the "extensible, evolving
+  /// preference" the column's docstring describes — no schema migration
+  /// needed.
+  Future<void> updateAccent(String userId, String accent) async {
+    try {
+      final existing = await getByUserId(userId);
+      if (existing == null) {
+        throw DatabaseException(
+          'Cannot update accent: no settings row for user: $userId',
+        );
+      }
+      final preferences = Map<String, dynamic>.from(
+        jsonDecode(existing.preferences) as Map,
+      )..['accent'] = accent;
+      final now = DateTime.now().toUtc().toIso8601String();
+      await (_database.update(
+        _database.userSettings,
+      )..where((t) => t.userId.equals(userId))).write(
+        UserSettingsCompanion(
+          preferences: Value(jsonEncode(preferences)),
+          updatedAt: Value(now),
+        ),
+      );
+      await _syncQueueRepository?.enqueue(
+        targetTable: 'user_settings',
+        recordId: existing.id,
+        operation: 'UPDATE',
+      );
+    } on DatabaseException {
+      rethrow;
+    } catch (e) {
+      throw DatabaseException('Failed to update accent for user: $userId', e);
     }
   }
 

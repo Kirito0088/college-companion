@@ -1,4 +1,6 @@
 import 'package:college_companion/shared/widgets/cc_card.dart';
+import 'package:college_companion/theme/app_theme.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,126 +15,175 @@ void main() {
     GoogleFonts.config.allowRuntimeFetching = false;
   });
 
-  // ── Primitive token assertions ────────────────────────────────────────────
-  // These tests do NOT construct AppTheme.darkTheme (which loads Inter), so
-  // they are pure unit tests against the token constants.
-  group('ColorTokens De-Vibecode Palette Tests', () {
-    test('primary is electric cobalt #3B82F6', () {
-      expect(ColorTokens.primary, equals(const Color(0xFF3B82F6)));
+  // ── Primitive token assertions (ADR-011 jade palette) ────────────────────
+  // These tests do NOT construct AppTheme.theme() (which loads fonts), so
+  // they are pure unit tests against the static (dark, jade) fallback
+  // token constants.
+  group('ColorTokens ADR-011 jade palette tests', () {
+    test('primary is jade #6FCFB0', () {
+      expect(ColorTokens.primary, equals(const Color(0xFF6FCFB0)));
     });
-    test('background is deep obsidian #0D0F12', () {
-      expect(ColorTokens.background, equals(const Color(0xFF0D0F12)));
+    test('background is deep charcoal #0E1315', () {
+      expect(ColorTokens.background, equals(const Color(0xFF0E1315)));
     });
-    test('surface is dark graphite #121518', () {
-      expect(ColorTokens.surface, equals(const Color(0xFF121518)));
+    test('surface is #131A1C', () {
+      expect(ColorTokens.surface, equals(const Color(0xFF131A1C)));
     });
-    test('surfaceContainerLow is warm graphite #161A1F', () {
-      expect(ColorTokens.surfaceContainerLow, equals(const Color(0xFF161A1F)));
+    test('surfaceContainerLow is the raise elevation step #182124', () {
+      expect(ColorTokens.surfaceContainerLow, equals(const Color(0xFF182124)));
     });
-    test('surfaceContainer is elevated container #1A1E24', () {
-      expect(ColorTokens.surfaceContainer, equals(const Color(0xFF1A1E24)));
+    test('surfaceContainer is the raise2 elevation step #1F292C', () {
+      expect(ColorTokens.surfaceContainer, equals(const Color(0xFF1F292C)));
     });
-    test('surfaceContainerHigh is #1E232A', () {
-      expect(ColorTokens.surfaceContainerHigh, equals(const Color(0xFF1E232A)));
+    test('onSurface is the foreground tone #E9EEEC', () {
+      expect(ColorTokens.onSurface, equals(const Color(0xFFE9EEEC)));
     });
-    test('surfaceContainerHighest is #252B33', () {
-      expect(
-        ColorTokens.surfaceContainerHighest,
-        equals(const Color(0xFF252B33)),
-      );
+    test('onSurfaceVariant is the muted tone #93A09C', () {
+      expect(ColorTokens.onSurfaceVariant, equals(const Color(0xFF93A09C)));
     });
-    test('onSurface is crisp off-white #F0F2F5', () {
-      expect(ColorTokens.onSurface, equals(const Color(0xFFF0F2F5)));
+    test('warning is sand #E3B274', () {
+      expect(ColorTokens.warning, equals(const Color(0xFFE3B274)));
     });
-    test('onSurfaceVariant is subdued #8B909A', () {
-      expect(ColorTokens.onSurfaceVariant, equals(const Color(0xFF8B909A)));
+    test('error is coral (risk) #E98A80', () {
+      expect(ColorTokens.error, equals(const Color(0xFFE98A80)));
     });
-    test('success is emerald #10B981', () {
-      expect(ColorTokens.success, equals(const Color(0xFF10B981)));
+    test('primary is NOT the prior electric cobalt', () {
+      expect(ColorTokens.primary, isNot(equals(const Color(0xFF3B82F6))));
     });
-    test('warning is amber #F59E0B', () {
-      expect(ColorTokens.warning, equals(const Color(0xFFF59E0B)));
-    });
-    test('error is coral red #EF4444', () {
-      expect(ColorTokens.error, equals(const Color(0xFFEF4444)));
-    });
-    test('outline is subtle border #2D3340', () {
-      expect(ColorTokens.outline, equals(const Color(0xFF2D3340)));
-    });
-    test('outlineVariant is very subtle border #1F2530', () {
-      expect(ColorTokens.outlineVariant, equals(const Color(0xFF1F2530)));
-    });
-    test('primary is NOT old neon purple', () {
-      expect(ColorTokens.primary, isNot(equals(const Color(0xFF9C6AFF))));
-    });
-    test('primaryContainer is NOT old deep purple', () {
-      expect(
-        ColorTokens.primaryContainer,
-        isNot(equals(const Color(0xFF2D1F5E))),
-      );
+    test('background is NOT the prior deep obsidian', () {
+      expect(ColorTokens.background, isNot(equals(const Color(0xFF0D0F12))));
     });
     test('outlineVariant token is non-transparent (micro-border usable)', () {
       expect(ColorTokens.outlineVariant, isNot(equals(Colors.transparent)));
     });
   });
 
-  // ── ColorScheme unit tests (no font loading) ─────────────────────────────
-  // Access the color scheme directly from AppTheme without materializing
-  // a TextTheme — avoids the google_fonts network issue in CI.
-  group('AppTheme ColorScheme integration tests', () {
-    // Build only the color scheme portion, which does not touch google_fonts.
-    const colorScheme = ColorScheme.dark(
-      primary: ColorTokens.primary,
-      onPrimary: ColorTokens.onPrimary,
-      primaryContainer: ColorTokens.primaryContainer,
-      onPrimaryContainer: ColorTokens.onPrimaryContainer,
-      secondary: ColorTokens.secondary,
-      onSecondary: ColorTokens.onSecondary,
-      secondaryContainer: ColorTokens.secondaryContainer,
-      onSecondaryContainer: ColorTokens.onSecondaryContainer,
-      tertiary: ColorTokens.tertiary,
-      onTertiary: ColorTokens.onTertiary,
-      tertiaryContainer: ColorTokens.tertiaryContainer,
-      onTertiaryContainer: ColorTokens.onTertiaryContainer,
-      error: ColorTokens.error,
-      onError: ColorTokens.onError,
-      surface: ColorTokens.surface,
-      onSurface: ColorTokens.onSurface,
-      onSurfaceVariant: ColorTokens.onSurfaceVariant,
-      outline: ColorTokens.outline,
-      outlineVariant: ColorTokens.outlineVariant,
-      inverseSurface: ColorTokens.inverseSurface,
-      onInverseSurface: ColorTokens.onInverseSurface,
-      inversePrimary: ColorTokens.inversePrimary,
-      scrim: ColorTokens.scrim,
-      shadow: ColorTokens.shadow,
-      surfaceContainerHighest: ColorTokens.surfaceContainerHighest,
-      surfaceContainerHigh: ColorTokens.surfaceContainerHigh,
-      surfaceContainer: ColorTokens.surfaceContainer,
-      surfaceContainerLow: ColorTokens.surfaceContainerLow,
-      surfaceContainerLowest: ColorTokens.background,
-    );
+  // ── CCTokens factory tests ────────────────────────────────────────────────
+  group('CCTokens.resolve per (brightness, accent)', () {
+    test('dark jade matches the canvas literal values', () {
+      final cc = CCTokens.resolve(Brightness.dark, Accent.jade);
+      expect(cc.bg, equals(const Color(0xFF0E1315)));
+      expect(cc.pri, equals(const Color(0xFF6FCFB0)));
+      expect(cc.priFg, equals(const Color(0xFF052620)));
+    });
 
-    test('colorScheme primary is electric cobalt', () {
-      expect(colorScheme.primary, equals(const Color(0xFF3B82F6)));
+    test('light jade matches the canvas literal values', () {
+      final cc = CCTokens.resolve(Brightness.light, Accent.jade);
+      expect(cc.bg, equals(const Color(0xFFF3F0EA)));
+      expect(cc.pri, equals(const Color(0xFF1C7A63)));
+      expect(cc.priFg, equals(const Color(0xFFFFFFFF)));
     });
-    test('colorScheme surface is dark graphite', () {
-      expect(colorScheme.surface, equals(const Color(0xFF121518)));
+
+    test('dark sand overrides only the accent slots', () {
+      final jade = CCTokens.resolve(Brightness.dark, Accent.jade);
+      final sand = CCTokens.resolve(Brightness.dark, Accent.sand);
+      expect(sand.pri, equals(const Color(0xFFE3B274)));
+      expect(sand.priFg, equals(const Color(0xFF281904)));
+      // Non-accent slots are unaffected by the accent choice.
+      expect(sand.bg, equals(jade.bg));
+      expect(sand.fg, equals(jade.fg));
     });
-    test('colorScheme surfaceContainerLow maps correctly', () {
+
+    test('light azure falls back to the base light priFg (no override)', () {
+      final cc = CCTokens.resolve(Brightness.light, Accent.azure);
+      expect(cc.pri, equals(const Color(0xFF1F6491)));
+      expect(cc.priFg, equals(const Color(0xFFFFFFFF)));
+    });
+
+    test('lerp between dark and light interpolates, never throws', () {
+      final dark = CCTokens.resolve(Brightness.dark, Accent.jade);
+      final light = CCTokens.resolve(Brightness.light, Accent.jade);
+      final mid = dark.lerp(light, 0.5);
+      expect(mid, isA<CCTokens>());
+      expect(mid.bg, isNot(equals(dark.bg)));
+      expect(mid.bg, isNot(equals(light.bg)));
+    });
+  });
+
+  // ── AppTheme.theme() integration tests (loads Google Fonts) ──────────────
+  // Built inside testWidgets (not plain test()) so the test binding awaits
+  // the pending async font-loading work — matching the pattern the CCCard
+  // tests below already rely on. A plain test() leaks the async font
+  // rejection into whichever test runs next.
+  group('AppTheme.theme(brightness, accent)', () {
+    testWidgets('dark jade theme carries a matching CCTokens extension', (
+      tester,
+    ) async {
+      final theme = AppTheme.theme(Brightness.dark, Accent.jade);
+      await tester.pumpWidget(
+        MaterialApp(theme: theme, home: const SizedBox()),
+      );
+      expect(theme.brightness, equals(Brightness.dark));
+      final cc = theme.extension<CCTokens>();
+      expect(cc, isNotNull);
+      expect(cc!.pri, equals(const Color(0xFF6FCFB0)));
+      expect(theme.colorScheme.primary, equals(cc.pri));
+    });
+
+    testWidgets('light theme differs from dark theme in background/primary', (
+      tester,
+    ) async {
+      final dark = AppTheme.theme(Brightness.dark, Accent.jade);
+      final light = AppTheme.theme(Brightness.light, Accent.jade);
+      await tester.pumpWidget(MaterialApp(theme: dark, home: const SizedBox()));
+      await tester.pumpWidget(
+        MaterialApp(theme: light, home: const SizedBox()),
+      );
       expect(
-        colorScheme.surfaceContainerLow,
-        equals(ColorTokens.surfaceContainerLow),
+        dark.scaffoldBackgroundColor,
+        isNot(equals(light.scaffoldBackgroundColor)),
+      );
+      expect(
+        dark.colorScheme.primary,
+        isNot(equals(light.colorScheme.primary)),
       );
     });
-    test('colorScheme outlineVariant is crisp micro-border color', () {
-      expect(colorScheme.outlineVariant, equals(const Color(0xFF1F2530)));
-    });
-    test('AppTheme uses Material3 and dark brightness (via colorScheme)', () {
-      // We verify M3 + dark by inspecting the ColorScheme brightness directly
-      // without calling AppTheme.darkTheme in a plain test() context, which
-      // would trigger google_fonts async font loading and leak into other tests.
-      expect(colorScheme.brightness, equals(Brightness.dark));
+
+    testWidgets(
+      'accent changes primary but not background, within one brightness',
+      (tester) async {
+        final jade = AppTheme.theme(Brightness.dark, Accent.jade);
+        final sand = AppTheme.theme(Brightness.dark, Accent.sand);
+        await tester.pumpWidget(
+          MaterialApp(theme: jade, home: const SizedBox()),
+        );
+        await tester.pumpWidget(
+          MaterialApp(theme: sand, home: const SizedBox()),
+        );
+        expect(
+          jade.colorScheme.primary,
+          isNot(equals(sand.colorScheme.primary)),
+        );
+        expect(
+          jade.scaffoldBackgroundColor,
+          equals(sand.scaffoldBackgroundColor),
+        );
+      },
+    );
+
+    testWidgets('darkTheme/lightTheme aliases resolve to the jade accent', (
+      tester,
+    ) async {
+      final darkTheme = AppTheme.darkTheme;
+      final lightTheme = AppTheme.lightTheme;
+      await tester.pumpWidget(
+        MaterialApp(theme: darkTheme, home: const SizedBox()),
+      );
+      await tester.pumpWidget(
+        MaterialApp(theme: lightTheme, home: const SizedBox()),
+      );
+      expect(
+        darkTheme.colorScheme.primary,
+        equals(
+          AppTheme.theme(Brightness.dark, Accent.jade).colorScheme.primary,
+        ),
+      );
+      expect(
+        lightTheme.colorScheme.primary,
+        equals(
+          AppTheme.theme(Brightness.light, Accent.jade).colorScheme.primary,
+        ),
+      );
     });
   });
 
@@ -141,16 +192,9 @@ void main() {
     testWidgets('CCCard renders with a BoxDecoration that has a border', (
       tester,
     ) async {
-      // Use a minimal ThemeData with no google_fonts dependency.
-      final minimalTheme = ThemeData(
-        colorScheme: const ColorScheme.dark(
-          surface: ColorTokens.surface,
-          surfaceContainer: ColorTokens.surfaceContainer,
-        ),
-      );
       await tester.pumpWidget(
         MaterialApp(
-          theme: minimalTheme,
+          theme: AppTheme.theme(Brightness.dark, Accent.jade),
           home: const Scaffold(body: CCCard(child: Text('Test Card'))),
         ),
       );
@@ -159,23 +203,20 @@ void main() {
       expect(decoration.border, isNotNull);
     });
 
-    testWidgets('CCCard border uses outlineVariant color', (tester) async {
-      final minimalTheme = ThemeData(
-        colorScheme: const ColorScheme.dark(
-          surface: ColorTokens.surface,
-          surfaceContainer: ColorTokens.surfaceContainer,
-        ),
-      );
+    testWidgets('CCCard border uses the theme\'s outlineVariant color', (
+      tester,
+    ) async {
+      final theme = AppTheme.theme(Brightness.dark, Accent.jade);
       await tester.pumpWidget(
         MaterialApp(
-          theme: minimalTheme,
+          theme: theme,
           home: const Scaffold(body: CCCard(child: Text('Test Card'))),
         ),
       );
       final container = tester.widget<Container>(find.byType(Container).first);
       final decoration = container.decoration as BoxDecoration;
       final border = decoration.border as Border;
-      expect(border.top.color, equals(ColorTokens.outlineVariant));
+      expect(border.top.color, equals(theme.colorScheme.outlineVariant));
     });
   });
 }

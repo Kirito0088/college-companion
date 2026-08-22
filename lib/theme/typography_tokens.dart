@@ -1,7 +1,10 @@
 /// Design Tokens: Typography Tokens
 ///
-/// Single font family: Inter (per 01-design-tokens.md).
-/// No custom font sizes outside the typography scale.
+/// ADR-011 three-font system: Plus Jakarta Sans (UI/body — the base
+/// [textTheme]), Newsreader (serif display/headline text via
+/// [serifTextTheme]), and IBM Plex Mono (tabular numerals and uppercase
+/// eyebrow labels via [mono]). No custom font sizes outside the typography
+/// scale.
 ///
 /// Issue #21 — De-Vibecode: Deliberate tracking constants for editorial
 /// precision. Headlines use tighter tracking; uppercase labels use expanded
@@ -29,9 +32,13 @@ abstract final class TypographyTokens {
   /// Moderate tracking for metadata/caption text — readable density.
   static const double metadataSpacing = 0.5;
 
-  /// Base text theme using Inter font family.
+  /// Expanded tracking for mono eyebrow labels/uppercase micro-copy
+  /// (e.g. "TUE 22 AUG · WEEK 6", "SAFE MARGIN") per the redesign canvas.
+  static const double monoLabelSpacing = 1.4; // ~0.1em at 14px
+
+  /// Base text theme using Plus Jakarta Sans (ADR-011 — replaces Inter).
   static TextTheme get textTheme {
-    return GoogleFonts.interTextTheme(
+    return GoogleFonts.plusJakartaSansTextTheme(
       const TextTheme(
         // ── Display ──────────────────────────────────────────────────────
         displayLarge: TextStyle(
@@ -134,5 +141,32 @@ abstract final class TypographyTokens {
         ),
       ),
     );
+  }
+
+  /// Serif display/headline text theme using Newsreader (ADR-011).
+  ///
+  /// Only the display/headline tiers carry the serif face — body, title,
+  /// and label tiers fall back to [textTheme]'s Plus Jakarta Sans so a
+  /// screen can mix `Theme.of(context).textTheme` (UI chrome) with
+  /// `TypographyTokens.serifTextTheme` (greetings, section titles) without
+  /// two incompatible type systems.
+  static TextTheme get serifTextTheme {
+    final base = textTheme;
+    return GoogleFonts.newsreaderTextTheme(base).copyWith(
+      displayLarge: GoogleFonts.newsreader(textStyle: base.displayLarge),
+      displayMedium: GoogleFonts.newsreader(textStyle: base.displayMedium),
+      displaySmall: GoogleFonts.newsreader(textStyle: base.displaySmall),
+      headlineLarge: GoogleFonts.newsreader(textStyle: base.headlineLarge),
+      headlineMedium: GoogleFonts.newsreader(textStyle: base.headlineMedium),
+      headlineSmall: GoogleFonts.newsreader(textStyle: base.headlineSmall),
+    );
+  }
+
+  /// Applies IBM Plex Mono with tabular figures to [style] — for numerals
+  /// (times, percentages, counts) and uppercase eyebrow labels.
+  static TextStyle mono(TextStyle? style) {
+    return GoogleFonts.ibmPlexMono(
+      textStyle: style,
+    ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
   }
 }

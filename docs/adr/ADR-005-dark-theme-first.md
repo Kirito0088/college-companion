@@ -1,6 +1,6 @@
 # ADR-005: Dark Theme-First Visual Direction
 
-- **Status:** Accepted
+- **Status:** Superseded by [ADR-011](ADR-011-user-selectable-theme-and-accent.md)
 - **Date:** 2026-06-25
 - **Deciders:** Design & Architecture Team
 

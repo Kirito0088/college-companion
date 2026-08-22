@@ -1,4 +1,3 @@
-import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -52,9 +51,8 @@ class _CCSkeletonState extends State<CCSkeleton>
           width: widget.width,
           height: widget.height,
           decoration: BoxDecoration(
-            color: ColorTokens.surfaceContainerHighest.withValues(
-              alpha: _animation.value,
-            ),
+            color: Theme.of(context).colorScheme.surfaceContainerHighest
+                .withValues(alpha: _animation.value),
             borderRadius:
                 widget.borderRadius ?? BorderRadius.circular(RadiusTokens.md),
           ),

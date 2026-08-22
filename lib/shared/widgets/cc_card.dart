@@ -5,7 +5,7 @@
 /// card-style section. Presentation-only; contains no business logic.
 ///
 /// Issue #21 — De-Vibecode: Adds a crisp 1dp micro-border using
-/// [ColorTokens.outlineVariant] to replace diffuse glowing shadows.
+/// [ColorScheme.outlineVariant] to replace diffuse glowing shadows.
 /// Structural integrity over ambient decoration.
 ///
 /// Rules (per DESIGN.md / 03-ui-rules.md §7):
@@ -14,7 +14,6 @@
 /// - Avoid hardcoded spacing/radius/colors — use design tokens.
 library;
 
-import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -38,12 +37,13 @@ class CCCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: padding ?? const EdgeInsets.all(SpacingTokens.base),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
+        color: colorScheme.surfaceContainer,
         borderRadius: RadiusTokens.borderRadiusMd,
-        border: Border.all(color: ColorTokens.outlineVariant, width: 1),
+        border: Border.all(color: colorScheme.outlineVariant, width: 1),
       ),
       child: child,
     );

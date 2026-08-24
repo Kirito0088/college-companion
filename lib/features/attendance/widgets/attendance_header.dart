@@ -19,39 +19,39 @@ class AttendanceHeader extends StatelessWidget {
       child: SizedBox(
         height: 64,
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(999),
-                    onTap: () {
-                      if (context.canPop()) {
-                        context.pop();
-                      }
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(SpacingTokens.sm),
-                      child: Icon(
-                        Symbols.arrow_back_rounded,
-                        color: cc.mut,
-                        size: 24,
-                      ),
-                    ),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(999),
+                onTap: () {
+                  if (context.canPop()) {
+                    context.pop();
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(SpacingTokens.sm),
+                  child: Icon(
+                    Symbols.arrow_back_rounded,
+                    color: cc.mut,
+                    size: 24,
                   ),
                 ),
-                const SizedBox(width: SpacingTokens.sm),
-                Text(
-                  'Attendance',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: cc.fg,
-                  ),
-                ),
-              ],
+              ),
             ),
+            const SizedBox(width: SpacingTokens.sm),
+            Expanded(
+              child: Text(
+                'Attendance',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: cc.fg,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: SpacingTokens.sm),
             Container(
               padding: const EdgeInsets.symmetric(
                 horizontal: SpacingTokens.lg,

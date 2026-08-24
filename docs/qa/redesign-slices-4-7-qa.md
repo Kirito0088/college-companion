@@ -149,3 +149,29 @@ Safe Bunk screen real numbers, Lecture Record / evidence capture flow, Semester 
 real semesters, Resources, Focus Mode, Timetable, and the full Light/Sand and Dark/Sand accent
 combinations. Recommend a follow-up pass after seeding at least one semester + subject + a few
 attendance records.
+
+---
+
+## Follow-up — 2026-08-24, issue #32 (app-wide layout responsiveness)
+
+Fixed defect **J**'s nav-bar half (Attendance's Subjects-tab empty state remains #31's to fix) plus
+the wider RenderFlex-overflow audit issue #32 asked for. What was actually verified, precisely:
+
+- **Automated**: `test/widget/responsive_layout_test.dart` pumps the nav bar and a curated set of
+  the widgets/screens the static audit flagged (`SectionHeader`, `LectureCard`, `NextLectureCard`,
+  Dashboard/Attendance/Calendar/Assignments/Resources/Settings) at 320/360/411/600dp, portrait and
+  landscape for the nav bar and at the two width extremes for the screen sweep, asserting zero
+  overflow and (for the nav bar) that no label wraps onto a second line. This is a bounded suite,
+  not full coverage of every route below — see "Not yet exercised" above and the scope note below.
+- **Real device**: rebuilt and reinstalled onto the same physical device this QA run used
+  (CPH2455, Android 14, 1080×2400 @480dpi — 360dp logical width). Confirmed live that the bottom
+  nav bar's 5 labels ("Home", "Attendance", "Calendar", "Assignments", "Profile") now render on a
+  single line, unwrapped, at this device's actual width — the exact regression defect **J**
+  reported. Did not re-run the full manual route-by-route sweep from this doc on-device this pass;
+  that remains open, same as the "Not yet exercised" list above.
+- **Scope note**: this pass fixed every RenderFlex overflow the automated sweep actually found
+  (nav bar, `SectionHeader`, `CCListRow`, `LectureCard`'s room/faculty metadata, `NextLectureCard`,
+  `AttendanceHeader`, `AttendanceTrendCard`, the attendance-requirement stat row, the calendar
+  month-label row, `TodayOverviewSection`, and the resources file-type/size row). It did not
+  attempt a screen-by-screen visual audit beyond what the widget suite covers — a full 320dp/600dp
+  manual sweep of every route in this doc is still open, same as before this pass.

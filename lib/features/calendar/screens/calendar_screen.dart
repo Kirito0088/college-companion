@@ -174,11 +174,15 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          monthLabel,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            color: cc.pri,
-                            fontWeight: FontWeight.w600,
+                        Flexible(
+                          child: Text(
+                            monthLabel,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: cc.pri,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         const SizedBox(width: SpacingTokens.xxs),

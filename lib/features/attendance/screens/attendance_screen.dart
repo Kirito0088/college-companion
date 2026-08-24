@@ -431,14 +431,30 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildRequirementStat(
-                context,
-                'Minimum Required',
-                targetStr,
-                cc.fg,
+              Expanded(
+                child: _buildRequirementStat(
+                  context,
+                  'Minimum Required',
+                  targetStr,
+                  cc.fg,
+                ),
               ),
-              _buildRequirementStat(context, 'Current', currentStr, cc.fg),
-              _buildRequirementStat(context, 'Status', statusStr, statusColor),
+              Expanded(
+                child: _buildRequirementStat(
+                  context,
+                  'Current',
+                  currentStr,
+                  cc.fg,
+                ),
+              ),
+              Expanded(
+                child: _buildRequirementStat(
+                  context,
+                  'Status',
+                  statusStr,
+                  statusColor,
+                ),
+              ),
             ],
           ),
         ),
@@ -459,6 +475,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
         Text(
           label,
           style: theme.textTheme.labelMedium?.copyWith(color: cc.mut),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: SpacingTokens.xs),
         Text(
@@ -467,6 +485,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
             color: valueColor,
             fontWeight: FontWeight.bold,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );

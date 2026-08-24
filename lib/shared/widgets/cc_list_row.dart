@@ -75,6 +75,8 @@ class CCListRow extends StatelessWidget {
                       style: theme.textTheme.bodyLarge?.copyWith(
                         color: labelColor ?? cc.fg,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     if (subtitle != null) ...[
                       const SizedBox(height: SpacingTokens.xxs),
@@ -83,6 +85,8 @@ class CCListRow extends StatelessWidget {
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: cc.mut,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ],
@@ -90,9 +94,13 @@ class CCListRow extends StatelessWidget {
               ),
               if (trailingText != null) ...[
                 const SizedBox(width: SpacingTokens.sm),
-                Text(
-                  trailingText!,
-                  style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
+                Flexible(
+                  child: Text(
+                    trailingText!,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
               if (trailing != null) ...[

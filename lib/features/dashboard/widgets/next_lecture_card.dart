@@ -59,34 +59,46 @@ class NextLectureCard extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Text(
-                          'NEXT ACTION',
-                          style:
-                              TypographyTokens.mono(
-                                theme.textTheme.labelMedium,
-                              ).copyWith(
-                                color: cc.mut,
-                                letterSpacing:
-                                    TypographyTokens.monoLabelSpacing,
-                              ),
-                        ),
-                        const SizedBox(width: SpacingTokens.xs),
-                        Icon(
-                          Symbols.arrow_forward_rounded,
-                          size: 14,
-                          color: cc.mut,
-                        ),
-                      ],
+                    Flexible(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              'NEXT ACTION',
+                              style:
+                                  TypographyTokens.mono(
+                                    theme.textTheme.labelMedium,
+                                  ).copyWith(
+                                    color: cc.mut,
+                                    letterSpacing:
+                                        TypographyTokens.monoLabelSpacing,
+                                  ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: SpacingTokens.xs),
+                          Icon(
+                            Symbols.arrow_forward_rounded,
+                            size: 14,
+                            color: cc.mut,
+                          ),
+                        ],
+                      ),
                     ),
-                    Text(
-                      nextAction.urgencyString,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: cc.pri,
-                        fontWeight: FontWeight.w600,
+                    const SizedBox(width: SpacingTokens.sm),
+                    Flexible(
+                      child: Text(
+                        nextAction.urgencyString,
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: cc.pri,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.end,
                       ),
                     ),
                   ],
@@ -109,14 +121,20 @@ class NextLectureCard extends ConsumerWidget {
                       style: TypographyTokens.mono(
                         theme.textTheme.bodyMedium,
                       ).copyWith(color: cc.mut),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(width: SpacingTokens.md),
                     Icon(Symbols.location_on, size: 16, color: cc.mut),
                     const SizedBox(width: 4),
-                    Text(
-                      nextAction.location,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: cc.mut,
+                    Flexible(
+                      child: Text(
+                        nextAction.location,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: cc.mut,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],

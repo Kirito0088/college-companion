@@ -187,34 +187,48 @@ class LectureCard extends StatelessWidget {
 
                     // Room
                     if (lecture.room != null && lecture.room!.isNotEmpty)
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Symbols.location_on, size: 16, color: cc.mut),
-                          const SizedBox(width: SpacingTokens.xs),
-                          Text(
-                            lecture.room!,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: cc.mut,
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 140),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Symbols.location_on, size: 16, color: cc.mut),
+                            const SizedBox(width: SpacingTokens.xs),
+                            Flexible(
+                              child: Text(
+                                lecture.room!,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: cc.mut,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
 
                     // Faculty
                     if (lecture.faculty != null && lecture.faculty!.isNotEmpty)
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Symbols.person, size: 16, color: cc.mut),
-                          const SizedBox(width: SpacingTokens.xs),
-                          Text(
-                            lecture.faculty!,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: cc.mut,
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 140),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Symbols.person, size: 16, color: cc.mut),
+                            const SizedBox(width: SpacingTokens.xs),
+                            Flexible(
+                              child: Text(
+                                lecture.faculty!,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: cc.mut,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                   ],
                 ),

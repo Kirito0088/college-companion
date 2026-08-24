@@ -37,15 +37,19 @@ class TodayOverviewSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              "Today's Flow",
-              style: TypographyTokens.serifTextTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: cc.fg,
+            Expanded(
+              child: Text(
+                "Today's Flow",
+                style: TypographyTokens.serifTextTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: cc.fg,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
+            const SizedBox(width: SpacingTokens.sm),
             Icon(Symbols.tune_rounded, color: cc.mut, size: 24),
           ],
         ),

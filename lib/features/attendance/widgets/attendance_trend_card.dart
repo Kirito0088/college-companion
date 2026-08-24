@@ -23,20 +23,27 @@ class AttendanceTrendCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Attendance Trend',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: cc.fg,
+              Expanded(
+                child: Text(
+                  'Attendance Trend',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: cc.fg,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+              const SizedBox(width: SpacingTokens.sm),
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     'This Week',
                     style: theme.textTheme.labelLarge?.copyWith(color: cc.mut),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(width: 4),
                   Icon(Symbols.expand_more_rounded, color: cc.mut, size: 18),
@@ -105,13 +112,16 @@ class AttendanceTrendCard extends StatelessWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            _buildXLabel(context, cc, 'Mon'),
-                            _buildXLabel(context, cc, 'Tue'),
-                            _buildXLabel(context, cc, 'Wed'),
-                            _buildXLabel(context, cc, 'Thu'),
-                            _buildXLabel(context, cc, 'Fri'),
-                            _buildXLabel(context, cc, 'Sat'),
-                            _buildXLabel(context, cc, 'Sun'),
+                            for (final day in const [
+                              'Mon',
+                              'Tue',
+                              'Wed',
+                              'Thu',
+                              'Fri',
+                              'Sat',
+                              'Sun',
+                            ])
+                              Flexible(child: _buildXLabel(context, cc, day)),
                           ],
                         ),
                       ),

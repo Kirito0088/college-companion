@@ -522,11 +522,15 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
                     const SizedBox(height: SpacingTokens.xs),
                     Row(
                       children: [
-                        Text(
-                          fileType,
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: cc.mut,
-                            fontWeight: FontWeight.bold,
+                        Flexible(
+                          child: Text(
+                            fileType,
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: cc.mut,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         const SizedBox(width: SpacingTokens.xs),

@@ -29,16 +29,16 @@ void main() {
       expect(row.data['ok'], 1);
     });
 
-    test('schema version is 2 baseline', () async {
-      expect(backend.db.schemaVersion, 2);
+    test('schema version is 3 baseline', () async {
+      expect(backend.db.schemaVersion, 3);
     });
 
-    test('Drift reports schema version 2 via user_version pragma', () async {
+    test('Drift reports schema version 3 via user_version pragma', () async {
       await backend.db.customSelect('SELECT 1').get();
       final row = await backend.db
           .customSelect('PRAGMA user_version')
           .getSingle();
-      expect(row.data.values.first, 2);
+      expect(row.data.values.first, 3);
     });
   });
 

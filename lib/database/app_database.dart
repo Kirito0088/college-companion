@@ -58,7 +58,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -70,6 +70,9 @@ class AppDatabase extends _$AppDatabase {
         if (from < 2) {
           await m.addColumn(semesters, semesters.startDate);
           await m.addColumn(semesters, semesters.expectedCompletionDate);
+        }
+        if (from < 3) {
+          await m.addColumn(userSettings, userSettings.lectureRemindersEnabled);
         }
       },
     );

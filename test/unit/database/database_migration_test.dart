@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:college_companion/database/app_database.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sqlite3/sqlite3.dart' as sqlite3;
 
 void main() {
   late AppDatabase database;
@@ -14,8 +17,8 @@ void main() {
   });
 
   group('Database Migration & Schema Tests', () {
-    test('Drift database instantiates with schema version 2', () {
-      expect(database.schemaVersion, 2);
+    test('Drift database instantiates with schema version 3', () {
+      expect(database.schemaVersion, 3);
     });
 
     test('All tables are registered in database schema', () {
@@ -186,6 +189,7 @@ void main() {
           'id',
           'user_id',
           'notifications_enabled',
+          'lecture_reminders_enabled',
           'enabled_modules',
           'theme',
           'preferences',
@@ -316,5 +320,53 @@ void main() {
         throwsA(anything),
       );
     });
+
+    test(
+      'upgrading from a v2 db missing lecture_reminders_enabled backfills the column',
+      () async {
+        // Reproduces a real on-device schema (schema_version 2, user_settings
+        // created before `lectureRemindersEnabled` existed in the Dart table
+        // definition) and asserts the v2 -> v3 migration repairs it in place.
+        final tempDir = await Directory.systemTemp.createTemp('cc_migration');
+        final dbFile = File('${tempDir.path}/legacy_v2.db');
+        addTearDown(() => tempDir.delete(recursive: true));
+
+        final raw = sqlite3.sqlite3.open(dbFile.path);
+        raw.execute('''
+          CREATE TABLE user_settings (
+            id TEXT NOT NULL,
+            user_id TEXT NOT NULL,
+            notifications_enabled INTEGER NOT NULL DEFAULT 1
+              CHECK (notifications_enabled IN (0, 1)),
+            enabled_modules TEXT NOT NULL DEFAULT '{}',
+            theme TEXT NOT NULL DEFAULT 'dark',
+            preferences TEXT NOT NULL DEFAULT '{}',
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            PRIMARY KEY (id)
+          );
+        ''');
+        raw.execute('''
+          INSERT INTO user_settings
+            (id, user_id, notifications_enabled, enabled_modules, theme, preferences, created_at, updated_at)
+          VALUES
+            ('settings_legacy_user', 'legacy_user', 1, '{}', 'dark', '{"accent":"sand"}', '2026-01-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z');
+        ''');
+        raw.execute('PRAGMA user_version = 2;');
+        raw.close();
+
+        final migrated = AppDatabase.forTesting(NativeDatabase(dbFile));
+        addTearDown(migrated.close);
+
+        final row = await migrated
+            .customSelect(
+              'SELECT lecture_reminders_enabled FROM user_settings '
+              "WHERE user_id = 'legacy_user'",
+            )
+            .getSingle();
+
+        expect(row.data['lecture_reminders_enabled'], 1);
+      },
+    );
   });
 }

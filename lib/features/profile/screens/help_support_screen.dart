@@ -1,5 +1,7 @@
 import 'package:college_companion/shared/widgets/cc_card.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/shared/widgets/cc_list_row.dart';
+import 'package:college_companion/shared/widgets/cc_section.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -12,21 +14,22 @@ class HelpSupportScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: cc.bg,
       appBar: AppBar(
-        backgroundColor: theme.colorScheme.surface,
+        backgroundColor: cc.bg,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Symbols.arrow_back),
-          color: ColorTokens.onSurface,
+          color: cc.fg,
           onPressed: () => context.pop(),
         ),
         title: Text(
           'Help & Support',
           style: theme.textTheme.titleLarge?.copyWith(
-            color: ColorTokens.onSurface,
+            color: cc.fg,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -42,14 +45,66 @@ class HelpSupportScreen extends StatelessWidget {
           children: [
             _buildSearchBox(context),
             const SizedBox(height: LayoutTokens.sectionGap),
-            _buildSectionTitle(context, 'Contact Us'),
-            _buildContactOptions(context),
+            CCSection(
+              title: 'Contact Us',
+              children: [
+                CCListRow(
+                  icon: Symbols.chat,
+                  label: 'Chat with Support',
+                  subtitle: 'Usually responds in 5 minutes',
+                  showBorder: true,
+                  onTap: () {},
+                ),
+                CCListRow(
+                  icon: Symbols.mail,
+                  label: 'Email Us',
+                  subtitle: 'support@collegecompanion.app',
+                  showBorder: false,
+                  onTap: () {},
+                ),
+              ],
+            ),
             const SizedBox(height: LayoutTokens.sectionGap),
-            _buildSectionTitle(context, 'Frequently Asked Questions'),
+            Padding(
+              padding: const EdgeInsets.only(
+                left: SpacingTokens.sm,
+                bottom: SpacingTokens.sm,
+              ),
+              child: Text(
+                'Frequently Asked Questions',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: cc.mut,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.1,
+                ),
+              ),
+            ),
             _buildFaqSection(context),
             const SizedBox(height: LayoutTokens.sectionGap),
-            _buildSectionTitle(context, 'Community & Feedback'),
-            _buildCommunityFeedbackOptions(context),
+            CCSection(
+              title: 'Community & Feedback',
+              children: [
+                CCListRow(
+                  icon: Symbols.bug_report,
+                  label: 'Report a Bug',
+                  showBorder: true,
+                  onTap: () {},
+                ),
+                CCListRow(
+                  icon: Symbols.feedback,
+                  label: 'Send Feedback',
+                  showBorder: true,
+                  onTap: () {},
+                ),
+                CCListRow(
+                  icon: Symbols.forum,
+                  label: 'Join Discord Community',
+                  showBorder: false,
+                  trailing: Icon(Symbols.open_in_new, color: cc.mut, size: 20),
+                  onTap: () {},
+                ),
+              ],
+            ),
             const SizedBox(height: SpacingTokens.huge),
           ],
         ),
@@ -59,18 +114,14 @@ class HelpSupportScreen extends StatelessWidget {
 
   Widget _buildSearchBox(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return TextField(
       decoration: InputDecoration(
         hintText: 'Search help articles...',
-        hintStyle: theme.textTheme.bodyLarge?.copyWith(
-          color: ColorTokens.onSurfaceVariant,
-        ),
-        prefixIcon: const Icon(
-          Symbols.search,
-          color: ColorTokens.onSurfaceVariant,
-        ),
+        hintStyle: theme.textTheme.bodyLarge?.copyWith(color: cc.mut),
+        prefixIcon: Icon(Symbols.search, color: cc.mut),
         filled: true,
-        fillColor: ColorTokens.surfaceContainer,
+        fillColor: cc.raise,
         border: const OutlineInputBorder(
           borderRadius: RadiusTokens.borderRadiusLg,
           borderSide: BorderSide.none,
@@ -79,86 +130,6 @@ class HelpSupportScreen extends StatelessWidget {
           vertical: SpacingTokens.md,
           horizontal: SpacingTokens.md,
         ),
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(BuildContext context, String title) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(
-        left: SpacingTokens.sm,
-        bottom: SpacingTokens.sm,
-      ),
-      child: Text(
-        title,
-        style: theme.textTheme.labelLarge?.copyWith(
-          color: ColorTokens.onSurfaceVariant,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 0.1,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildContactOptions(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: ColorTokens.surfaceContainer,
-        borderRadius: RadiusTokens.borderRadiusXl,
-        border: Border.all(
-          color: ColorTokens.outlineVariant.withValues(alpha: 0.2),
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: const Column(
-        children: [
-          _ActionRow(
-            icon: Symbols.chat,
-            label: 'Chat with Support',
-            subtitle: 'Usually responds in 5 minutes',
-            showBorder: true,
-          ),
-          _ActionRow(
-            icon: Symbols.mail,
-            label: 'Email Us',
-            subtitle: 'support@collegecompanion.app',
-            showBorder: false,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCommunityFeedbackOptions(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: ColorTokens.surfaceContainer,
-        borderRadius: RadiusTokens.borderRadiusXl,
-        border: Border.all(
-          color: ColorTokens.outlineVariant.withValues(alpha: 0.2),
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: const Column(
-        children: [
-          _ActionRow(
-            icon: Symbols.bug_report,
-            label: 'Report a Bug',
-            showBorder: true,
-          ),
-          _ActionRow(
-            icon: Symbols.feedback,
-            label: 'Send Feedback',
-            showBorder: true,
-          ),
-          _ActionRow(
-            icon: Symbols.forum,
-            label: 'Join Discord Community',
-            showBorder: false,
-            trailingIcon: Symbols.open_in_new,
-          ),
-        ],
       ),
     );
   }
@@ -193,78 +164,6 @@ class HelpSupportScreen extends StatelessWidget {
   }
 }
 
-class _ActionRow extends StatelessWidget {
-  const _ActionRow({
-    required this.icon,
-    required this.label,
-    this.subtitle,
-    required this.showBorder,
-    this.trailingIcon = Symbols.chevron_right,
-  });
-
-  final IconData icon;
-  final String label;
-  final String? subtitle;
-  final bool showBorder;
-  final IconData trailingIcon;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {},
-        hoverColor: ColorTokens.surfaceContainerHigh,
-        child: Container(
-          padding: const EdgeInsets.all(LayoutTokens.cardPadding),
-          decoration: BoxDecoration(
-            border: showBorder
-                ? Border(
-                    bottom: BorderSide(
-                      color: ColorTokens.outlineVariant.withValues(alpha: 0.3),
-                    ),
-                  )
-                : null,
-          ),
-          child: Row(
-            children: [
-              Icon(icon, color: ColorTokens.onSurfaceVariant),
-              const SizedBox(width: SpacingTokens.base),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: ColorTokens.onSurface,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    if (subtitle != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle!,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: ColorTokens.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(width: SpacingTokens.sm),
-              Icon(trailingIcon, color: ColorTokens.onSurfaceVariant, size: 20),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _FaqCard extends StatelessWidget {
   const _FaqCard({required this.question, required this.answer});
 
@@ -274,6 +173,7 @@ class _FaqCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return CCCard(
       padding: EdgeInsets.zero,
@@ -285,12 +185,12 @@ class _FaqCard extends StatelessWidget {
             title: Text(
               question,
               style: theme.textTheme.titleSmall?.copyWith(
-                color: ColorTokens.onSurface,
+                color: cc.fg,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            iconColor: ColorTokens.primary,
-            collapsedIconColor: ColorTokens.onSurfaceVariant,
+            iconColor: cc.pri,
+            collapsedIconColor: cc.mut,
             tilePadding: const EdgeInsets.symmetric(
               horizontal: LayoutTokens.cardPadding,
               vertical: SpacingTokens.xs,
@@ -304,7 +204,7 @@ class _FaqCard extends StatelessWidget {
               Text(
                 answer,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: ColorTokens.onSurfaceVariant,
+                  color: cc.mut,
                   height: 1.5,
                 ),
               ),

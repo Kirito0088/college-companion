@@ -1,5 +1,7 @@
 import 'package:college_companion/shared/widgets/cc_card.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/shared/widgets/cc_list_row.dart';
+import 'package:college_companion/shared/widgets/cc_section.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -62,21 +64,22 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: cc.bg,
       appBar: AppBar(
-        backgroundColor: theme.colorScheme.surface,
+        backgroundColor: cc.bg,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Symbols.arrow_back),
-          color: ColorTokens.onSurface,
+          color: cc.fg,
           onPressed: () => context.pop(),
         ),
         title: Text(
           'Data & Sync',
           style: theme.textTheme.titleLarge?.copyWith(
-            color: ColorTokens.onSurface,
+            color: cc.fg,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -94,54 +97,52 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
             const SizedBox(height: LayoutTokens.sectionGap),
             _buildAccountInfoCard(context),
             const SizedBox(height: LayoutTokens.sectionGap),
-            _buildSection(
-              context: context,
+            CCSection(
               title: 'Sync Preferences',
               children: [
-                _SettingsSwitchRow(
+                CCListRow(
                   icon: Symbols.autorenew,
                   label: 'Auto Sync',
-                  value: true,
-                  onChanged: (val) {},
                   showBorder: true,
+                  trailing: Switch(value: true, onChanged: (val) {}),
                 ),
-                _SettingsSwitchRow(
+                CCListRow(
                   icon: Symbols.wifi,
                   label: 'Sync over Wi-Fi only',
-                  value: true,
-                  onChanged: (val) {},
                   showBorder: true,
+                  trailing: Switch(value: true, onChanged: (val) {}),
                 ),
-                _SettingsSwitchRow(
+                CCListRow(
                   icon: Symbols.cached,
                   label: 'Background Sync',
-                  value: false,
-                  onChanged: (val) {},
                   showBorder: false,
+                  trailing: Switch(value: false, onChanged: (val) {}),
                 ),
               ],
             ),
             const SizedBox(height: LayoutTokens.sectionGap),
-            _buildSection(
-              context: context,
+            const CCSection(
               title: 'Storage & Cache',
               children: [
-                const _StorageInfoRow(
+                CCListRow(
                   icon: Symbols.sd_storage,
                   label: 'Local Storage',
-                  value: '12.4 MB',
+                  trailingText: '12.4 MB',
+                  hideChevron: true,
                   showBorder: true,
                 ),
-                const _StorageInfoRow(
+                CCListRow(
                   icon: Symbols.cloud,
                   label: 'Cloud Storage',
-                  value: '45.1 MB',
+                  trailingText: '45.1 MB',
+                  hideChevron: true,
                   showBorder: true,
                 ),
-                const _StorageInfoRow(
+                CCListRow(
                   icon: Symbols.memory,
                   label: 'Cache',
-                  value: '8.2 MB',
+                  trailingText: '8.2 MB',
+                  hideChevron: true,
                   showBorder: false,
                 ),
               ],
@@ -157,6 +158,7 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
 
   Widget _buildSyncStatusCard(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return CCCard(
       padding: const EdgeInsets.all(SpacingTokens.lg),
@@ -166,20 +168,18 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
           Container(
             padding: const EdgeInsets.all(SpacingTokens.md),
             decoration: BoxDecoration(
-              color: ColorTokens.success.withValues(alpha: 0.15),
+              color: cc.priSoft,
               shape: BoxShape.circle,
             ),
             child: _isSyncing
-                ? const SizedBox(
+                ? SizedBox(
                     width: 40,
                     height: 40,
-                    child: CircularProgressIndicator(
-                      color: ColorTokens.success,
-                    ),
+                    child: CircularProgressIndicator(color: cc.pri),
                   )
-                : const Icon(
+                : Icon(
                     Symbols.check_circle,
-                    color: ColorTokens.success,
+                    color: cc.pri,
                     size: 40,
                     fill: 1.0,
                   ),
@@ -188,16 +188,14 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
           Text(
             _isSyncing ? 'Syncing data...' : 'All data synced',
             style: theme.textTheme.titleLarge?.copyWith(
-              color: ColorTokens.onSurface,
+              color: cc.fg,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: SpacingTokens.xs),
           Text(
             'Last synced: $_lastSynced',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: ColorTokens.onSurfaceVariant,
-            ),
+            style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
           ),
           const SizedBox(height: SpacingTokens.lg),
           SizedBox(
@@ -205,8 +203,8 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
             child: ElevatedButton(
               onPressed: _isSyncing ? null : _performSync,
               style: ElevatedButton.styleFrom(
-                backgroundColor: ColorTokens.primary,
-                foregroundColor: ColorTokens.onPrimary,
+                backgroundColor: cc.pri,
+                foregroundColor: cc.priFg,
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: SpacingTokens.md),
                 shape: const RoundedRectangleBorder(
@@ -229,6 +227,7 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
 
   Widget _buildAccountInfoCard(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return CCCard(
       padding: const EdgeInsets.all(SpacingTokens.md),
@@ -237,15 +236,15 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
           Container(
             width: 48,
             height: 48,
-            decoration: const BoxDecoration(
-              color: ColorTokens.primaryContainer,
+            decoration: BoxDecoration(
+              color: cc.priSoft,
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
             child: Text(
               'J',
               style: theme.textTheme.titleLarge?.copyWith(
-                color: ColorTokens.onPrimaryContainer,
+                color: cc.pri,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -257,14 +256,12 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
               children: [
                 Text(
                   'Syncing to',
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: ColorTokens.onSurfaceVariant,
-                  ),
+                  style: theme.textTheme.labelMedium?.copyWith(color: cc.mut),
                 ),
                 Text(
                   'jayeshpatil@gmail.com',
                   style: theme.textTheme.bodyLarge?.copyWith(
-                    color: ColorTokens.onSurface,
+                    color: cc.fg,
                     fontWeight: FontWeight.w500,
                   ),
                   maxLines: 1,
@@ -278,176 +275,23 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
     );
   }
 
-  Widget _buildSection({
-    required BuildContext context,
-    required String title,
-    required List<Widget> children,
-  }) {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(
-            left: SpacingTokens.sm,
-            bottom: SpacingTokens.sm,
-          ),
-          child: Text(
-            title,
-            style: theme.textTheme.labelLarge?.copyWith(
-              color: ColorTokens.onSurfaceVariant,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.1,
-            ),
-          ),
-        ),
-        Container(
-          decoration: BoxDecoration(
-            color: ColorTokens.surfaceContainer,
-            borderRadius: RadiusTokens.borderRadiusXl,
-            border: Border.all(
-              color: ColorTokens.outlineVariant.withValues(alpha: 0.2),
-            ),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Column(children: children),
-        ),
-      ],
-    );
-  }
-
   Widget _buildInfoFooter(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
-            Symbols.info,
-            size: 20,
-            color: ColorTokens.onSurfaceVariant,
-          ),
+          Icon(Symbols.info, size: 20, color: cc.mut),
           const SizedBox(width: SpacingTokens.sm),
           Expanded(
             child: Text(
               'Data is encrypted locally and in transit. Your college credentials are never sent to our servers.',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: ColorTokens.onSurfaceVariant,
+                color: cc.mut,
                 height: 1.4,
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SettingsSwitchRow extends StatelessWidget {
-  const _SettingsSwitchRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.onChanged,
-    required this.showBorder,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-  final bool showBorder;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: LayoutTokens.cardPadding,
-        vertical: SpacingTokens.sm,
-      ),
-      decoration: BoxDecoration(
-        border: showBorder
-            ? Border(
-                bottom: BorderSide(
-                  color: ColorTokens.outlineVariant.withValues(alpha: 0.3),
-                ),
-              )
-            : null,
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: ColorTokens.onSurfaceVariant),
-          const SizedBox(width: SpacingTokens.base),
-          Expanded(
-            child: Text(
-              label,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: ColorTokens.onSurface,
-              ),
-            ),
-          ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeThumbColor: ColorTokens.surface,
-            activeTrackColor: ColorTokens.primary,
-            inactiveThumbColor: ColorTokens.outline,
-            inactiveTrackColor: ColorTokens.surfaceContainerHighest,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StorageInfoRow extends StatelessWidget {
-  const _StorageInfoRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.showBorder,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-  final bool showBorder;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.all(LayoutTokens.cardPadding),
-      decoration: BoxDecoration(
-        border: showBorder
-            ? Border(
-                bottom: BorderSide(
-                  color: ColorTokens.outlineVariant.withValues(alpha: 0.3),
-                ),
-              )
-            : null,
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: ColorTokens.onSurfaceVariant),
-          const SizedBox(width: SpacingTokens.base),
-          Expanded(
-            child: Text(
-              label,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: ColorTokens.onSurface,
-              ),
-            ),
-          ),
-          Text(
-            value,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: ColorTokens.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
             ),
           ),
         ],

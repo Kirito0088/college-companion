@@ -6,7 +6,7 @@ import 'package:college_companion/features/profile/widgets/profile_header_card.d
 import 'package:college_companion/features/profile/widgets/profile_menu_list.dart';
 import 'package:college_companion/routing/app_router.dart';
 import 'package:college_companion/shared/widgets/dialogs/cc_dialogs.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +18,7 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
+    final cc = context.cc;
     final authState = ref.watch(authStateProvider);
     final profile = ref.watch(userProfileProvider);
 
@@ -32,7 +32,7 @@ class ProfileScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: cc.bg,
       body: SafeArea(
         child: Column(
           children: [
@@ -75,30 +75,29 @@ class _PreviewOnboardingButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return Material(
-      color: ColorTokens.surfaceContainerHigh,
-      borderRadius: RadiusTokens.borderRadiusXl,
+      color: cc.raise2,
+      borderRadius: RadiusTokens.borderRadiusXxl,
       child: InkWell(
         onTap: () {
           context.push(RoutePaths.onboarding);
         },
-        borderRadius: RadiusTokens.borderRadiusXl,
-        hoverColor: ColorTokens.surfaceContainerHighest,
+        borderRadius: RadiusTokens.borderRadiusXxl,
+        hoverColor: cc.raise,
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: SpacingTokens.base),
           decoration: BoxDecoration(
-            border: Border.all(
-              color: ColorTokens.primary.withValues(alpha: 0.3),
-            ),
-            borderRadius: RadiusTokens.borderRadiusXl,
+            border: Border.all(color: cc.pri.withValues(alpha: 0.3)),
+            borderRadius: RadiusTokens.borderRadiusXxl,
           ),
           alignment: Alignment.center,
           child: Text(
             'Preview Onboarding',
             style: theme.textTheme.titleMedium?.copyWith(
-              color: ColorTokens.primary,
+              color: cc.pri,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -114,10 +113,11 @@ class _LogoutButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return Material(
-      color: ColorTokens.surfaceContainer,
-      borderRadius: RadiusTokens.borderRadiusXl,
+      color: cc.raise,
+      borderRadius: RadiusTokens.borderRadiusXxl,
       child: InkWell(
         onTap: () async {
           final confirm = await CCDialogs.showLogoutConfirmation(context);
@@ -126,22 +126,20 @@ class _LogoutButton extends ConsumerWidget {
             await authService.signOut();
           }
         },
-        borderRadius: RadiusTokens.borderRadiusXl,
-        hoverColor: ColorTokens.surfaceContainerHigh,
+        borderRadius: RadiusTokens.borderRadiusXxl,
+        hoverColor: cc.raise2,
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: SpacingTokens.base),
           decoration: BoxDecoration(
-            border: Border.all(
-              color: ColorTokens.outlineVariant.withValues(alpha: 0.2),
-            ),
-            borderRadius: RadiusTokens.borderRadiusXl,
+            border: Border.all(color: cc.line),
+            borderRadius: RadiusTokens.borderRadiusXxl,
           ),
           alignment: Alignment.center,
           child: Text(
             'Logout',
             style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.error,
+              color: cc.risk,
               fontWeight: FontWeight.bold,
             ),
           ),

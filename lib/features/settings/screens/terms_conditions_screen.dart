@@ -1,4 +1,4 @@
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -10,21 +10,22 @@ class TermsConditionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: cc.bg,
       appBar: AppBar(
-        backgroundColor: theme.colorScheme.surface,
+        backgroundColor: cc.bg,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Symbols.arrow_back),
-          color: ColorTokens.onSurface,
+          color: cc.fg,
           onPressed: () => context.pop(),
         ),
         title: Text(
           'Terms of Service',
           style: theme.textTheme.titleLarge?.copyWith(
-            color: ColorTokens.onSurface,
+            color: cc.fg,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -37,9 +38,7 @@ class TermsConditionsScreen extends StatelessWidget {
           children: [
             Text(
               'Last updated: October 2026',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: ColorTokens.onSurfaceVariant,
-              ),
+              style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
             ),
             const SizedBox(height: SpacingTokens.lg),
             _buildSection(
@@ -86,6 +85,7 @@ class TermsConditionsScreen extends StatelessWidget {
 
   Widget _buildSection(BuildContext context, String title, String content) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Padding(
       padding: const EdgeInsets.only(bottom: SpacingTokens.xl),
       child: Column(
@@ -94,7 +94,7 @@ class TermsConditionsScreen extends StatelessWidget {
           Text(
             title,
             style: theme.textTheme.titleMedium?.copyWith(
-              color: ColorTokens.primary,
+              color: cc.pri,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -102,7 +102,7 @@ class TermsConditionsScreen extends StatelessWidget {
           Text(
             content,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: ColorTokens.onSurface,
+              color: cc.fg,
               height: 1.6,
             ),
           ),

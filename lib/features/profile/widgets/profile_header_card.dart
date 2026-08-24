@@ -1,5 +1,5 @@
 import 'package:college_companion/shared/widgets/cc_card.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +21,7 @@ class ProfileHeaderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     final String initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
 
     return CCCard(
@@ -30,15 +31,15 @@ class ProfileHeaderCard extends StatelessWidget {
           Container(
             width: 64, // w-16
             height: 64, // h-16
-            decoration: const BoxDecoration(
-              color: ColorTokens.primaryContainer,
+            decoration: BoxDecoration(
+              color: cc.priSoft,
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
             child: Text(
               initial,
               style: theme.textTheme.headlineMedium?.copyWith(
-                color: ColorTokens.onPrimaryContainer,
+                color: cc.pri,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -50,17 +51,13 @@ class ProfileHeaderCard extends StatelessWidget {
               children: [
                 Text(
                   name,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: ColorTokens.onSurface,
-                  ),
+                  style: theme.textTheme.titleLarge?.copyWith(color: cc.fg),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   email,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: ColorTokens.onSurfaceVariant,
-                  ),
+                  style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -71,15 +68,13 @@ class ProfileHeaderCard extends StatelessWidget {
                     vertical: 6, // better breathing room
                   ),
                   decoration: BoxDecoration(
-                    color: ColorTokens.surfaceVariant,
+                    color: cc.raise2,
                     borderRadius: RadiusTokens.borderRadiusPill,
-                    border: Border.all(color: ColorTokens.outlineVariant),
+                    border: Border.all(color: cc.line),
                   ),
                   child: Text(
                     '$semester • $course',
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: ColorTokens.onSurfaceVariant,
-                    ),
+                    style: theme.textTheme.labelLarge?.copyWith(color: cc.mut),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

@@ -1,5 +1,5 @@
 import 'package:college_companion/features/profile/providers/profile_provider.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -74,23 +74,24 @@ class _AccountInformationScreenState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     final profile = ref.watch(userProfileProvider);
     _initControllers(profile);
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: cc.bg,
       appBar: AppBar(
-        backgroundColor: theme.colorScheme.surface,
+        backgroundColor: cc.bg,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Symbols.arrow_back),
-          color: ColorTokens.onSurface,
+          color: cc.fg,
           onPressed: () => context.pop(),
         ),
         title: Text(
           'Account Information',
           style: theme.textTheme.titleLarge?.copyWith(
-            color: ColorTokens.onSurface,
+            color: cc.fg,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -122,25 +123,26 @@ class _AccountInformationScreenState
 
   Widget _buildProfileCard(BuildContext context, UserProfileDetails profile) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     final initial = profile.displayName.isNotEmpty
         ? profile.displayName[0].toUpperCase()
         : 'J';
 
     return Container(
       padding: const EdgeInsets.all(SpacingTokens.xl),
-      decoration: const BoxDecoration(
-        color: ColorTokens.surfaceContainer,
-        borderRadius: RadiusTokens.borderRadiusXl,
+      decoration: BoxDecoration(
+        color: cc.raise,
+        borderRadius: RadiusTokens.borderRadiusXxl,
       ),
       child: Column(
         children: [
           CircleAvatar(
             radius: 40,
-            backgroundColor: ColorTokens.primaryContainer,
+            backgroundColor: cc.priSoft,
             child: Text(
               initial,
               style: theme.textTheme.displaySmall?.copyWith(
-                color: ColorTokens.onPrimaryContainer,
+                color: cc.pri,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -149,16 +151,14 @@ class _AccountInformationScreenState
           Text(
             profile.displayName,
             style: theme.textTheme.titleLarge?.copyWith(
-              color: ColorTokens.onSurface,
+              color: cc.fg,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: SpacingTokens.xs),
           Text(
             profile.email,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: ColorTokens.onSurfaceVariant,
-            ),
+            style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
           ),
           const SizedBox(height: SpacingTokens.md),
           Container(
@@ -166,23 +166,19 @@ class _AccountInformationScreenState
               horizontal: SpacingTokens.md,
               vertical: SpacingTokens.xs,
             ),
-            decoration: const BoxDecoration(
-              color: ColorTokens.surfaceContainerHigh,
+            decoration: BoxDecoration(
+              color: cc.raise2,
               borderRadius: RadiusTokens.borderRadiusSm,
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Symbols.shield_person,
-                  size: 16,
-                  color: ColorTokens.primary,
-                ),
+                Icon(Symbols.shield_person, size: 16, color: cc.pri),
                 const SizedBox(width: SpacingTokens.sm),
                 Text(
                   'Signed in with Google',
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: ColorTokens.onSurfaceVariant,
+                    color: cc.mut,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -201,21 +197,28 @@ class _AccountInformationScreenState
       child: Column(
         children: [
           _buildTextField(
+            context: context,
             label: 'Display Name',
             controller: _displayNameController,
           ),
           const SizedBox(height: SpacingTokens.md),
           _buildTextField(
+            context: context,
             label: 'College Name',
             controller: _collegeNameController,
           ),
           const SizedBox(height: SpacingTokens.md),
-          _buildTextField(label: 'Branch', controller: _branchController),
+          _buildTextField(
+            context: context,
+            label: 'Branch',
+            controller: _branchController,
+          ),
           const SizedBox(height: SpacingTokens.md),
           Row(
             children: [
               Expanded(
                 child: _buildTextField(
+                  context: context,
                   label: 'Semester',
                   controller: _semesterController,
                   keyboardType: TextInputType.number,
@@ -225,6 +228,7 @@ class _AccountInformationScreenState
               Expanded(
                 flex: 2,
                 child: _buildTextField(
+                  context: context,
                   label: 'Student ID',
                   controller: _studentIdController,
                 ),
@@ -243,18 +247,25 @@ class _AccountInformationScreenState
       child: Column(
         children: [
           _buildTextField(
+            context: context,
             label: 'University',
             controller: _universityController,
           ),
           const SizedBox(height: SpacingTokens.md),
-          _buildTextField(label: 'Course', controller: _courseController),
+          _buildTextField(
+            context: context,
+            label: 'Course',
+            controller: _courseController,
+          ),
           const SizedBox(height: SpacingTokens.md),
           _buildTextField(
+            context: context,
             label: 'Department',
             controller: _departmentController,
           ),
           const SizedBox(height: SpacingTokens.md),
           _buildTextField(
+            context: context,
             label: 'Expected Graduation',
             controller: _gradYearController,
             keyboardType: TextInputType.number,
@@ -265,6 +276,7 @@ class _AccountInformationScreenState
   }
 
   Widget _buildAccountStatus(BuildContext context) {
+    final cc = context.cc;
     return _buildSectionContainer(
       context: context,
       title: 'Account Status',
@@ -275,40 +287,31 @@ class _AccountInformationScreenState
             'Status',
             'Verified',
             Symbols.verified,
-            ColorTokens.primary,
+            cc.pri,
           ),
-          const Divider(
-            height: SpacingTokens.xl,
-            color: ColorTokens.outlineVariant,
-          ),
+          Divider(height: SpacingTokens.xl, color: cc.line),
           _buildStatusRow(
             context,
             'Authentication',
             'Google Sign-In',
             Symbols.login,
-            ColorTokens.onSurfaceVariant,
+            cc.mut,
           ),
-          const Divider(
-            height: SpacingTokens.xl,
-            color: ColorTokens.outlineVariant,
-          ),
+          Divider(height: SpacingTokens.xl, color: cc.line),
           _buildStatusRow(
             context,
             'Account Created',
             '12 June 2026',
             Symbols.calendar_today,
-            ColorTokens.onSurfaceVariant,
+            cc.mut,
           ),
-          const Divider(
-            height: SpacingTokens.xl,
-            color: ColorTokens.outlineVariant,
-          ),
+          Divider(height: SpacingTokens.xl, color: cc.line),
           _buildStatusRow(
             context,
             'Last Sync',
             'Today, 9:30 AM',
             Symbols.sync,
-            ColorTokens.onSurfaceVariant,
+            cc.mut,
           ),
         ],
       ),
@@ -323,6 +326,7 @@ class _AccountInformationScreenState
     Color iconColor,
   ) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Row(
       children: [
         Icon(icon, size: 20, color: iconColor),
@@ -330,15 +334,13 @@ class _AccountInformationScreenState
         Expanded(
           child: Text(
             label,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: ColorTokens.onSurfaceVariant,
-            ),
+            style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
           ),
         ),
         Text(
           value,
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: ColorTokens.onSurface,
+            color: cc.fg,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -347,40 +349,38 @@ class _AccountInformationScreenState
   }
 
   Widget _buildTextField({
+    required BuildContext context,
     required String label,
     required TextEditingController controller,
     TextInputType keyboardType = TextInputType.text,
   }) {
+    final cc = context.cc;
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: ColorTokens.onSurfaceVariant),
+        labelStyle: TextStyle(color: cc.mut),
         filled: true,
-        fillColor: ColorTokens.surface,
+        fillColor: cc.bg,
         border: OutlineInputBorder(
           borderRadius: RadiusTokens.borderRadiusMd,
-          borderSide: BorderSide(
-            color: ColorTokens.outlineVariant.withValues(alpha: 0.5),
-          ),
+          borderSide: BorderSide(color: cc.line2),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: RadiusTokens.borderRadiusMd,
-          borderSide: BorderSide(
-            color: ColorTokens.outlineVariant.withValues(alpha: 0.5),
-          ),
+          borderSide: BorderSide(color: cc.line2),
         ),
-        focusedBorder: const OutlineInputBorder(
+        focusedBorder: OutlineInputBorder(
           borderRadius: RadiusTokens.borderRadiusMd,
-          borderSide: BorderSide(color: ColorTokens.primary, width: 2),
+          borderSide: BorderSide(color: cc.pri, width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: SpacingTokens.md,
           vertical: SpacingTokens.md,
         ),
       ),
-      style: const TextStyle(color: ColorTokens.onSurface),
+      style: TextStyle(color: cc.fg),
     );
   }
 
@@ -409,7 +409,9 @@ class _AccountInformationScreenState
       },
       style: FilledButton.styleFrom(
         padding: const EdgeInsets.all(SpacingTokens.lg),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: const RoundedRectangleBorder(
+          borderRadius: RadiusTokens.borderRadiusXl,
+        ),
       ),
       child: const Text(
         'Save Changes',
@@ -424,6 +426,7 @@ class _AccountInformationScreenState
     required Widget child,
   }) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -435,7 +438,7 @@ class _AccountInformationScreenState
           child: Text(
             title,
             style: theme.textTheme.titleMedium?.copyWith(
-              color: ColorTokens.onSurface,
+              color: cc.fg,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -446,9 +449,9 @@ class _AccountInformationScreenState
             horizontal: LayoutTokens.cardPadding,
             vertical: LayoutTokens.cardPadding + 4,
           ),
-          decoration: const BoxDecoration(
-            color: ColorTokens.surfaceContainer,
-            borderRadius: RadiusTokens.borderRadiusXl,
+          decoration: BoxDecoration(
+            color: cc.raise,
+            borderRadius: RadiusTokens.borderRadiusXxl,
           ),
           clipBehavior: Clip.antiAlias,
           child: child,

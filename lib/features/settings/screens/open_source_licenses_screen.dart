@@ -1,4 +1,5 @@
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
+import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -7,6 +8,7 @@ class OpenSourceLicensesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cc = context.cc;
     return LicensePage(
       applicationName: 'College Companion',
       applicationVersion: '1.0.0',
@@ -15,13 +17,11 @@ class OpenSourceLicensesScreen extends StatelessWidget {
         child: Container(
           width: 80,
           height: 80,
-          decoration: const BoxDecoration(
-            color: ColorTokens.primaryContainer,
-            borderRadius: BorderRadius.all(Radius.circular(20)),
+          decoration: BoxDecoration(
+            color: cc.priSoft,
+            borderRadius: RadiusTokens.borderRadiusXxl,
           ),
-          child: const Center(
-            child: Icon(Symbols.school, size: 40, color: ColorTokens.primary),
-          ),
+          child: Center(child: Icon(Symbols.school, size: 40, color: cc.pri)),
         ),
       ),
       applicationLegalese: '© 2026 College Companion',

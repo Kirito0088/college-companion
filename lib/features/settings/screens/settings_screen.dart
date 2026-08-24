@@ -1,11 +1,15 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:college_companion/database/app_database.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/features/settings/providers/settings_provider.dart';
 import 'package:college_companion/routing/app_router.dart';
+import 'package:college_companion/shared/widgets/cc_list_row.dart';
+import 'package:college_companion/shared/widgets/cc_section.dart';
 import 'package:college_companion/shared/widgets/dialogs/cc_dialogs.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
+import 'package:college_companion/theme/providers/app_theme_provider.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:drift/drift.dart' show Value;
@@ -75,6 +79,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     final authState = ref.watch(authStateProvider);
     final userId =
         authState is AuthAuthenticated && authState.user.uid.isNotEmpty
@@ -88,19 +93,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         _localPushNotifications ?? (dbSettings?.notificationsEnabled ?? true);
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: cc.bg,
       appBar: AppBar(
-        backgroundColor: theme.colorScheme.surface,
+        backgroundColor: cc.bg,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Symbols.arrow_back),
-          color: ColorTokens.onSurface,
+          color: cc.fg,
           onPressed: () => context.pop(),
         ),
         title: Text(
           'Settings',
           style: theme.textTheme.titleLarge?.copyWith(
-            color: ColorTokens.onSurface,
+            color: cc.fg,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -114,17 +119,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSection(
-              context: context,
+            _AppearanceSection(userId: userId),
+            const SizedBox(height: LayoutTokens.sectionGap),
+            CCSection(
               title: 'Account',
               children: [
-                _SettingsRow(
+                CCListRow(
                   icon: Symbols.person,
                   label: 'Account Information',
                   showBorder: true,
                   onTap: () => context.push(RoutePaths.accountInformation),
                 ),
-                _SettingsRow(
+                CCListRow(
                   icon: Symbols.lock,
                   label: 'Privacy & Security',
                   showBorder: false,
@@ -133,99 +139,101 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ],
             ),
             const SizedBox(height: LayoutTokens.sectionGap),
-            _buildSection(
-              context: context,
+            CCSection(
               title: 'Notifications',
               children: [
-                _SettingsSwitchRow(
+                CCListRow(
                   icon: Symbols.notifications,
                   label: 'Push Notifications',
-                  value: pushNotifications,
-                  onChanged: (val) async {
-                    if (val) {
-                      final status = await Permission.notification.request();
-                      if (status.isDenied || status.isPermanentlyDenied) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: const Text(
-                                'Please enable notifications in system settings.',
-                              ),
-                              action: SnackBarAction(
-                                label: 'Settings',
-                                onPressed: () => openAppSettings(),
-                              ),
-                            ),
-                          );
-                        }
-                        val = false;
-                      }
-                    }
-
-                    setState(() {
-                      _localPushNotifications = val;
-                    });
-
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.setBool('push_notifications', val);
-
-                    final repo = ref.read(userSettingsRepositoryProvider);
-                    final nowIso = DateTime.now().toUtc().toIso8601String();
-                    final existing = await repo.getByUserId(userId);
-                    if (existing != null) {
-                      await repo.saveSettings(
-                        UserSettingsCompanion(
-                          id: Value(existing.id),
-                          userId: Value(userId),
-                          notificationsEnabled: Value(val),
-                          updatedAt: Value(nowIso),
-                        ),
-                      );
-                    } else {
-                      await repo.saveSettings(
-                        UserSettingsCompanion(
-                          id: Value('settings_$userId'),
-                          userId: Value(userId),
-                          notificationsEnabled: Value(val),
-                          createdAt: Value(nowIso),
-                          updatedAt: Value(nowIso),
-                        ),
-                      );
-                    }
-                  },
                   showBorder: true,
+                  trailing: Switch(
+                    value: pushNotifications,
+                    onChanged: (val) async {
+                      if (val) {
+                        final status = await Permission.notification.request();
+                        if (status.isDenied || status.isPermanentlyDenied) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Text(
+                                  'Please enable notifications in system settings.',
+                                ),
+                                action: SnackBarAction(
+                                  label: 'Settings',
+                                  onPressed: () => openAppSettings(),
+                                ),
+                              ),
+                            );
+                          }
+                          val = false;
+                        }
+                      }
+
+                      setState(() {
+                        _localPushNotifications = val;
+                      });
+
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setBool('push_notifications', val);
+
+                      final repo = ref.read(userSettingsRepositoryProvider);
+                      final nowIso = DateTime.now().toUtc().toIso8601String();
+                      final existing = await repo.getByUserId(userId);
+                      if (existing != null) {
+                        await repo.saveSettings(
+                          UserSettingsCompanion(
+                            id: Value(existing.id),
+                            userId: Value(userId),
+                            notificationsEnabled: Value(val),
+                            updatedAt: Value(nowIso),
+                          ),
+                        );
+                      } else {
+                        await repo.saveSettings(
+                          UserSettingsCompanion(
+                            id: Value('settings_$userId'),
+                            userId: Value(userId),
+                            notificationsEnabled: Value(val),
+                            createdAt: Value(nowIso),
+                            updatedAt: Value(nowIso),
+                          ),
+                        );
+                      }
+                    },
+                  ),
                 ),
-                _SettingsSwitchRow(
+                CCListRow(
                   icon: Symbols.schedule,
                   label: 'Lecture Reminders',
-                  value: _lectureReminders,
-                  onChanged: (val) {
-                    setState(() {
-                      _lectureReminders = val;
-                    });
-                  },
                   showBorder: false,
+                  trailing: Switch(
+                    value: _lectureReminders,
+                    onChanged: (val) {
+                      setState(() {
+                        _lectureReminders = val;
+                      });
+                    },
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: LayoutTokens.sectionGap),
 
-            _buildSection(
-              context: context,
+            CCSection(
               title: 'Data & Sync',
               children: [
-                _SettingsRow(
+                CCListRow(
                   icon: Symbols.sync,
                   label: 'Sync Data',
                   showBorder: true,
                   onTap: () => context.push(RoutePaths.dataSync),
                 ),
-                _SettingsRow(
+                CCListRow(
                   icon: Symbols.delete,
                   label: 'Clear Cache',
                   trailingText: _cacheSize,
-                  textColor: ColorTokens.error,
-                  iconColor: ColorTokens.error,
+                  labelColor: cc.risk,
+                  iconColor: cc.risk,
                   showBorder: false,
                   hideChevron: true,
                   onTap: () async {
@@ -277,24 +285,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ],
             ),
             const SizedBox(height: LayoutTokens.sectionGap),
-            _buildSection(
-              context: context,
+            CCSection(
               title: 'About',
               children: [
-                const _SettingsRow(
+                const CCListRow(
                   icon: Symbols.info,
                   label: 'App Version',
                   trailingText: 'v1.0.0',
                   hideChevron: true,
                   showBorder: true,
                 ),
-                _SettingsRow(
+                CCListRow(
                   icon: Symbols.description,
                   label: 'Terms of Service',
                   showBorder: true,
                   onTap: () => context.push(RoutePaths.termsConditions),
                 ),
-                _SettingsRow(
+                CCListRow(
                   icon: Symbols.policy,
                   label: 'Privacy Policy',
                   showBorder: false,
@@ -308,116 +315,166 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
     );
   }
+}
 
-  Widget _buildSection({
-    required BuildContext context,
-    required String title,
-    required List<Widget> children,
-  }) {
+/// Dark/Light toggle + jade/sand/azure accent picker (ADR-011, Slice 3).
+///
+/// Reads the resolved preference from [appThemeProvider] and writes through
+/// [UserSettingsRepository.updateTheme]/`updateAccent` — the same
+/// read-stream/write-repo shape as the Push Notifications toggle above.
+///
+/// [UserSettingsRepository.updateTheme]/`updateAccent` both require an
+/// existing settings row (an `UPDATE ... WHERE userId` and, for `updateAccent`,
+/// an explicit null-check that throws). A brand-new account has no row yet —
+/// the Push Notifications toggle above already handles this with a
+/// get-or-create; [_setTheme]/[_setAccent] mirror that same pattern.
+class _AppearanceSection extends ConsumerWidget {
+  const _AppearanceSection({required this.userId});
+
+  final String userId;
+
+  Future<void> _setTheme(WidgetRef ref, String value) async {
+    final repo = ref.read(userSettingsRepositoryProvider);
+    final existing = await repo.getByUserId(userId);
+    if (existing == null) {
+      final nowIso = DateTime.now().toUtc().toIso8601String();
+      await repo.saveSettings(
+        UserSettingsCompanion(
+          id: Value('settings_$userId'),
+          userId: Value(userId),
+          theme: Value(value),
+          createdAt: Value(nowIso),
+          updatedAt: Value(nowIso),
+        ),
+      );
+    } else {
+      await repo.updateTheme(userId, value);
+    }
+  }
+
+  Future<void> _setAccent(WidgetRef ref, String accentName) async {
+    final repo = ref.read(userSettingsRepositoryProvider);
+    final existing = await repo.getByUserId(userId);
+    if (existing == null) {
+      final nowIso = DateTime.now().toUtc().toIso8601String();
+      await repo.saveSettings(
+        UserSettingsCompanion(
+          id: Value('settings_$userId'),
+          userId: Value(userId),
+          preferences: Value(jsonEncode({'accent': accentName})),
+          createdAt: Value(nowIso),
+          updatedAt: Value(nowIso),
+        ),
+      );
+    } else {
+      await repo.updateAccent(userId, accentName);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    final cc = context.cc;
+    final preference = ref.watch(appThemeProvider);
+    final brightness = theme.brightness;
+
+    return CCSection(
+      title: 'Appearance',
       children: [
         Padding(
-          padding: const EdgeInsets.only(
-            left: SpacingTokens.sm,
-            bottom: SpacingTokens.sm,
+          padding: const EdgeInsets.all(LayoutTokens.cardPadding),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Theme',
+                style: theme.textTheme.labelLarge?.copyWith(color: cc.mut),
+              ),
+              const SizedBox(height: SpacingTokens.sm),
+              Row(
+                children: [
+                  Expanded(
+                    child: _ThemeOptionChip(
+                      label: 'Light',
+                      selected: preference.themeMode == ThemeMode.light,
+                      onTap: () => _setTheme(ref, 'light'),
+                    ),
+                  ),
+                  const SizedBox(width: SpacingTokens.sm),
+                  Expanded(
+                    child: _ThemeOptionChip(
+                      label: 'Dark',
+                      selected: preference.themeMode == ThemeMode.dark,
+                      onTap: () => _setTheme(ref, 'dark'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: SpacingTokens.lg),
+              Text(
+                'Accent',
+                style: theme.textTheme.labelLarge?.copyWith(color: cc.mut),
+              ),
+              const SizedBox(height: SpacingTokens.sm),
+              Row(
+                children: [
+                  for (final accent in Accent.values)
+                    Padding(
+                      padding: const EdgeInsets.only(right: SpacingTokens.md),
+                      child: _AccentSwatch(
+                        label:
+                            accent.name[0].toUpperCase() +
+                            accent.name.substring(1),
+                        color: CCTokens.resolve(brightness, accent).pri,
+                        selected: preference.accent == accent,
+                        onTap: () => _setAccent(ref, accent.name),
+                      ),
+                    ),
+                ],
+              ),
+            ],
           ),
-          child: Text(
-            title,
-            style: theme.textTheme.labelLarge?.copyWith(
-              color: ColorTokens.onSurfaceVariant,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.1,
-            ),
-          ),
-        ),
-        Container(
-          decoration: BoxDecoration(
-            color: ColorTokens.surfaceContainer,
-            borderRadius: RadiusTokens.borderRadiusXl,
-            border: Border.all(
-              color: ColorTokens.outlineVariant.withValues(alpha: 0.2),
-            ),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Column(children: children),
         ),
       ],
     );
   }
 }
 
-class _SettingsRow extends StatelessWidget {
-  const _SettingsRow({
-    required this.icon,
+class _ThemeOptionChip extends StatelessWidget {
+  const _ThemeOptionChip({
     required this.label,
-    this.trailingText,
-    this.textColor,
-    this.iconColor,
-    this.hideChevron = false,
-    required this.showBorder,
-    this.onTap,
+    required this.selected,
+    required this.onTap,
   });
 
-  final IconData icon;
   final String label;
-  final String? trailingText;
-  final Color? textColor;
-  final Color? iconColor;
-  final bool hideChevron;
-  final bool showBorder;
-  final VoidCallback? onTap;
+  final bool selected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return Material(
-      color: Colors.transparent,
+      color: selected ? cc.priSoft : cc.raise2,
+      borderRadius: RadiusTokens.borderRadiusLg,
       child: InkWell(
-        onTap: onTap ?? () {},
-        hoverColor: ColorTokens.surfaceContainerHigh,
+        onTap: onTap,
+        borderRadius: RadiusTokens.borderRadiusLg,
         child: Container(
-          padding: const EdgeInsets.all(LayoutTokens.cardPadding),
+          padding: const EdgeInsets.symmetric(vertical: SpacingTokens.md),
           decoration: BoxDecoration(
-            border: showBorder
-                ? Border(
-                    bottom: BorderSide(
-                      color: ColorTokens.outlineVariant.withValues(alpha: 0.3),
-                    ),
-                  )
-                : null,
+            borderRadius: RadiusTokens.borderRadiusLg,
+            border: Border.all(color: selected ? cc.pri : cc.line),
           ),
-          child: Row(
-            children: [
-              Icon(icon, color: iconColor ?? ColorTokens.onSurfaceVariant),
-              const SizedBox(width: SpacingTokens.base),
-              Expanded(
-                child: Text(
-                  label,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: textColor ?? ColorTokens.onSurface,
-                  ),
-                ),
-              ),
-              if (trailingText != null) ...[
-                const SizedBox(width: SpacingTokens.sm),
-                Text(
-                  trailingText!,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: ColorTokens.onSurfaceVariant,
-                  ),
-                ),
-              ],
-              if (!hideChevron) ...[
-                const SizedBox(width: SpacingTokens.sm),
-                const Icon(
-                  Symbols.chevron_right,
-                  color: ColorTokens.onSurfaceVariant,
-                ),
-              ],
-            ],
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: selected ? cc.pri : cc.mut,
+              fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
         ),
       ),
@@ -425,58 +482,49 @@ class _SettingsRow extends StatelessWidget {
   }
 }
 
-class _SettingsSwitchRow extends StatelessWidget {
-  const _SettingsSwitchRow({
-    required this.icon,
+class _AccentSwatch extends StatelessWidget {
+  const _AccentSwatch({
     required this.label,
-    required this.value,
-    required this.onChanged,
-    required this.showBorder,
+    required this.color,
+    required this.selected,
+    required this.onTap,
   });
 
-  final IconData icon;
   final String label;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-  final bool showBorder;
+  final Color color;
+  final bool selected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: LayoutTokens.cardPadding,
-        vertical: SpacingTokens.sm,
-      ),
-      decoration: BoxDecoration(
-        border: showBorder
-            ? Border(
-                bottom: BorderSide(
-                  color: ColorTokens.outlineVariant.withValues(alpha: 0.3),
-                ),
-              )
-            : null,
-      ),
-      child: Row(
+    return InkWell(
+      onTap: onTap,
+      borderRadius: RadiusTokens.borderRadiusLg,
+      child: Column(
         children: [
-          Icon(icon, color: ColorTokens.onSurfaceVariant),
-          const SizedBox(width: SpacingTokens.base),
-          Expanded(
-            child: Text(
-              label,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: ColorTokens.onSurface,
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: selected ? cc.fg : Colors.transparent,
+                width: 2,
               ),
             ),
+            alignment: Alignment.center,
+            child: selected
+                ? Icon(Symbols.check, color: cc.bg, size: 18, fill: 1.0)
+                : null,
           ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeThumbColor: ColorTokens.surface,
-            activeTrackColor: ColorTokens.primary,
-            inactiveThumbColor: ColorTokens.outline,
-            inactiveTrackColor: ColorTokens.surfaceContainerHighest,
+          const SizedBox(height: SpacingTokens.xs),
+          Text(
+            label,
+            style: theme.textTheme.labelMedium?.copyWith(color: cc.mut),
           ),
         ],
       ),

@@ -1,5 +1,5 @@
 import 'package:college_companion/features/attendance/services/bunk_calculator.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/icon_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
@@ -24,6 +24,7 @@ class SubjectMetricOverview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     Color statusColor;
     String statusLabel;
@@ -31,17 +32,17 @@ class SubjectMetricOverview extends StatelessWidget {
 
     switch (bunkMetrics.status) {
       case AttendanceStatus.onTrack:
-        statusColor = ColorTokens.success;
+        statusColor = cc.pri;
         statusLabel = 'On Track';
         statusIcon = Symbols.check_circle;
         break;
       case AttendanceStatus.warning:
-        statusColor = ColorTokens.warning;
+        statusColor = cc.warn;
         statusLabel = 'Warning';
         statusIcon = Symbols.warning;
         break;
       case AttendanceStatus.critical:
-        statusColor = ColorTokens.error;
+        statusColor = cc.risk;
         statusLabel = 'Critical Deficit';
         statusIcon = Symbols.error;
         break;
@@ -58,11 +59,9 @@ class SubjectMetricOverview extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(LayoutTokens.cardPadding),
           decoration: BoxDecoration(
-            color: ColorTokens.surfaceContainer,
-            borderRadius: RadiusTokens.borderRadiusXl,
-            border: Border.all(
-              color: ColorTokens.outlineVariant.withValues(alpha: 0.2),
-            ),
+            color: cc.raise,
+            borderRadius: RadiusTokens.borderRadiusXxl,
+            border: Border.all(color: cc.line),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,7 +78,7 @@ class SubjectMetricOverview extends StatelessWidget {
                       Text(
                         '$pctInt%',
                         style: theme.textTheme.displaySmall?.copyWith(
-                          color: ColorTokens.onSurface,
+                          color: cc.fg,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -87,7 +86,7 @@ class SubjectMetricOverview extends StatelessWidget {
                       Text(
                         'Target: ${bunkMetrics.targetPercentage.round()}%',
                         style: theme.textTheme.labelMedium?.copyWith(
-                          color: ColorTokens.onSurfaceVariant,
+                          color: cc.mut,
                         ),
                       ),
                     ],
@@ -133,7 +132,7 @@ class SubjectMetricOverview extends StatelessWidget {
                 child: LinearProgressIndicator(
                   value: pctValue,
                   minHeight: 8,
-                  backgroundColor: ColorTokens.surfaceContainerHighest,
+                  backgroundColor: statusColor.withValues(alpha: 0.15),
                   valueColor: AlwaysStoppedAnimation<Color>(statusColor),
                 ),
               ),
@@ -142,9 +141,7 @@ class SubjectMetricOverview extends StatelessWidget {
               // Quiet Confidence Status Message
               Text(
                 bunkMetrics.statusMessage,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: ColorTokens.onSurfaceVariant,
-                ),
+                style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
               ),
               const SizedBox(height: SpacingTokens.lg),
 
@@ -158,7 +155,7 @@ class SubjectMetricOverview extends StatelessWidget {
                       value:
                           '${bunkMetrics.attended} / ${bunkMetrics.total} Classes',
                       icon: Symbols.school,
-                      iconColor: ColorTokens.primary,
+                      iconColor: cc.pri,
                     ),
                   ),
                   const SizedBox(width: SpacingTokens.md),
@@ -177,10 +174,10 @@ class SubjectMetricOverview extends StatelessWidget {
                           ? Symbols.airline_seat_recline_extra
                           : Symbols.event_repeat,
                       iconColor: bunkMetrics.safeBunks > 0
-                          ? ColorTokens.success
+                          ? cc.pri
                           : (bunkMetrics.classesToAttend > 0
-                                ? ColorTokens.warning
-                                : ColorTokens.onSurfaceVariant),
+                                ? cc.warn
+                                : cc.mut),
                     ),
                   ),
                 ],
@@ -198,7 +195,7 @@ class SubjectMetricOverview extends StatelessWidget {
                 context,
                 label: 'Present',
                 count: presentCount,
-                color: ColorTokens.success,
+                color: cc.pri,
               ),
             ),
             const SizedBox(width: SpacingTokens.sm),
@@ -207,7 +204,7 @@ class SubjectMetricOverview extends StatelessWidget {
                 context,
                 label: 'Absent',
                 count: absentCount,
-                color: ColorTokens.error,
+                color: cc.risk,
               ),
             ),
             const SizedBox(width: SpacingTokens.sm),
@@ -216,7 +213,7 @@ class SubjectMetricOverview extends StatelessWidget {
                 context,
                 label: 'Cancelled',
                 count: cancelledCount,
-                color: ColorTokens.onSurfaceVariant,
+                color: cc.mut,
               ),
             ),
           ],
@@ -233,14 +230,13 @@ class SubjectMetricOverview extends StatelessWidget {
     required Color iconColor,
   }) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Container(
       padding: const EdgeInsets.all(SpacingTokens.md),
       decoration: BoxDecoration(
-        color: ColorTokens.surfaceContainerHigh.withValues(alpha: 0.6),
+        color: cc.raise2,
         borderRadius: RadiusTokens.borderRadiusLg,
-        border: Border.all(
-          color: ColorTokens.outlineVariant.withValues(alpha: 0.15),
-        ),
+        border: Border.all(color: cc.line),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -252,9 +248,7 @@ class SubjectMetricOverview extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: ColorTokens.onSurfaceVariant,
-                  ),
+                  style: theme.textTheme.labelSmall?.copyWith(color: cc.mut),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -265,7 +259,7 @@ class SubjectMetricOverview extends StatelessWidget {
           Text(
             value,
             style: theme.textTheme.titleSmall?.copyWith(
-              color: ColorTokens.onSurface,
+              color: cc.fg,
               fontWeight: FontWeight.bold,
             ),
             maxLines: 1,
@@ -283,25 +277,22 @@ class SubjectMetricOverview extends StatelessWidget {
     required Color color,
   }) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Container(
       padding: const EdgeInsets.symmetric(
         vertical: SpacingTokens.md,
         horizontal: SpacingTokens.sm,
       ),
       decoration: BoxDecoration(
-        color: ColorTokens.surfaceContainer,
+        color: cc.raise,
         borderRadius: RadiusTokens.borderRadiusLg,
-        border: Border.all(
-          color: ColorTokens.outlineVariant.withValues(alpha: 0.15),
-        ),
+        border: Border.all(color: cc.line),
       ),
       child: Column(
         children: [
           Text(
             label,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: ColorTokens.onSurfaceVariant,
-            ),
+            style: theme.textTheme.labelSmall?.copyWith(color: cc.mut),
           ),
           const SizedBox(height: SpacingTokens.xs),
           Text(

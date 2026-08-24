@@ -1,6 +1,6 @@
 import 'package:college_companion/database/app_database.dart';
 import 'package:college_companion/shared/widgets/cc_empty_state.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/icon_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
@@ -49,6 +49,7 @@ class SubjectAttendanceTimeline extends StatelessWidget {
 
   Widget _buildRecordCard(BuildContext context, AttendanceEntity record) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     Color statusColor;
     IconData statusIcon;
@@ -56,22 +57,22 @@ class SubjectAttendanceTimeline extends StatelessWidget {
 
     switch (record.primaryStatus) {
       case 'present':
-        statusColor = ColorTokens.success;
+        statusColor = cc.pri;
         statusIcon = Symbols.check_circle;
         statusText = 'Present';
         break;
       case 'absent':
-        statusColor = ColorTokens.error;
+        statusColor = cc.risk;
         statusIcon = Symbols.cancel;
         statusText = 'Absent';
         break;
       case 'cancelled':
-        statusColor = ColorTokens.onSurfaceVariant;
+        statusColor = cc.mut;
         statusIcon = Symbols.event_busy;
         statusText = 'Cancelled';
         break;
       default:
-        statusColor = ColorTokens.onSurfaceVariant;
+        statusColor = cc.mut;
         statusIcon = Symbols.help_outline;
         statusText = record.primaryStatus;
         break;
@@ -82,11 +83,9 @@ class SubjectAttendanceTimeline extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(SpacingTokens.base),
       decoration: BoxDecoration(
-        color: ColorTokens.surfaceContainer,
+        color: cc.raise,
         borderRadius: RadiusTokens.borderRadiusLg,
-        border: Border.all(
-          color: ColorTokens.outlineVariant.withValues(alpha: 0.2),
-        ),
+        border: Border.all(color: cc.line),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,7 +116,7 @@ class SubjectAttendanceTimeline extends StatelessWidget {
                     Text(
                       record.date,
                       style: theme.textTheme.titleSmall?.copyWith(
-                        color: ColorTokens.onSurface,
+                        color: cc.fg,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -144,7 +143,7 @@ class SubjectAttendanceTimeline extends StatelessWidget {
                 Text(
                   record.lectureType.toUpperCase(),
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: ColorTokens.onSurfaceVariant,
+                    color: cc.mut,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -152,9 +151,7 @@ class SubjectAttendanceTimeline extends StatelessWidget {
                   const SizedBox(height: SpacingTokens.xs),
                   Text(
                     record.notes!,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: ColorTokens.onSurface,
-                    ),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: cc.fg),
                   ),
                 ],
               ],
@@ -165,12 +162,12 @@ class SubjectAttendanceTimeline extends StatelessWidget {
           if (onEdit != null || onDelete != null) ...[
             const SizedBox(width: SpacingTokens.xs),
             PopupMenuButton<String>(
-              icon: const Icon(
+              icon: Icon(
                 Symbols.more_vert,
                 size: IconSizeTokens.sm,
-                color: ColorTokens.onSurfaceVariant,
+                color: cc.mut,
               ),
-              color: ColorTokens.surfaceContainerHigh,
+              color: cc.raise2,
               onSelected: (action) {
                 if (action == 'edit' && onEdit != null) {
                   onEdit!(record);
@@ -191,20 +188,17 @@ class SubjectAttendanceTimeline extends StatelessWidget {
                     ),
                   ),
                 if (onDelete != null)
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'delete',
                     child: Row(
                       children: [
                         Icon(
                           Symbols.delete,
                           size: IconSizeTokens.sm,
-                          color: ColorTokens.error,
+                          color: cc.risk,
                         ),
-                        SizedBox(width: SpacingTokens.sm),
-                        Text(
-                          'Delete',
-                          style: TextStyle(color: ColorTokens.error),
-                        ),
+                        const SizedBox(width: SpacingTokens.sm),
+                        Text('Delete', style: TextStyle(color: cc.risk)),
                       ],
                     ),
                   ),

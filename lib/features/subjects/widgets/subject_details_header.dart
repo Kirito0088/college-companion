@@ -1,5 +1,5 @@
 import 'package:college_companion/database/app_database.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/icon_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
@@ -16,6 +16,7 @@ class SubjectDetailsHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     final subjectType = subject.type.toUpperCase();
 
     return Column(
@@ -31,7 +32,7 @@ class SubjectDetailsHeader extends StatelessWidget {
                   Text(
                     subject.name,
                     style: theme.textTheme.headlineMedium?.copyWith(
-                      color: ColorTokens.onSurface,
+                      color: cc.fg,
                       fontWeight: FontWeight.bold,
                       letterSpacing: TypographyTokens.headlineLetterSpacing,
                     ),
@@ -41,17 +42,17 @@ class SubjectDetailsHeader extends StatelessWidget {
                     const SizedBox(height: SpacingTokens.xs),
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Symbols.person,
                           size: IconSizeTokens.sm,
-                          color: ColorTokens.primary,
+                          color: cc.pri,
                         ),
                         const SizedBox(width: SpacingTokens.xs),
                         Expanded(
                           child: Text(
                             subject.faculty!,
                             style: theme.textTheme.titleSmall?.copyWith(
-                              color: ColorTokens.onSurfaceVariant,
+                              color: cc.mut,
                               fontWeight: FontWeight.w500,
                             ),
                             maxLines: 1,
@@ -71,16 +72,14 @@ class SubjectDetailsHeader extends StatelessWidget {
                 vertical: SpacingTokens.xs,
               ),
               decoration: BoxDecoration(
-                color: ColorTokens.primaryContainer.withValues(alpha: 0.6),
+                color: cc.priSoft,
                 borderRadius: RadiusTokens.borderRadiusSm,
-                border: Border.all(
-                  color: ColorTokens.primary.withValues(alpha: 0.3),
-                ),
+                border: Border.all(color: cc.pri.withValues(alpha: 0.3)),
               ),
               child: Text(
                 subjectType,
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: ColorTokens.onPrimaryContainer,
+                  color: cc.pri,
                   fontWeight: FontWeight.bold,
                   letterSpacing: TypographyTokens.labelUppercaseSpacing,
                 ),

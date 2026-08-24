@@ -1,5 +1,5 @@
 import 'package:college_companion/features/subjects/providers/subject_detail_provider.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -25,63 +25,65 @@ class SubjectAttendanceFilterBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cc = context.cc;
     return Wrap(
       spacing: SpacingTokens.sm,
       runSpacing: SpacingTokens.xs,
       children: [
         _buildChip(
+          context,
           label: 'All',
           count: totalCount,
           filter: AttendanceFilter.all,
         ),
         _buildChip(
+          context,
           label: 'Present',
           count: presentCount,
           filter: AttendanceFilter.present,
-          color: ColorTokens.success,
+          color: cc.pri,
         ),
         _buildChip(
+          context,
           label: 'Absent',
           count: absentCount,
           filter: AttendanceFilter.absent,
-          color: ColorTokens.error,
+          color: cc.risk,
         ),
         _buildChip(
+          context,
           label: 'Cancelled',
           count: cancelledCount,
           filter: AttendanceFilter.cancelled,
-          color: ColorTokens.onSurfaceVariant,
+          color: cc.mut,
         ),
       ],
     );
   }
 
-  Widget _buildChip({
+  Widget _buildChip(
+    BuildContext context, {
     required String label,
     required int count,
     required AttendanceFilter filter,
     Color? color,
   }) {
+    final cc = context.cc;
     final isSelected = selectedFilter == filter;
+    final chipColor = color ?? cc.pri;
 
     return FilterChip(
       label: Text('$label ($count)'),
       selected: isSelected,
       onSelected: (_) => onFilterSelected(filter),
-      selectedColor: (color ?? ColorTokens.primary).withValues(alpha: 0.2),
-      backgroundColor: ColorTokens.surfaceContainer,
+      selectedColor: chipColor.withValues(alpha: 0.2),
+      backgroundColor: cc.raise,
       shape: RoundedRectangleBorder(
         borderRadius: RadiusTokens.borderRadiusPill,
-        side: BorderSide(
-          color: isSelected
-              ? (color ?? ColorTokens.primary)
-              : ColorTokens.outlineVariant.withValues(alpha: 0.3),
-        ),
+        side: BorderSide(color: isSelected ? chipColor : cc.line),
       ),
       labelStyle: TextStyle(
-        color: isSelected
-            ? (color ?? ColorTokens.primary)
-            : ColorTokens.onSurfaceVariant,
+        color: isSelected ? chipColor : cc.mut,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
         fontSize: 13,
       ),

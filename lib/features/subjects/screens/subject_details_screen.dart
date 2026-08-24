@@ -7,7 +7,7 @@ import 'package:college_companion/features/subjects/widgets/subject_attendance_f
 import 'package:college_companion/features/subjects/widgets/subject_attendance_timeline.dart';
 import 'package:college_companion/features/subjects/widgets/subject_details_header.dart';
 import 'package:college_companion/features/subjects/widgets/subject_metric_overview.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/icon_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
@@ -30,6 +30,7 @@ class SubjectDetailsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     final authState = ref.watch(authStateProvider);
     final userId =
         authState is AuthAuthenticated && authState.user.uid.isNotEmpty
@@ -41,19 +42,19 @@ class SubjectDetailsScreen extends ConsumerWidget {
     final controller = ref.read(subjectDetailControllerProvider(params));
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: cc.bg,
       appBar: AppBar(
-        backgroundColor: theme.colorScheme.surface,
+        backgroundColor: cc.bg,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Symbols.arrow_back, size: IconSizeTokens.md),
-          color: ColorTokens.onSurface,
+          color: cc.fg,
           onPressed: () => context.pop(),
         ),
         title: Text(
           stateAsync.valueOrNull?.subject?.name ?? 'Subject Details',
           style: theme.textTheme.titleMedium?.copyWith(
-            color: ColorTokens.onSurface,
+            color: cc.fg,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -80,8 +81,8 @@ class SubjectDetailsScreen extends ConsumerWidget {
                 },
           );
         },
-        backgroundColor: ColorTokens.primary,
-        foregroundColor: ColorTokens.onPrimary,
+        backgroundColor: cc.pri,
+        foregroundColor: cc.priFg,
         icon: const Icon(Symbols.add, size: IconSizeTokens.md),
         label: const Text('Mark Attendance'),
         shape: const RoundedRectangleBorder(
@@ -95,9 +96,7 @@ class SubjectDetailsScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(SpacingTokens.xl),
             child: Text(
               'Error loading subject: $error',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: ColorTokens.error,
-              ),
+              style: theme.textTheme.bodyMedium?.copyWith(color: cc.risk),
               textAlign: TextAlign.center,
             ),
           ),
@@ -146,7 +145,7 @@ class SubjectDetailsScreen extends ConsumerWidget {
                     Text(
                       'Attendance History',
                       style: theme.textTheme.titleMedium?.copyWith(
-                        color: ColorTokens.onSurface,
+                        color: cc.fg,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

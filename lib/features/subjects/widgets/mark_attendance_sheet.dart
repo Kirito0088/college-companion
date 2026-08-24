@@ -1,4 +1,4 @@
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/icon_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
@@ -46,7 +46,7 @@ class MarkAttendanceSheet extends StatefulWidget {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: ColorTokens.surface,
+      backgroundColor: context.cc.surf,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(RadiusTokens.xl),
@@ -120,6 +120,7 @@ class _MarkAttendanceSheetState extends State<MarkAttendanceSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return SafeArea(
       child: Padding(
@@ -137,8 +138,8 @@ class _MarkAttendanceSheetState extends State<MarkAttendanceSheet> {
                 child: Container(
                   width: 36,
                   height: 4,
-                  decoration: const BoxDecoration(
-                    color: ColorTokens.outline,
+                  decoration: BoxDecoration(
+                    color: cc.line2,
                     borderRadius: RadiusTokens.borderRadiusPill,
                   ),
                 ),
@@ -152,13 +153,13 @@ class _MarkAttendanceSheetState extends State<MarkAttendanceSheet> {
                   Text(
                     'Mark Attendance',
                     style: theme.textTheme.titleLarge?.copyWith(
-                      color: ColorTokens.onSurface,
+                      color: cc.fg,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   IconButton(
                     icon: const Icon(Symbols.close, size: IconSizeTokens.md),
-                    color: ColorTokens.onSurfaceVariant,
+                    color: cc.mut,
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -168,9 +169,7 @@ class _MarkAttendanceSheetState extends State<MarkAttendanceSheet> {
               // Status Selector
               Text(
                 'Status',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: ColorTokens.onSurfaceVariant,
-                ),
+                style: theme.textTheme.labelMedium?.copyWith(color: cc.mut),
               ),
               const SizedBox(height: SpacingTokens.sm),
               Row(
@@ -181,7 +180,7 @@ class _MarkAttendanceSheetState extends State<MarkAttendanceSheet> {
                       label: 'Present',
                       value: 'present',
                       icon: Symbols.check_circle,
-                      color: ColorTokens.success,
+                      color: cc.pri,
                     ),
                   ),
                   const SizedBox(width: SpacingTokens.sm),
@@ -191,7 +190,7 @@ class _MarkAttendanceSheetState extends State<MarkAttendanceSheet> {
                       label: 'Absent',
                       value: 'absent',
                       icon: Symbols.cancel,
-                      color: ColorTokens.error,
+                      color: cc.risk,
                     ),
                   ),
                   const SizedBox(width: SpacingTokens.sm),
@@ -201,7 +200,7 @@ class _MarkAttendanceSheetState extends State<MarkAttendanceSheet> {
                       label: 'Cancelled',
                       value: 'cancelled',
                       icon: Symbols.event_busy,
-                      color: ColorTokens.onSurfaceVariant,
+                      color: cc.mut,
                     ),
                   ),
                 ],
@@ -211,9 +210,7 @@ class _MarkAttendanceSheetState extends State<MarkAttendanceSheet> {
               // Date Picker Field
               Text(
                 'Date',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: ColorTokens.onSurfaceVariant,
-                ),
+                style: theme.textTheme.labelMedium?.copyWith(color: cc.mut),
               ),
               const SizedBox(height: SpacingTokens.sm),
               InkWell(
@@ -237,9 +234,9 @@ class _MarkAttendanceSheetState extends State<MarkAttendanceSheet> {
                     vertical: SpacingTokens.md,
                   ),
                   decoration: BoxDecoration(
-                    color: ColorTokens.surfaceContainer,
+                    color: cc.raise,
                     borderRadius: RadiusTokens.borderRadiusMd,
-                    border: Border.all(color: ColorTokens.outlineVariant),
+                    border: Border.all(color: cc.line),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -247,13 +244,13 @@ class _MarkAttendanceSheetState extends State<MarkAttendanceSheet> {
                       Text(
                         '${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}',
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: ColorTokens.onSurface,
+                          color: cc.fg,
                         ),
                       ),
-                      const Icon(
+                      Icon(
                         Symbols.calendar_today,
                         size: IconSizeTokens.sm,
-                        color: ColorTokens.onSurfaceVariant,
+                        color: cc.mut,
                       ),
                     ],
                   ),
@@ -264,9 +261,7 @@ class _MarkAttendanceSheetState extends State<MarkAttendanceSheet> {
               // Lecture Type
               Text(
                 'Lecture Type',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: ColorTokens.onSurfaceVariant,
-                ),
+                style: theme.textTheme.labelMedium?.copyWith(color: cc.mut),
               ),
               const SizedBox(height: SpacingTokens.sm),
               SegmentedButton<String>(
@@ -299,35 +294,31 @@ class _MarkAttendanceSheetState extends State<MarkAttendanceSheet> {
               // Notes
               Text(
                 'Topic / Notes (Optional)',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: ColorTokens.onSurfaceVariant,
-                ),
+                style: theme.textTheme.labelMedium?.copyWith(color: cc.mut),
               ),
               const SizedBox(height: SpacingTokens.sm),
               TextField(
                 key: const Key('attendance_notes_field'),
                 controller: _notesController,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: ColorTokens.onSurface,
-                ),
+                style: theme.textTheme.bodyMedium?.copyWith(color: cc.fg),
                 decoration: InputDecoration(
                   hintText: 'e.g. Binary Search Trees',
                   hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                    color: ColorTokens.onSurfaceVariant,
+                    color: cc.mut,
                   ),
                   filled: true,
-                  fillColor: ColorTokens.surfaceContainer,
-                  border: const OutlineInputBorder(
+                  fillColor: cc.raise,
+                  border: OutlineInputBorder(
                     borderRadius: RadiusTokens.borderRadiusMd,
-                    borderSide: BorderSide(color: ColorTokens.outlineVariant),
+                    borderSide: BorderSide(color: cc.line),
                   ),
-                  enabledBorder: const OutlineInputBorder(
+                  enabledBorder: OutlineInputBorder(
                     borderRadius: RadiusTokens.borderRadiusMd,
-                    borderSide: BorderSide(color: ColorTokens.outlineVariant),
+                    borderSide: BorderSide(color: cc.line),
                   ),
-                  focusedBorder: const OutlineInputBorder(
+                  focusedBorder: OutlineInputBorder(
                     borderRadius: RadiusTokens.borderRadiusMd,
-                    borderSide: BorderSide(color: ColorTokens.primary),
+                    borderSide: BorderSide(color: cc.pri),
                   ),
                   contentPadding: const EdgeInsets.all(SpacingTokens.base),
                 ),
@@ -339,8 +330,8 @@ class _MarkAttendanceSheetState extends State<MarkAttendanceSheet> {
                 key: const Key('save_attendance_button'),
                 onPressed: _isSaving ? null : _handleSave,
                 style: FilledButton.styleFrom(
-                  backgroundColor: ColorTokens.primary,
-                  foregroundColor: ColorTokens.onPrimary,
+                  backgroundColor: cc.pri,
+                  foregroundColor: cc.priFg,
                   padding: const EdgeInsets.symmetric(
                     vertical: SpacingTokens.base,
                   ),
@@ -349,18 +340,18 @@ class _MarkAttendanceSheetState extends State<MarkAttendanceSheet> {
                   ),
                 ),
                 child: _isSaving
-                    ? const SizedBox(
+                    ? SizedBox(
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: ColorTokens.onPrimary,
+                          color: cc.priFg,
                         ),
                       )
                     : Text(
                         'Save Attendance',
                         style: theme.textTheme.labelLarge?.copyWith(
-                          color: ColorTokens.onPrimary,
+                          color: cc.priFg,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -381,6 +372,7 @@ class _MarkAttendanceSheetState extends State<MarkAttendanceSheet> {
   }) {
     final isSelected = _selectedStatus == value;
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return InkWell(
       key: key,
@@ -396,12 +388,10 @@ class _MarkAttendanceSheetState extends State<MarkAttendanceSheet> {
           horizontal: SpacingTokens.xs,
         ),
         decoration: BoxDecoration(
-          color: isSelected
-              ? color.withValues(alpha: 0.15)
-              : ColorTokens.surfaceContainer,
+          color: isSelected ? color.withValues(alpha: 0.15) : cc.raise,
           borderRadius: RadiusTokens.borderRadiusMd,
           border: Border.all(
-            color: isSelected ? color : ColorTokens.outlineVariant,
+            color: isSelected ? color : cc.line,
             width: isSelected ? 1.5 : 1,
           ),
         ),
@@ -410,13 +400,13 @@ class _MarkAttendanceSheetState extends State<MarkAttendanceSheet> {
             Icon(
               icon,
               size: IconSizeTokens.md,
-              color: isSelected ? color : ColorTokens.onSurfaceVariant,
+              color: isSelected ? color : cc.mut,
             ),
             const SizedBox(height: SpacingTokens.xs),
             Text(
               label,
               style: theme.textTheme.labelMedium?.copyWith(
-                color: isSelected ? color : ColorTokens.onSurfaceVariant,
+                color: isSelected ? color : cc.mut,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
               maxLines: 1,

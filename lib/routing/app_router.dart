@@ -84,7 +84,7 @@ abstract final class RoutePaths {
   static const String subjectDetails = '/subject-details/:id';
   static const String subjectDetailsLegacy = '/subject-details';
   static const String resources = '/resources';
-  static const String resourceDetails = '/resource-details';
+  static const String resourceDetails = '/resource-details/:id';
   static const String assignmentDetails = '/assignment-details/:id';
   static const String addEditEvent = '/calendar/add-edit';
   static const String eventDetails = '/calendar/event-details/:id';
@@ -380,7 +380,8 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
         path: RoutePaths.resourceDetails,
         name: RouteNames.resourceDetails,
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const ResourceDetailsScreen(),
+        builder: (context, state) =>
+            ResourceDetailsScreen(resourceId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: RoutePaths.assignmentDetails,

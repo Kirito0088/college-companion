@@ -316,6 +316,7 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
                 padding: const EdgeInsets.only(bottom: SpacingTokens.md),
                 child: _buildResourceCard(
                   context,
+                  resourceId: r.id,
                   icon: icon,
                   title: r.title,
                   subject: r.subjectId ?? 'General',
@@ -464,6 +465,7 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
 
   Widget _buildResourceCard(
     BuildContext context, {
+    required String resourceId,
     required IconData icon,
     required String title,
     required String subject,
@@ -482,7 +484,7 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
-          context.push(RoutePaths.resourceDetails);
+          context.push('/resource-details/$resourceId');
         },
         child: Padding(
           padding: const EdgeInsets.all(LayoutTokens.cardPadding),

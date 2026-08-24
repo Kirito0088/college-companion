@@ -54,6 +54,7 @@ dependencies:
   timeago: ^3.7.1
   image_picker: ^1.2.3
   crypto: ^3.0.7
+  open_filex: ^4.7.0
 
 dev_dependencies:
   flutter_test:

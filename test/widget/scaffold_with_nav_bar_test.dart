@@ -24,7 +24,7 @@ void main() {
       expect(find.text('Home'), findsOneWidget);
       expect(find.text('Attendance'), findsOneWidget);
       expect(find.text('Calendar'), findsOneWidget);
-      expect(find.text('Academics'), findsOneWidget);
+      expect(find.text('Assignments'), findsOneWidget);
       expect(find.text('Profile'), findsOneWidget);
     });
 

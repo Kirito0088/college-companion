@@ -6,7 +6,7 @@ import 'package:college_companion/routing/app_router.dart';
 import 'package:college_companion/shared/widgets/empty_states/cc_empty_states.dart';
 import 'package:college_companion/shared/widgets/errors/cc_errors.dart';
 import 'package:college_companion/shared/widgets/loading/cc_skeletons.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -116,6 +116,7 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
 
   Widget _buildHeader(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         LayoutTokens.screenPadding,
@@ -135,7 +136,7 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
             },
             icon: const Icon(Symbols.arrow_back),
             style: IconButton.styleFrom(
-              backgroundColor: ColorTokens.surfaceContainer,
+              backgroundColor: cc.raise,
               shape: const RoundedRectangleBorder(
                 borderRadius: RadiusTokens.borderRadiusMd,
               ),
@@ -150,14 +151,12 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
                   'Resources',
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: ColorTokens.onSurface,
+                    color: cc.fg,
                   ),
                 ),
                 Text(
                   'Manage all your study materials in one place.',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: ColorTokens.onSurfaceVariant,
-                  ),
+                  style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
                 ),
               ],
             ),
@@ -169,17 +168,16 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
 
   Widget _buildSearchBar(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: SpacingTokens.md,
         vertical: SpacingTokens.xs,
       ),
       decoration: BoxDecoration(
-        color: ColorTokens.surfaceContainer,
+        color: cc.raise,
         borderRadius: RadiusTokens.borderRadiusXl,
-        border: Border.all(
-          color: ColorTokens.outlineVariant.withValues(alpha: 0.2),
-        ),
+        border: Border.all(color: cc.line.withValues(alpha: 0.2)),
       ),
       child: TextField(
         controller: _searchController,
@@ -190,13 +188,8 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
         },
         decoration: InputDecoration(
           hintText: 'Search resources...',
-          hintStyle: theme.textTheme.bodyMedium?.copyWith(
-            color: ColorTokens.onSurfaceVariant,
-          ),
-          prefixIcon: const Icon(
-            Symbols.search,
-            color: ColorTokens.onSurfaceVariant,
-          ),
+          hintStyle: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
+          prefixIcon: Icon(Symbols.search, color: cc.mut),
           border: InputBorder.none,
           isDense: true,
         ),
@@ -205,6 +198,7 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
   }
 
   Widget _buildCategories(BuildContext context) {
+    final cc = context.cc;
     return ExcludeSemantics(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -222,13 +216,11 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
                     _selectedCategory = category;
                   });
                 },
-                backgroundColor: ColorTokens.surfaceContainer,
-                selectedColor: ColorTokens.primaryContainer,
-                checkmarkColor: ColorTokens.onPrimaryContainer,
+                backgroundColor: cc.raise,
+                selectedColor: cc.priSoft,
+                checkmarkColor: cc.pri,
                 labelStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: isSelected
-                      ? ColorTokens.onPrimaryContainer
-                      : ColorTokens.onSurfaceVariant,
+                  color: isSelected ? cc.pri : cc.mut,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
                 shape: RoundedRectangleBorder(
@@ -236,7 +228,7 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
                   side: BorderSide(
                     color: isSelected
                         ? Colors.transparent
-                        : ColorTokens.outlineVariant.withValues(alpha: 0.5),
+                        : cc.line.withValues(alpha: 0.5),
                   ),
                 ),
                 showCheckmark: false,
@@ -347,6 +339,7 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
     BuildContext context,
     List<ResourceEntity> list,
   ) {
+    final cc = context.cc;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -354,7 +347,7 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
           'Recently Viewed',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
-            color: ColorTokens.onSurface,
+            color: cc.fg,
           ),
         ),
         const SizedBox(height: SpacingTokens.md),
@@ -418,15 +411,14 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
     required String timeAgo,
     required Color color,
   }) {
+    final cc = context.cc;
     return Container(
       width: 160,
       padding: const EdgeInsets.all(SpacingTokens.md),
       decoration: BoxDecoration(
-        color: ColorTokens.surfaceContainer,
+        color: cc.raise,
         borderRadius: RadiusTokens.borderRadiusLg,
-        border: Border.all(
-          color: ColorTokens.outlineVariant.withValues(alpha: 0.2),
-        ),
+        border: Border.all(color: cc.line.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -444,7 +436,7 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
             title,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.bold,
-              color: ColorTokens.onSurface,
+              color: cc.fg,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -454,16 +446,16 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
             subject,
             style: Theme.of(
               context,
-            ).textTheme.bodySmall?.copyWith(color: ColorTokens.primary),
+            ).textTheme.bodySmall?.copyWith(color: cc.pri),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: SpacingTokens.xs),
           Text(
             timeAgo,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: ColorTokens.onSurfaceVariant,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelSmall?.copyWith(color: cc.mut),
           ),
         ],
       ),
@@ -482,8 +474,9 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
     bool isFavorite = false,
   }) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Material(
-      color: ColorTokens.surfaceContainer,
+      color: cc.raise,
       borderRadius: RadiusTokens.borderRadiusXl,
       elevation: 0,
       clipBehavior: Clip.antiAlias,
@@ -512,7 +505,7 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
                     Text(
                       title,
                       style: theme.textTheme.titleMedium?.copyWith(
-                        color: ColorTokens.onSurface,
+                        color: cc.fg,
                         fontWeight: FontWeight.w600,
                       ),
                       maxLines: 2,
@@ -522,7 +515,7 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
                     Text(
                       subject,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: ColorTokens.primary,
+                        color: cc.pri,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -532,33 +525,27 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
                         Text(
                           fileType,
                           style: theme.textTheme.labelMedium?.copyWith(
-                            color: ColorTokens.onSurfaceVariant,
+                            color: cc.mut,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(width: SpacingTokens.xs),
-                        const Text(
-                          '•',
-                          style: TextStyle(color: ColorTokens.onSurfaceVariant),
-                        ),
+                        Text('•', style: TextStyle(color: cc.mut)),
                         const SizedBox(width: SpacingTokens.xs),
                         Text(
                           fileSize,
                           style: theme.textTheme.labelMedium?.copyWith(
-                            color: ColorTokens.onSurfaceVariant,
+                            color: cc.mut,
                           ),
                         ),
                         const SizedBox(width: SpacingTokens.xs),
-                        const Text(
-                          '•',
-                          style: TextStyle(color: ColorTokens.onSurfaceVariant),
-                        ),
+                        Text('•', style: TextStyle(color: cc.mut)),
                         const SizedBox(width: SpacingTokens.xs),
                         Expanded(
                           child: Text(
                             lastModified,
                             style: theme.textTheme.labelMedium?.copyWith(
-                              color: ColorTokens.onSurfaceVariant,
+                              color: cc.mut,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -575,16 +562,11 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
                 children: [
                   Icon(
                     isFavorite ? Symbols.bookmark : Symbols.bookmark_border,
-                    color: isFavorite
-                        ? ColorTokens.primary
-                        : ColorTokens.onSurfaceVariant,
+                    color: isFavorite ? cc.pri : cc.mut,
                     size: 24,
                   ),
                   const SizedBox(height: SpacingTokens.sm),
-                  const Icon(
-                    Symbols.chevron_right,
-                    color: ColorTokens.onSurfaceVariant,
-                  ),
+                  Icon(Symbols.chevron_right, color: cc.mut),
                 ],
               ),
             ],

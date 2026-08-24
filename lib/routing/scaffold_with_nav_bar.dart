@@ -54,7 +54,7 @@ class ScaffoldWithNavBar extends StatelessWidget {
           NavigationDestination(
             icon: Icon(Symbols.assignment_rounded),
             selectedIcon: Icon(Symbols.assignment_rounded, fill: 1),
-            label: 'Academics',
+            label: 'Assignments',
           ),
           NavigationDestination(
             icon: Icon(Symbols.person_rounded),

@@ -1,4 +1,4 @@
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +10,7 @@ class AssignmentsAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -25,9 +26,7 @@ class AssignmentsAppBar extends StatelessWidget {
               }
             },
             icon: const Icon(Symbols.arrow_back),
-            style: IconButton.styleFrom(
-              hoverColor: ColorTokens.surfaceContainerHigh,
-            ),
+            style: IconButton.styleFrom(hoverColor: cc.raise2),
           ),
           const SizedBox(width: SpacingTokens.sm),
           Text(

@@ -2,7 +2,7 @@ import 'package:college_companion/database/app_database.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/features/notifications/providers/notification_provider.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +17,7 @@ class NotificationsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     final authState = ref.watch(authStateProvider);
     final userId = authState is AuthAuthenticated ? authState.user.uid : null;
 
@@ -36,13 +37,13 @@ class NotificationsScreen extends ConsumerWidget {
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Symbols.arrow_back),
-          color: ColorTokens.onSurface,
+          color: cc.fg,
           onPressed: () => context.pop(),
         ),
         title: Text(
           'Alerts & Activity',
           style: theme.textTheme.titleLarge?.copyWith(
-            color: ColorTokens.onSurface,
+            color: cc.fg,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -50,7 +51,7 @@ class NotificationsScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Symbols.done_all),
-            color: ColorTokens.onSurfaceVariant,
+            color: cc.mut,
             tooltip: 'Mark all as read',
             onPressed: () {
               ref.read(notificationRepositoryProvider).markAllRead(userId);
@@ -61,10 +62,10 @@ class NotificationsScreen extends ConsumerWidget {
       body: notificationsAsync.when(
         data: (notifications) {
           if (notifications.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
                 'No notifications right now.',
-                style: TextStyle(color: ColorTokens.onSurfaceVariant),
+                style: TextStyle(color: cc.mut),
               ),
             );
           }
@@ -150,7 +151,7 @@ class NotificationsScreen extends ConsumerWidget {
         error: (error, stack) => Center(
           child: Text(
             'Error loading notifications: $error',
-            style: const TextStyle(color: ColorTokens.error),
+            style: TextStyle(color: cc.risk),
           ),
         ),
       ),
@@ -167,6 +168,7 @@ class _NotificationGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -178,7 +180,7 @@ class _NotificationGroup extends StatelessWidget {
           child: Text(
             title.toUpperCase(),
             style: theme.textTheme.labelMedium?.copyWith(
-              color: ColorTokens.onSurfaceVariant,
+              color: cc.mut,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.2,
             ),
@@ -186,11 +188,9 @@ class _NotificationGroup extends StatelessWidget {
         ),
         Container(
           decoration: BoxDecoration(
-            color: ColorTokens.surfaceContainer,
+            color: cc.raise,
             borderRadius: RadiusTokens.borderRadiusXl,
-            border: Border.all(
-              color: ColorTokens.outlineVariant.withValues(alpha: 0.2),
-            ),
+            border: Border.all(color: cc.line.withValues(alpha: 0.2)),
           ),
           clipBehavior: Clip.antiAlias,
           child: Column(children: notifications),
@@ -214,6 +214,7 @@ class _NotificationItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     IconData icon;
     Color iconColor;
@@ -221,19 +222,19 @@ class _NotificationItem extends ConsumerWidget {
     switch (notification.type) {
       case 'academic_alert':
         icon = Symbols.warning;
-        iconColor = ColorTokens.error;
+        iconColor = cc.risk;
         break;
       case 'insight':
         icon = Symbols.psychology;
-        iconColor = ColorTokens.success;
+        iconColor = cc.pri;
         break;
       case 'upcoming':
         icon = Symbols.event;
-        iconColor = ColorTokens.primary;
+        iconColor = cc.pri;
         break;
       default:
         icon = Symbols.notifications;
-        iconColor = ColorTokens.secondary;
+        iconColor = theme.colorScheme.secondary;
     }
 
     final date = DateTime.parse(notification.createdAt).toLocal();
@@ -243,10 +244,10 @@ class _NotificationItem extends ConsumerWidget {
       key: Key(notification.id),
       direction: DismissDirection.endToStart,
       background: Container(
-        color: ColorTokens.error,
+        color: cc.risk,
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: SpacingTokens.xl),
-        child: const Icon(Symbols.delete, color: ColorTokens.onPrimary),
+        child: Icon(Symbols.delete, color: cc.priFg),
       ),
       onDismissed: (direction) {
         ref
@@ -258,7 +259,7 @@ class _NotificationItem extends ConsumerWidget {
       },
       child: Material(
         color: !notification.isRead
-            ? ColorTokens.primaryContainer.withValues(alpha: 0.3)
+            ? cc.priSoft.withValues(alpha: 0.3)
             : Colors.transparent,
         child: InkWell(
           onTap: () {
@@ -272,17 +273,13 @@ class _NotificationItem extends ConsumerWidget {
               context.push(notification.targetRoute!);
             }
           },
-          hoverColor: ColorTokens.surfaceContainerHigh,
+          hoverColor: cc.raise2,
           child: Container(
             padding: const EdgeInsets.all(LayoutTokens.cardPadding),
             decoration: BoxDecoration(
               border: showBorder
                   ? Border(
-                      bottom: BorderSide(
-                        color: ColorTokens.outlineVariant.withValues(
-                          alpha: 0.3,
-                        ),
-                      ),
+                      bottom: BorderSide(color: cc.line.withValues(alpha: 0.3)),
                     )
                   : null,
             ),
@@ -308,7 +305,7 @@ class _NotificationItem extends ConsumerWidget {
                             child: Text(
                               notification.title,
                               style: theme.textTheme.titleSmall?.copyWith(
-                                color: ColorTokens.onSurface,
+                                color: cc.fg,
                                 fontWeight: !notification.isRead
                                     ? FontWeight.bold
                                     : FontWeight.w600,
@@ -322,8 +319,8 @@ class _NotificationItem extends ConsumerWidget {
                               margin: const EdgeInsets.only(
                                 left: SpacingTokens.sm,
                               ),
-                              decoration: const BoxDecoration(
-                                color: ColorTokens.primary,
+                              decoration: BoxDecoration(
+                                color: cc.pri,
                                 shape: BoxShape.circle,
                               ),
                             ),
@@ -333,16 +330,14 @@ class _NotificationItem extends ConsumerWidget {
                       Text(
                         notification.message,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: !notification.isRead
-                              ? ColorTokens.onSurface
-                              : ColorTokens.onSurfaceVariant,
+                          color: !notification.isRead ? cc.fg : cc.mut,
                         ),
                       ),
                       const SizedBox(height: SpacingTokens.xs),
                       Text(
                         timeStr,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: ColorTokens.onSurfaceVariant,
+                          color: cc.mut,
                         ),
                       ),
                     ],

@@ -3,7 +3,7 @@ import 'package:college_companion/features/assignments/providers/assignments_pro
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/features/subjects/providers/subjects_provider.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:drift/drift.dart' hide Column;
@@ -118,6 +118,7 @@ class _AddAssignmentDialogState extends ConsumerState<AddAssignmentDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     final authState = ref.watch(authStateProvider);
     final userId =
         authState is AuthAuthenticated && authState.user.uid.isNotEmpty
@@ -151,7 +152,7 @@ class _AddAssignmentDialogState extends ConsumerState<AddAssignmentDialog> {
                 width: 32,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: ColorTokens.onSurfaceVariant.withValues(alpha: 0.4),
+                  color: cc.mut.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -164,7 +165,7 @@ class _AddAssignmentDialogState extends ConsumerState<AddAssignmentDialog> {
                   'New Assignment',
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: ColorTokens.onSurface,
+                    color: cc.fg,
                   ),
                 ),
                 IconButton(
@@ -176,12 +177,12 @@ class _AddAssignmentDialogState extends ConsumerState<AddAssignmentDialog> {
             const SizedBox(height: SpacingTokens.lg),
             TextField(
               controller: _titleController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Assignment Title *',
                 hintText: 'e.g. Lab Report 3',
                 filled: true,
-                fillColor: ColorTokens.surfaceContainer,
-                border: OutlineInputBorder(
+                fillColor: cc.raise,
+                border: const OutlineInputBorder(
                   borderRadius: RadiusTokens.borderRadiusMd,
                 ),
               ),
@@ -196,11 +197,11 @@ class _AddAssignmentDialogState extends ConsumerState<AddAssignmentDialog> {
                   )
                   ? _selectedSubjectId
                   : null,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Subject',
                 filled: true,
-                fillColor: ColorTokens.surfaceContainer,
-                border: OutlineInputBorder(
+                fillColor: cc.raise,
+                border: const OutlineInputBorder(
                   borderRadius: RadiusTokens.borderRadiusMd,
                 ),
               ),
@@ -224,16 +225,13 @@ class _AddAssignmentDialogState extends ConsumerState<AddAssignmentDialog> {
               child: Container(
                 padding: const EdgeInsets.all(SpacingTokens.md),
                 decoration: BoxDecoration(
-                  color: ColorTokens.surfaceContainer,
+                  color: cc.raise,
                   borderRadius: RadiusTokens.borderRadiusMd,
-                  border: Border.all(color: ColorTokens.outlineVariant),
+                  border: Border.all(color: cc.line),
                 ),
                 child: Row(
                   children: [
-                    const Icon(
-                      Symbols.calendar_today,
-                      color: ColorTokens.primary,
-                    ),
+                    Icon(Symbols.calendar_today, color: cc.pri),
                     const SizedBox(width: SpacingTokens.md),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -241,13 +239,13 @@ class _AddAssignmentDialogState extends ConsumerState<AddAssignmentDialog> {
                         Text(
                           'Due Date',
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: ColorTokens.onSurfaceVariant,
+                            color: cc.mut,
                           ),
                         ),
                         Text(
                           DateFormat('EEE, MMM d, yyyy').format(_dueDate),
                           style: theme.textTheme.titleMedium?.copyWith(
-                            color: ColorTokens.onSurface,
+                            color: cc.fg,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -261,12 +259,12 @@ class _AddAssignmentDialogState extends ConsumerState<AddAssignmentDialog> {
             TextField(
               controller: _descriptionController,
               maxLines: 3,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Description / Notes (Optional)',
                 hintText: 'Add details or requirements...',
                 filled: true,
-                fillColor: ColorTokens.surfaceContainer,
-                border: OutlineInputBorder(
+                fillColor: cc.raise,
+                border: const OutlineInputBorder(
                   borderRadius: RadiusTokens.borderRadiusMd,
                 ),
               ),
@@ -278,8 +276,8 @@ class _AddAssignmentDialogState extends ConsumerState<AddAssignmentDialog> {
               child: FilledButton(
                 onPressed: _isSaving ? null : _saveAssignment,
                 style: FilledButton.styleFrom(
-                  backgroundColor: ColorTokens.primary,
-                  foregroundColor: ColorTokens.onPrimary,
+                  backgroundColor: cc.pri,
+                  foregroundColor: cc.priFg,
                   shape: const RoundedRectangleBorder(
                     borderRadius: RadiusTokens.borderRadiusMd,
                   ),

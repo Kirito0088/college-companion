@@ -7,7 +7,7 @@ import 'package:college_companion/features/authentication/providers/auth_provide
 import 'package:college_companion/shared/widgets/empty_states/cc_empty_states.dart';
 import 'package:college_companion/shared/widgets/errors/cc_errors.dart';
 import 'package:college_companion/shared/widgets/loading/cc_skeletons.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -61,6 +61,7 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     final authState = ref.watch(authStateProvider);
     final userId =
         authState is AuthAuthenticated && authState.user.uid.isNotEmpty
@@ -77,7 +78,7 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildHeader(theme),
+                _buildHeader(theme, cc),
                 Expanded(
                   child: assignmentsAsync.when(
                     data: (allAssignments) {
@@ -135,18 +136,19 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildSearchField(theme),
+                            _buildSearchField(theme, cc),
                             const SizedBox(height: SpacingTokens.lg),
-                            _buildFilterChips(theme),
+                            _buildFilterChips(theme, cc),
                             const SizedBox(height: SpacingTokens.lg),
                             _buildProgressSummaryCard(
                               theme,
+                              cc,
                               progress: progress,
                               completedCount: completedCount,
                               totalCount: totalCount,
                             ),
                             const SizedBox(height: SpacingTokens.xl),
-                            _buildAssignmentList(context, filtered),
+                            _buildAssignmentList(context, cc, filtered),
                             const SizedBox(height: 120),
                           ],
                         ),
@@ -179,7 +181,7 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
     );
   }
 
-  Widget _buildHeader(ThemeData theme) {
+  Widget _buildHeader(ThemeData theme, CCTokens cc) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         LayoutTokens.screenPadding,
@@ -194,22 +196,20 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
             'Assignments',
             style: theme.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: ColorTokens.onSurface,
+              color: cc.fg,
             ),
           ),
           const SizedBox(height: SpacingTokens.xs),
           Text(
             'Track all assignments across your subjects.',
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: ColorTokens.onSurfaceVariant,
-            ),
+            style: theme.textTheme.bodyLarge?.copyWith(color: cc.mut),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSearchField(ThemeData theme) {
+  Widget _buildSearchField(ThemeData theme, CCTokens cc) {
     return TextField(
       controller: _searchController,
       onChanged: (val) {
@@ -219,15 +219,10 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
       },
       decoration: InputDecoration(
         hintText: 'Search assignments...',
-        hintStyle: theme.textTheme.bodyLarge?.copyWith(
-          color: ColorTokens.onSurfaceVariant,
-        ),
-        prefixIcon: const Icon(
-          Symbols.search,
-          color: ColorTokens.onSurfaceVariant,
-        ),
+        hintStyle: theme.textTheme.bodyLarge?.copyWith(color: cc.mut),
+        prefixIcon: Icon(Symbols.search, color: cc.mut),
         filled: true,
-        fillColor: ColorTokens.surfaceContainerHigh,
+        fillColor: cc.raise2,
         border: const OutlineInputBorder(
           borderRadius: RadiusTokens.borderRadiusLg,
           borderSide: BorderSide.none,
@@ -241,7 +236,8 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
   }
 
   Widget _buildProgressSummaryCard(
-    ThemeData theme, {
+    ThemeData theme,
+    CCTokens cc, {
     required double progress,
     required int completedCount,
     required int totalCount,
@@ -255,9 +251,9 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
         vertical: SpacingTokens.md,
       ),
       decoration: BoxDecoration(
-        color: ColorTokens.surfaceContainer,
+        color: cc.raise,
         borderRadius: RadiusTokens.borderRadiusMd,
-        border: Border.all(color: ColorTokens.surfaceVariant),
+        border: Border.all(color: cc.line),
       ),
       child: Row(
         children: [
@@ -269,7 +265,7 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
                   'Overview',
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: ColorTokens.onSurface,
+                    color: cc.fg,
                   ),
                 ),
                 const SizedBox(height: SpacingTokens.xs),
@@ -277,8 +273,8 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
                   borderRadius: BorderRadius.circular(999),
                   child: LinearProgressIndicator(
                     value: progress,
-                    backgroundColor: ColorTokens.surfaceVariant,
-                    color: ColorTokens.primary,
+                    backgroundColor: cc.line,
+                    color: cc.pri,
                     minHeight: 6,
                   ),
                 ),
@@ -293,14 +289,12 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
                 pctString,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w900,
-                  color: ColorTokens.primary,
+                  color: cc.pri,
                 ),
               ),
               Text(
                 doneString,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: ColorTokens.onSurfaceVariant,
-                ),
+                style: theme.textTheme.labelSmall?.copyWith(color: cc.mut),
               ),
             ],
           ),
@@ -309,7 +303,7 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
     );
   }
 
-  Widget _buildFilterChips(ThemeData theme) {
+  Widget _buildFilterChips(ThemeData theme, CCTokens cc) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       clipBehavior: Clip.none,
@@ -328,18 +322,14 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
                     _selectedFilterIndex = index;
                   });
                 },
-                backgroundColor: ColorTokens.surfaceContainer,
-                selectedColor: ColorTokens.primaryContainer,
+                backgroundColor: cc.raise,
+                selectedColor: cc.priSoft,
                 labelStyle: theme.textTheme.labelMedium?.copyWith(
-                  color: isSelected
-                      ? ColorTokens.onPrimaryContainer
-                      : ColorTokens.onSurfaceVariant,
+                  color: isSelected ? cc.pri : cc.mut,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                 ),
                 side: BorderSide(
-                  color: isSelected
-                      ? Colors.transparent
-                      : ColorTokens.outlineVariant,
+                  color: isSelected ? Colors.transparent : cc.line,
                 ),
                 shape: const RoundedRectangleBorder(
                   borderRadius: RadiusTokens.borderRadiusMd,
@@ -360,6 +350,7 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
 
   Widget _buildAssignmentList(
     BuildContext context,
+    CCTokens cc,
     List<AssignmentEntity> filteredAssignments,
   ) {
     if (filteredAssignments.isEmpty) {
@@ -367,14 +358,14 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
     }
 
     final cards = filteredAssignments.map((entity) {
-      Color statusColor = ColorTokens.primary;
+      Color statusColor = cc.pri;
       final st = entity.status.toLowerCase();
       if (st == 'completed') {
-        statusColor = ColorTokens.success;
+        statusColor = cc.pri;
       } else if (st == 'overdue') {
-        statusColor = ColorTokens.error;
+        statusColor = cc.risk;
       } else if (st == 'pending') {
-        statusColor = ColorTokens.warning;
+        statusColor = cc.warn;
       }
 
       final dueDt = DateTime.tryParse(entity.dueDate);
@@ -385,7 +376,7 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
       return AssignmentCard(
         title: entity.title,
         subject: entity.subjectId,
-        subjectColor: ColorTokens.primary,
+        subjectColor: cc.pri,
         dueDate: dueStr,
         status: entity.status,
         statusColor: statusColor,

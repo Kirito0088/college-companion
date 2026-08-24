@@ -1,4 +1,4 @@
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +11,7 @@ class SemesterAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -28,7 +29,7 @@ class SemesterAppBar extends StatelessWidget implements PreferredSizeWidget {
                 }
               },
               icon: const Icon(Symbols.arrow_back),
-              color: ColorTokens.onSurfaceVariant,
+              color: cc.mut,
               iconSize: 24,
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
@@ -40,12 +41,12 @@ class SemesterAppBar extends StatelessWidget implements PreferredSizeWidget {
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w700,
                   fontFamily: 'Plus Jakarta Sans',
-                  color: ColorTokens.onSurface,
+                  color: cc.fg,
                 ),
               ),
             ),
             Material(
-              color: ColorTokens.surfaceVariant,
+              color: cc.raise,
               borderRadius: RadiusTokens.borderRadiusPill,
               child: InkWell(
                 onTap: () {},
@@ -61,15 +62,11 @@ class SemesterAppBar extends StatelessWidget implements PreferredSizeWidget {
                       Text(
                         'SEM 5',
                         style: theme.textTheme.labelLarge?.copyWith(
-                          color: ColorTokens.onSurfaceVariant,
+                          color: cc.mut,
                         ),
                       ),
                       const SizedBox(width: 4.0),
-                      const Icon(
-                        Symbols.expand_more,
-                        size: 16,
-                        color: ColorTokens.onSurfaceVariant,
-                      ),
+                      Icon(Symbols.expand_more, size: 16, color: cc.mut),
                     ],
                   ),
                 ),

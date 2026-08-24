@@ -1,4 +1,4 @@
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -9,13 +9,14 @@ class MarksTableCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
           'Internal Components',
           style: theme.textTheme.titleMedium?.copyWith(
-            color: ColorTokens.onSurfaceVariant,
+            color: cc.mut,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -24,19 +25,19 @@ class MarksTableCard extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
-            border: Border.all(color: ColorTokens.surfaceVariant),
+            border: Border.all(color: cc.line),
             borderRadius: RadiusTokens.borderRadiusMd,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildHeaderRow(theme),
-              _buildRow(theme, 'Test 1', '20', '18'),
-              _buildRow(theme, 'Test 2', '20', '16'),
-              _buildRow(theme, 'Assignment 1', '10', '9'),
-              _buildRow(theme, 'Assignment 2', '10', '8'),
-              _buildRow(theme, 'Mini Project', '20', '-', isLast: true),
-              _buildFooterRow(theme),
+              _buildHeaderRow(theme, cc),
+              _buildRow(theme, cc, 'Test 1', '20', '18'),
+              _buildRow(theme, cc, 'Test 2', '20', '16'),
+              _buildRow(theme, cc, 'Assignment 1', '10', '9'),
+              _buildRow(theme, cc, 'Assignment 2', '10', '8'),
+              _buildRow(theme, cc, 'Mini Project', '20', '-', isLast: true),
+              _buildFooterRow(theme, cc),
             ],
           ),
         ),
@@ -44,10 +45,10 @@ class MarksTableCard extends StatelessWidget {
     );
   }
 
-  Widget _buildHeaderRow(ThemeData theme) {
+  Widget _buildHeaderRow(ThemeData theme, CCTokens cc) {
     return Container(
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: ColorTokens.surfaceVariant)),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: cc.line)),
       ),
       padding: const EdgeInsets.symmetric(
         vertical: 12.0,
@@ -59,7 +60,7 @@ class MarksTableCard extends StatelessWidget {
             child: Text(
               'Component',
               style: theme.textTheme.labelLarge?.copyWith(
-                color: ColorTokens.onSurfaceVariant,
+                color: cc.mut,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -70,7 +71,7 @@ class MarksTableCard extends StatelessWidget {
               'Max',
               textAlign: TextAlign.right,
               style: theme.textTheme.labelLarge?.copyWith(
-                color: ColorTokens.onSurfaceVariant,
+                color: cc.mut,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -81,7 +82,7 @@ class MarksTableCard extends StatelessWidget {
               'Scored',
               textAlign: TextAlign.right,
               style: theme.textTheme.labelLarge?.copyWith(
-                color: ColorTokens.onSurfaceVariant,
+                color: cc.mut,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -93,6 +94,7 @@ class MarksTableCard extends StatelessWidget {
 
   Widget _buildRow(
     ThemeData theme,
+    CCTokens cc,
     String component,
     String max,
     String scored, {
@@ -102,11 +104,7 @@ class MarksTableCard extends StatelessWidget {
       decoration: BoxDecoration(
         border: isLast
             ? null
-            : Border(
-                bottom: BorderSide(
-                  color: ColorTokens.surfaceVariant.withValues(alpha: 0.5),
-                ),
-              ),
+            : Border(bottom: BorderSide(color: cc.line.withValues(alpha: 0.5))),
       ),
       padding: const EdgeInsets.symmetric(
         vertical: 12.0,
@@ -117,9 +115,7 @@ class MarksTableCard extends StatelessWidget {
           Expanded(
             child: Text(
               component,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: ColorTokens.onSurface,
-              ),
+              style: theme.textTheme.bodyMedium?.copyWith(color: cc.fg),
             ),
           ),
           SizedBox(
@@ -127,9 +123,7 @@ class MarksTableCard extends StatelessWidget {
             child: Text(
               max,
               textAlign: TextAlign.right,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: ColorTokens.onSurfaceVariant,
-              ),
+              style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
             ),
           ),
           SizedBox(
@@ -137,9 +131,7 @@ class MarksTableCard extends StatelessWidget {
             child: Text(
               scored,
               textAlign: TextAlign.right,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: ColorTokens.onSurface,
-              ),
+              style: theme.textTheme.bodyMedium?.copyWith(color: cc.fg),
             ),
           ),
         ],
@@ -147,11 +139,9 @@ class MarksTableCard extends StatelessWidget {
     );
   }
 
-  Widget _buildFooterRow(ThemeData theme) {
+  Widget _buildFooterRow(ThemeData theme, CCTokens cc) {
     return Container(
-      decoration: BoxDecoration(
-        color: ColorTokens.surfaceVariant.withValues(alpha: 0.2),
-      ),
+      decoration: BoxDecoration(color: cc.raise.withValues(alpha: 0.2)),
       padding: const EdgeInsets.symmetric(
         vertical: SpacingTokens.base,
         horizontal: SpacingTokens.base,
@@ -161,9 +151,7 @@ class MarksTableCard extends StatelessWidget {
           Expanded(
             child: Text(
               'Total',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: ColorTokens.onSurface,
-              ),
+              style: theme.textTheme.titleMedium?.copyWith(color: cc.fg),
             ),
           ),
           SizedBox(
@@ -171,9 +159,7 @@ class MarksTableCard extends StatelessWidget {
             child: Text(
               '80',
               textAlign: TextAlign.right,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: ColorTokens.onSurface,
-              ),
+              style: theme.textTheme.titleMedium?.copyWith(color: cc.fg),
             ),
           ),
           SizedBox(
@@ -181,9 +167,7 @@ class MarksTableCard extends StatelessWidget {
             child: Text(
               '51',
               textAlign: TextAlign.right,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: ColorTokens.primary,
-              ),
+              style: theme.textTheme.titleMedium?.copyWith(color: cc.pri),
             ),
           ),
         ],

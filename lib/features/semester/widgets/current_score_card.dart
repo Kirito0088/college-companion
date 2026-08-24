@@ -1,4 +1,4 @@
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -9,11 +9,12 @@ class CurrentScoreCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        border: Border.all(color: ColorTokens.surfaceVariant),
+        border: Border.all(color: cc.line),
         borderRadius: RadiusTokens.borderRadiusMd,
       ),
       child: Stack(
@@ -22,10 +23,7 @@ class CurrentScoreCard extends StatelessWidget {
             child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    ColorTokens.primary.withValues(alpha: 0.05),
-                    Colors.transparent,
-                  ],
+                  colors: [cc.pri.withValues(alpha: 0.05), Colors.transparent],
                 ),
               ),
             ),
@@ -41,7 +39,7 @@ class CurrentScoreCard extends StatelessWidget {
                     Text(
                       'Current Score',
                       style: theme.textTheme.labelLarge?.copyWith(
-                        color: ColorTokens.onSurfaceVariant,
+                        color: cc.mut,
                       ),
                     ),
                     const SizedBox(height: SpacingTokens.xs),
@@ -52,7 +50,7 @@ class CurrentScoreCard extends StatelessWidget {
                         Text(
                           '51',
                           style: theme.textTheme.headlineMedium?.copyWith(
-                            color: ColorTokens.primary,
+                            color: cc.pri,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -60,7 +58,7 @@ class CurrentScoreCard extends StatelessWidget {
                         Text(
                           '/ 80',
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: ColorTokens.onSurfaceVariant,
+                            color: cc.mut,
                           ),
                         ),
                       ],
@@ -70,7 +68,7 @@ class CurrentScoreCard extends StatelessWidget {
                 Text(
                   '63.75%',
                   style: theme.textTheme.headlineMedium?.copyWith(
-                    color: ColorTokens.primary,
+                    color: cc.pri,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

@@ -1,6 +1,6 @@
 import 'package:college_companion/features/focus/models/focus_timer_state.dart';
 import 'package:college_companion/features/focus/providers/focus_timer_provider.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +21,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     final timerState = ref.watch(focusTimerProvider);
     final timerNotifier = ref.read(focusTimerProvider.notifier);
 
@@ -41,7 +42,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                 ),
               ],
             ),
-            backgroundColor: ColorTokens.primary,
+            backgroundColor: cc.pri,
             duration: const Duration(seconds: 5),
             behavior: SnackBarBehavior.floating,
             shape: const RoundedRectangleBorder(
@@ -60,7 +61,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Symbols.arrow_back),
-          color: ColorTokens.onSurface,
+          color: cc.fg,
           onPressed: () => context.pop(),
         ),
         title: Column(
@@ -68,7 +69,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
             Text(
               'Focus Mode',
               style: theme.textTheme.titleLarge?.copyWith(
-                color: ColorTokens.onSurface,
+                color: cc.fg,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -77,9 +78,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                   ? 'Break Time'
                   : 'Stay focused. Study smarter.',
               style: theme.textTheme.labelSmall?.copyWith(
-                color: timerState.isBreak
-                    ? ColorTokens.tertiary
-                    : ColorTokens.onSurfaceVariant,
+                color: timerState.isBreak ? theme.colorScheme.tertiary : cc.mut,
                 fontWeight: timerState.isBreak
                     ? FontWeight.bold
                     : FontWeight.normal,
@@ -123,8 +122,9 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
 
   Widget _buildHeroTimer(BuildContext context, FocusTimerState state) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     final isBreak = state.isBreak;
-    final progressColor = isBreak ? ColorTokens.tertiary : ColorTokens.primary;
+    final progressColor = isBreak ? theme.colorScheme.tertiary : cc.pri;
 
     return Center(
       child: SizedBox(
@@ -136,7 +136,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
             CircularProgressIndicator(
               value: state.progress,
               strokeWidth: 10,
-              backgroundColor: ColorTokens.surfaceContainerHighest,
+              backgroundColor: cc.raise2,
               color: progressColor,
               strokeCap: StrokeCap.round,
             ),
@@ -147,7 +147,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                   state.formattedTime,
                   style: theme.textTheme.displayLarge?.copyWith(
                     fontSize: 62,
-                    color: ColorTokens.onSurface,
+                    color: cc.fg,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.5,
                   ),
@@ -156,9 +156,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                 Text(
                   isBreak ? 'Break Session' : 'Focus Session',
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: isBreak
-                        ? ColorTokens.tertiary
-                        : ColorTokens.onSurfaceVariant,
+                    color: isBreak ? theme.colorScheme.tertiary : cc.mut,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -169,17 +167,13 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                     vertical: SpacingTokens.sm,
                   ),
                   decoration: BoxDecoration(
-                    color: ColorTokens.surfaceContainerHigh.withValues(
-                      alpha: 0.5,
-                    ),
+                    color: cc.raise2.withValues(alpha: 0.5),
                     borderRadius: RadiusTokens.borderRadiusSm,
                   ),
                   child: Text(
                     "Today's Progress: ${state.completedSessionsToday} / 8 Sessions",
                     style: theme.textTheme.labelMedium?.copyWith(
-                      color: ColorTokens.onSurfaceVariant.withValues(
-                        alpha: 0.8,
-                      ),
+                      color: cc.mut.withValues(alpha: 0.8),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -196,6 +190,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     FocusTimerState state,
     FocusTimerNotifier notifier,
   ) {
+    final theme = Theme.of(context);
+    final cc = context.cc;
     if (state.status == FocusTimerStatus.running ||
         state.status == FocusTimerStatus.breakMode) {
       return Row(
@@ -205,8 +201,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
               onTap: () => notifier.pause(),
               icon: Symbols.pause,
               label: 'Pause',
-              backgroundColor: ColorTokens.surfaceContainerHigh,
-              foregroundColor: ColorTokens.onSurface,
+              backgroundColor: cc.raise2,
+              foregroundColor: cc.fg,
             ),
           ),
           const SizedBox(width: SpacingTokens.md),
@@ -215,8 +211,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
               onTap: () => notifier.stop(),
               icon: Symbols.stop,
               label: 'End Session',
-              backgroundColor: ColorTokens.error.withValues(alpha: 0.9),
-              foregroundColor: ColorTokens.onError,
+              backgroundColor: cc.risk.withValues(alpha: 0.9),
+              foregroundColor: theme.colorScheme.onError,
             ),
           ),
         ],
@@ -229,8 +225,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
               onTap: () => notifier.start(),
               icon: Symbols.play_arrow,
               label: 'Resume',
-              backgroundColor: ColorTokens.primary.withValues(alpha: 0.85),
-              foregroundColor: ColorTokens.onPrimary,
+              backgroundColor: cc.pri.withValues(alpha: 0.85),
+              foregroundColor: cc.priFg,
             ),
           ),
           const SizedBox(width: SpacingTokens.md),
@@ -239,8 +235,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
               onTap: () => notifier.stop(),
               icon: Symbols.refresh,
               label: 'Reset',
-              backgroundColor: ColorTokens.surfaceContainerHigh,
-              foregroundColor: ColorTokens.onSurface,
+              backgroundColor: cc.raise2,
+              foregroundColor: cc.fg,
             ),
           ),
         ],
@@ -250,8 +246,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
         onTap: () => notifier.start(),
         icon: Symbols.play_arrow,
         label: 'Start Focus Session',
-        backgroundColor: ColorTokens.primary.withValues(alpha: 0.85),
-        foregroundColor: ColorTokens.onPrimary,
+        backgroundColor: cc.pri.withValues(alpha: 0.85),
+        foregroundColor: cc.priFg,
       );
     }
   }
@@ -298,6 +294,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     FocusTimerState state,
     FocusTimerNotifier notifier,
   ) {
+    final cc = context.cc;
     final presets = [
       {'label': '25 min', 'work': 25, 'break': 5},
       {'label': '45 min', 'work': 45, 'break': 10},
@@ -332,14 +329,12 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                     }
                   }
                 },
-                selectedColor: ColorTokens.primaryContainer,
+                selectedColor: cc.priSoft,
                 labelPadding: const EdgeInsets.symmetric(
                   horizontal: SpacingTokens.md,
                 ),
                 labelStyle: TextStyle(
-                  color: isSelected
-                      ? ColorTokens.onPrimaryContainer
-                      : ColorTokens.onSurfaceVariant.withValues(alpha: 0.7),
+                  color: isSelected ? cc.pri : cc.mut.withValues(alpha: 0.7),
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
                 shape: RoundedRectangleBorder(
@@ -347,10 +342,10 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                   side: BorderSide(
                     color: isSelected
                         ? Colors.transparent
-                        : ColorTokens.outlineVariant.withValues(alpha: 0.2),
+                        : cc.line.withValues(alpha: 0.2),
                   ),
                 ),
-                backgroundColor: ColorTokens.surfaceContainer,
+                backgroundColor: cc.raise,
               ),
             ),
           );
@@ -431,6 +426,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
   }
 
   Widget _buildStatisticsCard(BuildContext context, FocusTimerState state) {
+    final cc = context.cc;
     final totalMins = state.history.fold<int>(
       0,
       (sum, s) => sum + s.durationMinutes,
@@ -450,7 +446,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
           Container(
             width: 1,
             height: 40,
-            color: ColorTokens.outlineVariant.withValues(alpha: 0.15),
+            color: cc.line.withValues(alpha: 0.15),
           ),
           Expanded(
             child: _buildStatItem(
@@ -462,7 +458,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
           Container(
             width: 1,
             height: 40,
-            color: ColorTokens.outlineVariant.withValues(alpha: 0.15),
+            color: cc.line.withValues(alpha: 0.15),
           ),
           Expanded(child: _buildStatItem(context, 'Streak', '3')),
         ],
@@ -472,12 +468,13 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
 
   Widget _buildStatItem(BuildContext context, String label, String value) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Column(
       children: [
         Text(
           value,
           style: theme.textTheme.titleLarge?.copyWith(
-            color: ColorTokens.onSurface,
+            color: cc.fg,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -485,7 +482,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
         Text(
           label,
           style: theme.textTheme.labelSmall?.copyWith(
-            color: ColorTokens.onSurfaceVariant.withValues(alpha: 0.7),
+            color: cc.mut.withValues(alpha: 0.7),
           ),
           textAlign: TextAlign.center,
         ),
@@ -495,6 +492,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
 
   Widget _buildStudyGoalCard(BuildContext context, FocusTimerState state) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     final goalProgress = (state.completedSessionsToday / 8).clamp(0.0, 1.0);
 
     return _buildSectionContainer(
@@ -508,14 +506,12 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
             children: [
               Text(
                 'Progress',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: ColorTokens.onSurfaceVariant,
-                ),
+                style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
               ),
               Text(
                 '${state.completedSessionsToday} / 8 Sessions',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: ColorTokens.onSurface,
+                  color: cc.fg,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -524,19 +520,17 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
           const SizedBox(height: SpacingTokens.lg),
           LinearProgressIndicator(
             value: goalProgress,
-            backgroundColor: ColorTokens.surfaceContainerHighest.withValues(
-              alpha: 0.5,
-            ),
-            color: ColorTokens.primary,
+            backgroundColor: cc.raise2.withValues(alpha: 0.5),
+            color: cc.pri,
             minHeight: 10,
             borderRadius: BorderRadius.circular(100),
           ),
           const SizedBox(height: SpacingTokens.lg),
           Row(
             children: [
-              const Icon(
+              Icon(
                 Symbols.emoji_events,
-                color: ColorTokens.tertiary,
+                color: theme.colorScheme.tertiary,
                 size: 20,
               ),
               const SizedBox(width: SpacingTokens.sm),
@@ -545,9 +539,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                   state.completedSessionsToday >= 8
                       ? 'Awesome! Goal completed for today!'
                       : "Keep going! You're making great progress.",
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: ColorTokens.onSurfaceVariant,
-                  ),
+                  style: theme.textTheme.bodySmall?.copyWith(color: cc.mut),
                 ),
               ),
             ],
@@ -595,28 +587,26 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     FocusTimerNotifier notifier,
   ) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: LayoutTokens.cardPadding,
         vertical: LayoutTokens.cardPadding + 8,
       ),
-      decoration: const BoxDecoration(
-        color: ColorTokens.surfaceContainer,
+      decoration: BoxDecoration(
+        color: cc.raise,
         borderRadius: RadiusTokens.borderRadiusXl,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Icon(
-            Symbols.do_not_disturb_on,
-            color: ColorTokens.onSurfaceVariant,
-          ),
+          Icon(Symbols.do_not_disturb_on, color: cc.mut),
           const SizedBox(width: SpacingTokens.base),
           Expanded(
             child: Text(
               'Automatically enable Do Not Disturb while studying',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: ColorTokens.onSurface.withValues(alpha: 0.8),
+                color: cc.fg.withValues(alpha: 0.8),
               ),
             ),
           ),
@@ -624,10 +614,10 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
           Switch(
             value: state.dndEnabled,
             onChanged: (val) => notifier.toggleDnd(val),
-            activeThumbColor: ColorTokens.surface,
-            activeTrackColor: ColorTokens.primary,
-            inactiveThumbColor: ColorTokens.outline,
-            inactiveTrackColor: ColorTokens.surfaceContainerHighest,
+            activeThumbColor: cc.surf,
+            activeTrackColor: cc.pri,
+            inactiveThumbColor: cc.line2,
+            inactiveTrackColor: cc.raise2,
           ),
         ],
       ),
@@ -636,6 +626,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
 
   Widget _buildSessionHistory(BuildContext context, FocusTimerState state) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     final history = state.history;
 
     if (history.isEmpty) {
@@ -646,9 +637,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
           padding: const EdgeInsets.symmetric(vertical: SpacingTokens.md),
           child: Text(
             'No study sessions recorded yet. Start your first session above!',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: ColorTokens.onSurfaceVariant,
-            ),
+            style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
             textAlign: TextAlign.center,
           ),
         ),
@@ -674,9 +663,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
               border: index != history.length - 1 && index != 9
                   ? Border(
                       bottom: BorderSide(
-                        color: ColorTokens.outlineVariant.withValues(
-                          alpha: 0.15,
-                        ),
+                        color: cc.line.withValues(alpha: 0.15),
                       ),
                     )
                   : null,
@@ -685,15 +672,11 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
               children: [
                 Container(
                   padding: const EdgeInsets.all(SpacingTokens.sm),
-                  decoration: const BoxDecoration(
-                    color: ColorTokens.surfaceContainerHigh,
+                  decoration: BoxDecoration(
+                    color: cc.raise2,
                     borderRadius: RadiusTokens.borderRadiusSm,
                   ),
-                  child: Icon(
-                    iconData,
-                    size: 20,
-                    color: ColorTokens.onSurfaceVariant,
-                  ),
+                  child: Icon(iconData, size: 20, color: cc.mut),
                 ),
                 const SizedBox(width: SpacingTokens.md + 4),
                 Expanded(
@@ -703,7 +686,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                       Text(
                         session.subject,
                         style: theme.textTheme.bodyLarge?.copyWith(
-                          color: ColorTokens.onSurface,
+                          color: cc.fg,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -711,19 +694,13 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                       Text(
                         '${session.durationMinutes} min',
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: ColorTokens.onSurfaceVariant.withValues(
-                            alpha: 0.7,
-                          ),
+                          color: cc.mut.withValues(alpha: 0.7),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Icon(
-                  Symbols.check_circle,
-                  color: ColorTokens.primary,
-                  size: 20,
-                ),
+                Icon(Symbols.check_circle, color: cc.pri, size: 20),
               ],
             ),
           );
@@ -748,28 +725,25 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
 
   Widget _buildMotivationalCard(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: SpacingTokens.xl,
         vertical: SpacingTokens.lg,
       ),
       decoration: BoxDecoration(
-        color: ColorTokens.primaryContainer.withValues(alpha: 0.3),
+        color: cc.priSoft.withValues(alpha: 0.3),
         borderRadius: RadiusTokens.borderRadiusLg,
       ),
       child: Row(
         children: [
-          const Icon(
-            Symbols.format_quote,
-            size: 40,
-            color: ColorTokens.primary,
-          ),
+          Icon(Symbols.format_quote, size: 40, color: cc.pri),
           const SizedBox(width: SpacingTokens.md),
           Expanded(
             child: Text(
               '"Small progress every day adds up to big results."',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: ColorTokens.onSurface.withValues(alpha: 0.8),
+                color: cc.fg.withValues(alpha: 0.8),
                 fontStyle: FontStyle.italic,
                 height: 1.5,
               ),
@@ -787,6 +761,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     EdgeInsetsGeometry? padding,
   }) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -798,7 +773,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
           child: Text(
             title,
             style: theme.textTheme.titleMedium?.copyWith(
-              color: ColorTokens.onSurface,
+              color: cc.fg,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -811,8 +786,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                 horizontal: LayoutTokens.cardPadding,
                 vertical: LayoutTokens.cardPadding + 4,
               ),
-          decoration: const BoxDecoration(
-            color: ColorTokens.surfaceContainer,
+          decoration: BoxDecoration(
+            color: cc.raise,
             borderRadius: RadiusTokens.borderRadiusXl,
           ),
           clipBehavior: Clip.antiAlias,
@@ -841,12 +816,13 @@ class _ActionRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        hoverColor: ColorTokens.surfaceContainerHigh,
+        hoverColor: cc.raise2,
         child: Container(
           padding: const EdgeInsets.symmetric(
             horizontal: LayoutTokens.cardPadding,
@@ -855,9 +831,7 @@ class _ActionRow extends StatelessWidget {
           decoration: BoxDecoration(
             border: showBorder
                 ? Border(
-                    bottom: BorderSide(
-                      color: ColorTokens.outlineVariant.withValues(alpha: 0.15),
-                    ),
+                    bottom: BorderSide(color: cc.line.withValues(alpha: 0.15)),
                   )
                 : null,
           ),
@@ -865,9 +839,7 @@ class _ActionRow extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                color: isSelected
-                    ? ColorTokens.primary
-                    : ColorTokens.onSurfaceVariant.withValues(alpha: 0.6),
+                color: isSelected ? cc.pri : cc.mut.withValues(alpha: 0.6),
                 size: 22,
               ),
               const SizedBox(width: SpacingTokens.md),
@@ -875,19 +847,17 @@ class _ActionRow extends StatelessWidget {
                 child: Text(
                   label,
                   style: theme.textTheme.bodyLarge?.copyWith(
-                    color: isSelected
-                        ? ColorTokens.primary
-                        : ColorTokens.onSurface,
+                    color: isSelected ? cc.pri : cc.fg,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                   ),
                 ),
               ),
               if (isSelected)
-                const Icon(Symbols.check, color: ColorTokens.primary, size: 20)
+                Icon(Symbols.check, color: cc.pri, size: 20)
               else
                 Icon(
                   Symbols.chevron_right,
-                  color: ColorTokens.onSurfaceVariant.withValues(alpha: 0.6),
+                  color: cc.mut.withValues(alpha: 0.6),
                   size: 20,
                 ),
             ],

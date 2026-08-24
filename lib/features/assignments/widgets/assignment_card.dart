@@ -1,4 +1,4 @@
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +29,7 @@ class AssignmentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return InkWell(
       onTap: onTap,
@@ -40,9 +41,9 @@ class AssignmentCard extends StatelessWidget {
         curve: Curves.easeOut,
         padding: const EdgeInsets.all(SpacingTokens.md), // Reduced from lg
         decoration: BoxDecoration(
-          color: ColorTokens.surfaceContainer,
+          color: cc.raise,
           borderRadius: RadiusTokens.borderRadiusMd,
-          border: Border.all(color: ColorTokens.surfaceVariant),
+          border: Border.all(color: cc.line),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,7 +53,7 @@ class AssignmentCard extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.titleLarge?.copyWith(
-                color: ColorTokens.onSurface,
+                color: cc.fg,
                 fontWeight: FontWeight.bold,
                 height: 1.2,
               ),
@@ -75,9 +76,7 @@ class AssignmentCard extends StatelessWidget {
                 Flexible(
                   child: Text(
                     subject,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: ColorTokens.onSurfaceVariant,
-                    ),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -115,17 +114,17 @@ class AssignmentCard extends StatelessWidget {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
+                          Icon(
                             Symbols.event,
                             size: 14, // Reduced from 16
-                            color: ColorTokens.onSurfaceVariant,
+                            color: cc.mut,
                           ),
                           const SizedBox(width: SpacingTokens.xs),
                           Text(
                             dueDate,
                             style: theme.textTheme.labelSmall?.copyWith(
                               // Reduced from labelMedium
-                              color: ColorTokens.onSurfaceVariant,
+                              color: cc.mut,
                             ),
                           ),
                         ],
@@ -134,17 +133,17 @@ class AssignmentCard extends StatelessWidget {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
+                            Icon(
                               Symbols.flag,
                               size: 14, // Reduced from 16
-                              color: ColorTokens.error,
+                              color: cc.risk,
                             ),
                             const SizedBox(width: SpacingTokens.xs),
                             Text(
                               priority!,
                               style: theme.textTheme.labelSmall?.copyWith(
                                 // Reduced from labelMedium
-                                color: ColorTokens.error,
+                                color: cc.risk,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -154,10 +153,10 @@ class AssignmentCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: SpacingTokens.sm), // Reduced from md
-                const Icon(
+                Icon(
                   Symbols.chevron_right,
                   size: 20, // Reduced from 24
-                  color: ColorTokens.onSurfaceVariant,
+                  color: cc.mut,
                 ),
               ],
             ),

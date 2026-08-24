@@ -1,4 +1,4 @@
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -10,11 +10,12 @@ class SubjectHeaderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Container(
       padding: const EdgeInsets.all(SpacingTokens.base),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        border: Border.all(color: ColorTokens.surfaceVariant),
+        border: Border.all(color: cc.line),
         borderRadius: RadiusTokens.borderRadiusMd,
       ),
       child: Row(
@@ -22,17 +23,12 @@ class SubjectHeaderCard extends StatelessWidget {
           Container(
             width: 48,
             height: 48,
-            decoration: const BoxDecoration(
-              color: ColorTokens.surfaceVariant,
+            decoration: BoxDecoration(
+              color: cc.raise,
               borderRadius: RadiusTokens.borderRadiusSm,
             ),
             alignment: Alignment.center,
-            child: const Icon(
-              Symbols.neurology,
-              color: ColorTokens.primary,
-              fill: 1.0,
-              size: 24,
-            ),
+            child: Icon(Symbols.neurology, color: cc.pri, fill: 1.0, size: 24),
           ),
           const SizedBox(width: SpacingTokens.base),
           Expanded(
@@ -41,16 +37,12 @@ class SubjectHeaderCard extends StatelessWidget {
               children: [
                 Text(
                   'Artificial Intelligence',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: ColorTokens.onSurface,
-                  ),
+                  style: theme.textTheme.titleMedium?.copyWith(color: cc.fg),
                 ),
                 const SizedBox(height: SpacingTokens.xs),
                 Text(
                   'Prof. Sharma',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: ColorTokens.onSurfaceVariant,
-                  ),
+                  style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
                 ),
               ],
             ),

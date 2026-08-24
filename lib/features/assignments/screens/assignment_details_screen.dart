@@ -3,7 +3,7 @@ import 'package:college_companion/features/assignments/providers/assignments_pro
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/shared/widgets/dialogs/cc_dialogs.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:drift/drift.dart' hide Column;
@@ -35,10 +35,11 @@ class _AssignmentDetailsScreenState
         .read(assignmentRepositoryProvider)
         .markCompleted(_userId, widget.assignmentId);
     if (mounted) {
+      final cc = context.cc;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Assignment marked as complete'),
-          backgroundColor: ColorTokens.success,
+        SnackBar(
+          content: const Text('Assignment marked as complete'),
+          backgroundColor: cc.pri,
         ),
       );
     }
@@ -63,6 +64,7 @@ class _AssignmentDetailsScreenState
     final titleCtrl = TextEditingController(text: assignment.title);
     final descCtrl = TextEditingController(text: assignment.description ?? '');
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     final result = await showModalBottomSheet<bool>(
       context: context,
@@ -96,7 +98,7 @@ class _AssignmentDetailsScreenState
                   width: 48,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: ColorTokens.surfaceVariant,
+                    color: cc.raise,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -110,7 +112,7 @@ class _AssignmentDetailsScreenState
                   'Edit Assignment',
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: ColorTokens.onSurface,
+                    color: cc.fg,
                   ),
                 ),
               ),
@@ -121,24 +123,19 @@ class _AssignmentDetailsScreenState
                 ),
                 child: TextField(
                   controller: titleCtrl,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: ColorTokens.onSurface,
-                  ),
-                  decoration: const InputDecoration(
+                  style: theme.textTheme.bodyLarge?.copyWith(color: cc.fg),
+                  decoration: InputDecoration(
                     labelText: 'Title',
-                    labelStyle: TextStyle(color: ColorTokens.onSurfaceVariant),
+                    labelStyle: TextStyle(color: cc.mut),
                     filled: true,
-                    fillColor: ColorTokens.surfaceContainerHigh,
-                    border: OutlineInputBorder(
+                    fillColor: cc.raise2,
+                    border: const OutlineInputBorder(
                       borderRadius: RadiusTokens.borderRadiusLg,
                       borderSide: BorderSide.none,
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: RadiusTokens.borderRadiusLg,
-                      borderSide: BorderSide(
-                        color: ColorTokens.primary,
-                        width: 2,
-                      ),
+                      borderSide: BorderSide(color: cc.pri, width: 2),
                     ),
                   ),
                 ),
@@ -151,24 +148,19 @@ class _AssignmentDetailsScreenState
                 child: TextField(
                   controller: descCtrl,
                   maxLines: 3,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: ColorTokens.onSurface,
-                  ),
-                  decoration: const InputDecoration(
+                  style: theme.textTheme.bodyLarge?.copyWith(color: cc.fg),
+                  decoration: InputDecoration(
                     labelText: 'Description',
-                    labelStyle: TextStyle(color: ColorTokens.onSurfaceVariant),
+                    labelStyle: TextStyle(color: cc.mut),
                     filled: true,
-                    fillColor: ColorTokens.surfaceContainerHigh,
-                    border: OutlineInputBorder(
+                    fillColor: cc.raise2,
+                    border: const OutlineInputBorder(
                       borderRadius: RadiusTokens.borderRadiusLg,
                       borderSide: BorderSide.none,
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: RadiusTokens.borderRadiusLg,
-                      borderSide: BorderSide(
-                        color: ColorTokens.primary,
-                        width: 2,
-                      ),
+                      borderSide: BorderSide(color: cc.pri, width: 2),
                     ),
                   ),
                 ),
@@ -191,10 +183,10 @@ class _AssignmentDetailsScreenState
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Cancel',
                           style: TextStyle(
-                            color: ColorTokens.onSurfaceVariant,
+                            color: cc.mut,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -205,8 +197,8 @@ class _AssignmentDetailsScreenState
                       child: FilledButton(
                         onPressed: () => Navigator.of(ctx).pop(true),
                         style: FilledButton.styleFrom(
-                          backgroundColor: ColorTokens.primary,
-                          foregroundColor: ColorTokens.onPrimary,
+                          backgroundColor: cc.pri,
+                          foregroundColor: cc.priFg,
                           padding: const EdgeInsets.symmetric(
                             vertical: SpacingTokens.md,
                           ),
@@ -247,9 +239,9 @@ class _AssignmentDetailsScreenState
           );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Assignment updated'),
-            backgroundColor: ColorTokens.primary,
+          SnackBar(
+            content: const Text('Assignment updated'),
+            backgroundColor: context.cc.pri,
           ),
         );
       }
@@ -261,6 +253,7 @@ class _AssignmentDetailsScreenState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     final repo = ref.watch(assignmentRepositoryProvider);
 
     return StreamBuilder<AssignmentEntity?>(
@@ -269,7 +262,7 @@ class _AssignmentDetailsScreenState
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
             backgroundColor: theme.colorScheme.surface,
-            appBar: _buildAppBar(theme),
+            appBar: _buildAppBar(theme, cc),
             body: const Center(child: CircularProgressIndicator()),
           );
         }
@@ -278,22 +271,16 @@ class _AssignmentDetailsScreenState
         if (assignment == null) {
           return Scaffold(
             backgroundColor: theme.colorScheme.surface,
-            appBar: _buildAppBar(theme),
+            appBar: _buildAppBar(theme, cc),
             body: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Symbols.assignment_late,
-                    size: 64,
-                    color: ColorTokens.onSurfaceVariant,
-                  ),
+                  Icon(Symbols.assignment_late, size: 64, color: cc.mut),
                   const SizedBox(height: SpacingTokens.md),
                   Text(
                     'Assignment not found',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: ColorTokens.onSurfaceVariant,
-                    ),
+                    style: theme.textTheme.titleMedium?.copyWith(color: cc.mut),
                   ),
                 ],
               ),
@@ -302,9 +289,7 @@ class _AssignmentDetailsScreenState
         }
 
         final isCompleted = assignment.status == 'completed';
-        final statusColor = isCompleted
-            ? ColorTokens.success
-            : ColorTokens.warning;
+        final statusColor = isCompleted ? cc.pri : cc.warn;
         final statusLabel = isCompleted ? 'Completed' : 'Pending';
 
         // Parse dates
@@ -323,7 +308,7 @@ class _AssignmentDetailsScreenState
 
         return Scaffold(
           backgroundColor: theme.colorScheme.surface,
-          appBar: _buildAppBar(theme),
+          appBar: _buildAppBar(theme, cc),
           body: SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(
@@ -338,7 +323,7 @@ class _AssignmentDetailsScreenState
                     assignment.title,
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: ColorTokens.onSurface,
+                      color: cc.fg,
                     ),
                   ),
                   if (assignment.subjectId.isNotEmpty) ...[
@@ -346,7 +331,7 @@ class _AssignmentDetailsScreenState
                     Text(
                       assignment.subjectId,
                       style: theme.textTheme.titleMedium?.copyWith(
-                        color: ColorTokens.onSurfaceVariant,
+                        color: cc.mut,
                       ),
                     ),
                   ],
@@ -361,14 +346,14 @@ class _AssignmentDetailsScreenState
                       'Description',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: ColorTokens.onSurface,
+                        color: cc.fg,
                       ),
                     ),
                     const SizedBox(height: SpacingTokens.sm),
                     Text(
                       assignment.description!,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: ColorTokens.onSurfaceVariant,
+                        color: cc.mut,
                         height: 1.5,
                       ),
                     ),
@@ -380,19 +365,17 @@ class _AssignmentDetailsScreenState
                     'Timeline',
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: ColorTokens.onSurface,
+                      color: cc.fg,
                     ),
                   ),
                   const SizedBox(height: SpacingTokens.sm),
                   Container(
                     padding: const EdgeInsets.all(SpacingTokens.lg),
                     decoration: BoxDecoration(
-                      color: ColorTokens.surfaceContainerHigh,
+                      color: cc.raise2,
                       borderRadius: RadiusTokens.borderRadiusXl,
                       border: Border.all(
-                        color: ColorTokens.outlineVariant.withValues(
-                          alpha: 0.5,
-                        ),
+                        color: cc.line2.withValues(alpha: 0.5),
                       ),
                     ),
                     child: Column(
@@ -400,27 +383,23 @@ class _AssignmentDetailsScreenState
                         if (createdStr.isNotEmpty)
                           _buildDateRow(
                             theme,
+                            cc,
                             'Created',
                             createdStr,
                             Symbols.calendar_add_on,
                           ),
                         if (createdStr.isNotEmpty)
-                          const Divider(
-                            height: SpacingTokens.xl,
-                            color: ColorTokens.surfaceVariant,
-                          ),
+                          Divider(height: SpacingTokens.xl, color: cc.line),
                         _buildDateRow(
                           theme,
+                          cc,
                           'Due',
                           dueDateStr,
                           Symbols.event_upcoming,
                         ),
                         if (isCompleted && assignment.completedAt != null) ...[
-                          const Divider(
-                            height: SpacingTokens.xl,
-                            color: ColorTokens.surfaceVariant,
-                          ),
-                          _buildDateRow(theme, 'Completed', () {
+                          Divider(height: SpacingTokens.xl, color: cc.line),
+                          _buildDateRow(theme, cc, 'Completed', () {
                             try {
                               return DateFormat(
                                 'MMM d, yyyy',
@@ -442,7 +421,7 @@ class _AssignmentDetailsScreenState
                       'Notes',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: ColorTokens.onSurface,
+                        color: cc.fg,
                       ),
                     ),
                     const SizedBox(height: SpacingTokens.sm),
@@ -450,18 +429,16 @@ class _AssignmentDetailsScreenState
                       width: double.infinity,
                       padding: const EdgeInsets.all(SpacingTokens.lg),
                       decoration: BoxDecoration(
-                        color: ColorTokens.surfaceContainerHigh,
+                        color: cc.raise2,
                         borderRadius: RadiusTokens.borderRadiusXl,
                         border: Border.all(
-                          color: ColorTokens.outlineVariant.withValues(
-                            alpha: 0.5,
-                          ),
+                          color: cc.line2.withValues(alpha: 0.5),
                         ),
                       ),
                       child: Text(
                         assignment.description!,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: ColorTokens.onSurfaceVariant,
+                          color: cc.mut,
                           height: 1.6,
                         ),
                       ),
@@ -490,8 +467,8 @@ class _AssignmentDetailsScreenState
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          backgroundColor: ColorTokens.success,
-                          foregroundColor: ColorTokens.onPrimary,
+                          backgroundColor: cc.pri,
+                          foregroundColor: cc.priFg,
                           elevation: 0,
                         ),
                       ),
@@ -514,10 +491,8 @@ class _AssignmentDetailsScreenState
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            side: const BorderSide(
-                              color: ColorTokens.outlineVariant,
-                            ),
-                            foregroundColor: ColorTokens.onSurface,
+                            side: BorderSide(color: cc.line2),
+                            foregroundColor: cc.fg,
                           ),
                         ),
                       ),
@@ -538,9 +513,9 @@ class _AssignmentDetailsScreenState
                               borderRadius: BorderRadius.circular(12),
                             ),
                             side: BorderSide(
-                              color: ColorTokens.error.withValues(alpha: 0.5),
+                              color: cc.risk.withValues(alpha: 0.5),
                             ),
-                            foregroundColor: ColorTokens.error,
+                            foregroundColor: cc.risk,
                           ),
                         ),
                       ),
@@ -556,12 +531,12 @@ class _AssignmentDetailsScreenState
     );
   }
 
-  AppBar _buildAppBar(ThemeData theme) {
+  AppBar _buildAppBar(ThemeData theme, CCTokens cc) {
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
       leading: IconButton(
-        icon: const Icon(Symbols.arrow_back, color: ColorTokens.onSurface),
+        icon: Icon(Symbols.arrow_back, color: cc.fg),
         onPressed: () => context.pop(),
       ),
       title: const Text('Assignment Details'),
@@ -590,26 +565,22 @@ class _AssignmentDetailsScreenState
 
   Widget _buildDateRow(
     ThemeData theme,
+    CCTokens cc,
     String label,
     String date,
     IconData icon,
   ) {
     return Row(
       children: [
-        Icon(icon, size: 20, color: ColorTokens.onSurfaceVariant),
+        Icon(icon, size: 20, color: cc.mut),
         const SizedBox(width: SpacingTokens.md),
-        Text(
-          label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: ColorTokens.onSurfaceVariant,
-          ),
-        ),
+        Text(label, style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut)),
         const Spacer(),
         Text(
           date,
           style: theme.textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w600,
-            color: ColorTokens.onSurface,
+            color: cc.fg,
           ),
         ),
       ],

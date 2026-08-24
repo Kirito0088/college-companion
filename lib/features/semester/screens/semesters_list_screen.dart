@@ -5,7 +5,7 @@ import 'package:college_companion/features/semester/providers/semester_provider.
 import 'package:college_companion/shared/widgets/empty_states/cc_empty_states.dart';
 import 'package:college_companion/shared/widgets/errors/cc_errors.dart';
 import 'package:college_companion/shared/widgets/loading/cc_skeletons.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:drift/drift.dart' as drift;
@@ -21,6 +21,7 @@ class SemestersListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     final authState = ref.watch(authStateProvider);
     final userId =
         authState is AuthAuthenticated && authState.user.uid.isNotEmpty
@@ -36,13 +37,13 @@ class SemestersListScreen extends ConsumerWidget {
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Symbols.arrow_back),
-          color: ColorTokens.onSurface,
+          color: cc.fg,
           onPressed: () => context.pop(),
         ),
         title: Text(
           'Semesters',
           style: theme.textTheme.titleLarge?.copyWith(
-            color: ColorTokens.onSurface,
+            color: cc.fg,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -65,8 +66,8 @@ class SemestersListScreen extends ConsumerWidget {
                       icon: const Icon(Symbols.add),
                       label: const Text('Add First Semester'),
                       style: FilledButton.styleFrom(
-                        backgroundColor: ColorTokens.primary,
-                        foregroundColor: ColorTokens.onPrimary,
+                        backgroundColor: cc.pri,
+                        foregroundColor: cc.priFg,
                       ),
                     ),
                   ],
@@ -83,7 +84,7 @@ class SemestersListScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildHeader(context),
+                _buildHeader(context, cc),
                 const SizedBox(height: LayoutTokens.sectionGap),
                 ...semesters.map(
                   (semester) => Padding(
@@ -106,8 +107,8 @@ class SemestersListScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddSemesterDialog(context, ref, userId),
-        backgroundColor: ColorTokens.primary,
-        foregroundColor: ColorTokens.onPrimary,
+        backgroundColor: cc.pri,
+        foregroundColor: cc.priFg,
         child: const Icon(Symbols.add),
       ),
     );
@@ -126,7 +127,7 @@ class SemestersListScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(BuildContext context, CCTokens cc) {
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,16 +135,14 @@ class SemestersListScreen extends ConsumerWidget {
         Text(
           'Your academic journey.',
           style: theme.textTheme.titleMedium?.copyWith(
-            color: ColorTokens.onSurface,
+            color: cc.fg,
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: SpacingTokens.xs),
         Text(
           'Track every semester in one place.',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: ColorTokens.onSurfaceVariant,
-          ),
+          style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
         ),
       ],
     );
@@ -158,9 +157,10 @@ class _SemesterCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return Material(
-      color: ColorTokens.surfaceContainer,
+      color: cc.raise,
       borderRadius: RadiusTokens.borderRadiusXl,
       elevation: 0,
       clipBehavior: Clip.antiAlias,
@@ -182,7 +182,7 @@ class _SemesterCard extends StatelessWidget {
                         Text(
                           semester.name,
                           style: theme.textTheme.titleLarge?.copyWith(
-                            color: ColorTokens.onSurface,
+                            color: cc.fg,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -190,7 +190,7 @@ class _SemesterCard extends StatelessWidget {
                         Text(
                           'Created ${semester.createdAt.split('T')[0]}',
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: ColorTokens.onSurfaceVariant,
+                            color: cc.mut,
                           ),
                         ),
                       ],
@@ -215,6 +215,7 @@ class _StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -222,13 +223,13 @@ class _StatusBadge extends StatelessWidget {
         vertical: SpacingTokens.xs,
       ),
       decoration: BoxDecoration(
-        color: ColorTokens.primaryContainer.withValues(alpha: 0.6),
+        color: cc.priSoft.withValues(alpha: 0.6),
         borderRadius: RadiusTokens.borderRadiusSm,
       ),
       child: Text(
         status.toUpperCase(),
         style: theme.textTheme.labelSmall?.copyWith(
-          color: ColorTokens.onPrimaryContainer,
+          color: cc.pri,
           fontWeight: FontWeight.bold,
           letterSpacing: 0.5,
         ),
@@ -267,12 +268,12 @@ class _AddSemesterSheetState extends ConsumerState<_AddSemesterSheet> {
       firstDate: DateTime(2020),
       lastDate: DateTime(2030),
       builder: (context, child) {
+        final cc = context.cc;
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: ColorTokens.primary,
-              onPrimary: ColorTokens.onPrimary,
-            ),
+            colorScheme: Theme.of(
+              context,
+            ).colorScheme.copyWith(primary: cc.pri, onPrimary: cc.priFg),
           ),
           child: child!,
         );
@@ -297,6 +298,7 @@ class _AddSemesterSheetState extends ConsumerState<_AddSemesterSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return Container(
       margin: EdgeInsets.only(
@@ -325,7 +327,7 @@ class _AddSemesterSheetState extends ConsumerState<_AddSemesterSheet> {
               width: 48,
               height: 4,
               decoration: BoxDecoration(
-                color: ColorTokens.surfaceVariant,
+                color: cc.raise,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -338,17 +340,17 @@ class _AddSemesterSheetState extends ConsumerState<_AddSemesterSheet> {
                 Container(
                   padding: const EdgeInsets.all(SpacingTokens.sm),
                   decoration: BoxDecoration(
-                    color: ColorTokens.primaryContainer.withValues(alpha: 0.5),
+                    color: cc.priSoft.withValues(alpha: 0.5),
                     borderRadius: RadiusTokens.borderRadiusMd,
                   ),
-                  child: const Icon(Symbols.school, color: ColorTokens.primary),
+                  child: Icon(Symbols.school, color: cc.pri),
                 ),
                 const SizedBox(width: SpacingTokens.md),
                 Text(
                   'Create Semester',
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: ColorTokens.onSurface,
+                    color: cc.fg,
                   ),
                 ),
               ],
@@ -360,15 +362,13 @@ class _AddSemesterSheetState extends ConsumerState<_AddSemesterSheet> {
             child: TextField(
               controller: _nameCtrl,
               autofocus: true,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: ColorTokens.onSurface,
-              ),
-              decoration: const InputDecoration(
+              style: theme.textTheme.bodyLarge?.copyWith(color: cc.fg),
+              decoration: InputDecoration(
                 labelText: 'Semester Name',
                 hintText: 'e.g. Semester 5, Fall 2026',
                 filled: true,
-                fillColor: ColorTokens.surfaceContainerHigh,
-                border: OutlineInputBorder(
+                fillColor: cc.raise2,
+                border: const OutlineInputBorder(
                   borderRadius: RadiusTokens.borderRadiusLg,
                   borderSide: BorderSide.none,
                 ),
@@ -387,11 +387,11 @@ class _AddSemesterSheetState extends ConsumerState<_AddSemesterSheet> {
                     child: Container(
                       padding: const EdgeInsets.all(SpacingTokens.md),
                       decoration: BoxDecoration(
-                        color: ColorTokens.surfaceContainerHigh,
+                        color: cc.raise2,
                         borderRadius: RadiusTokens.borderRadiusLg,
                         border: Border.all(
                           color: _startDate != null
-                              ? ColorTokens.primary
+                              ? cc.pri
                               : Colors.transparent,
                         ),
                       ),
@@ -401,7 +401,7 @@ class _AddSemesterSheetState extends ConsumerState<_AddSemesterSheet> {
                           Text(
                             'Start Date',
                             style: theme.textTheme.labelMedium?.copyWith(
-                              color: ColorTokens.onSurfaceVariant,
+                              color: cc.mut,
                             ),
                           ),
                           const SizedBox(height: SpacingTokens.xs),
@@ -411,10 +411,8 @@ class _AddSemesterSheetState extends ConsumerState<_AddSemesterSheet> {
                                 : 'Select',
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: _startDate != null
-                                  ? ColorTokens.onSurface
-                                  : ColorTokens.onSurfaceVariant.withValues(
-                                      alpha: 0.5,
-                                    ),
+                                  ? cc.fg
+                                  : cc.mut.withValues(alpha: 0.5),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -431,11 +429,11 @@ class _AddSemesterSheetState extends ConsumerState<_AddSemesterSheet> {
                     child: Container(
                       padding: const EdgeInsets.all(SpacingTokens.md),
                       decoration: BoxDecoration(
-                        color: ColorTokens.surfaceContainerHigh,
+                        color: cc.raise2,
                         borderRadius: RadiusTokens.borderRadiusLg,
                         border: Border.all(
                           color: _expectedCompletionDate != null
-                              ? ColorTokens.primary
+                              ? cc.pri
                               : Colors.transparent,
                         ),
                       ),
@@ -445,7 +443,7 @@ class _AddSemesterSheetState extends ConsumerState<_AddSemesterSheet> {
                           Text(
                             'End Date',
                             style: theme.textTheme.labelMedium?.copyWith(
-                              color: ColorTokens.onSurfaceVariant,
+                              color: cc.mut,
                             ),
                           ),
                           const SizedBox(height: SpacingTokens.xs),
@@ -455,10 +453,8 @@ class _AddSemesterSheetState extends ConsumerState<_AddSemesterSheet> {
                                 : 'Select',
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: _expectedCompletionDate != null
-                                  ? ColorTokens.onSurface
-                                  : ColorTokens.onSurfaceVariant.withValues(
-                                      alpha: 0.5,
-                                    ),
+                                  ? cc.fg
+                                  : cc.mut.withValues(alpha: 0.5),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -486,10 +482,10 @@ class _AddSemesterSheetState extends ConsumerState<_AddSemesterSheet> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Cancel',
                       style: TextStyle(
-                        color: ColorTokens.onSurfaceVariant,
+                        color: cc.mut,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -530,8 +526,8 @@ class _AddSemesterSheetState extends ConsumerState<_AddSemesterSheet> {
                       if (context.mounted) Navigator.pop(context);
                     },
                     style: FilledButton.styleFrom(
-                      backgroundColor: ColorTokens.primary,
-                      foregroundColor: ColorTokens.onPrimary,
+                      backgroundColor: cc.pri,
+                      foregroundColor: cc.priFg,
                       padding: const EdgeInsets.symmetric(
                         vertical: SpacingTokens.md,
                       ),

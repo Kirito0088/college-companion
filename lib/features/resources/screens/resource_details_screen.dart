@@ -1,4 +1,4 @@
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -67,6 +67,7 @@ class ResourceDetailsScreen extends StatelessWidget {
 
   Widget _buildHeroCard(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Column(
       children: [
         Container(
@@ -87,7 +88,7 @@ class ResourceDetailsScreen extends StatelessWidget {
           textAlign: TextAlign.center,
           style: theme.textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.bold,
-            color: ColorTokens.onSurface,
+            color: cc.fg,
           ),
         ),
         const SizedBox(height: SpacingTokens.xs),
@@ -95,7 +96,7 @@ class ResourceDetailsScreen extends StatelessWidget {
           'Operating Systems',
           textAlign: TextAlign.center,
           style: theme.textTheme.titleMedium?.copyWith(
-            color: ColorTokens.primary,
+            color: cc.pri,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -108,14 +109,14 @@ class ResourceDetailsScreen extends StatelessWidget {
                 horizontal: SpacingTokens.md,
                 vertical: SpacingTokens.xxs,
               ),
-              decoration: const BoxDecoration(
-                color: ColorTokens.surfaceContainer,
+              decoration: BoxDecoration(
+                color: cc.raise,
                 borderRadius: RadiusTokens.borderRadiusSm,
               ),
               child: Text(
                 'PDF',
                 style: theme.textTheme.labelMedium?.copyWith(
-                  color: ColorTokens.onSurfaceVariant,
+                  color: cc.mut,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -123,21 +124,14 @@ class ResourceDetailsScreen extends StatelessWidget {
             const SizedBox(width: SpacingTokens.md),
             Text(
               '2.4 MB',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: ColorTokens.onSurfaceVariant,
-              ),
+              style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
             ),
             const SizedBox(width: SpacingTokens.md),
-            const Text(
-              '•',
-              style: TextStyle(color: ColorTokens.onSurfaceVariant),
-            ),
+            Text('•', style: TextStyle(color: cc.mut)),
             const SizedBox(width: SpacingTokens.md),
             Text(
               'Modified Yesterday',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: ColorTokens.onSurfaceVariant,
-              ),
+              style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
             ),
           ],
         ),
@@ -173,7 +167,8 @@ class ResourceDetailsScreen extends StatelessWidget {
     bool isDestructive = false,
   }) {
     final theme = Theme.of(context);
-    final color = isDestructive ? ColorTokens.error : ColorTokens.primary;
+    final cc = context.cc;
+    final color = isDestructive ? cc.risk : cc.pri;
 
     return Column(
       children: [
@@ -191,9 +186,7 @@ class ResourceDetailsScreen extends StatelessWidget {
         Text(
           label,
           style: theme.textTheme.labelMedium?.copyWith(
-            color: isDestructive
-                ? ColorTokens.error
-                : ColorTokens.onSurfaceVariant,
+            color: isDestructive ? cc.risk : cc.mut,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -203,6 +196,7 @@ class ResourceDetailsScreen extends StatelessWidget {
 
   Widget _buildFileInformation(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -214,44 +208,29 @@ class ResourceDetailsScreen extends StatelessWidget {
           child: Text(
             'File Information',
             style: theme.textTheme.titleMedium?.copyWith(
-              color: ColorTokens.onSurface,
+              color: cc.fg,
               fontWeight: FontWeight.bold,
             ),
           ),
         ),
         Container(
           padding: const EdgeInsets.all(LayoutTokens.cardPadding),
-          decoration: const BoxDecoration(
-            color: ColorTokens.surfaceContainer,
+          decoration: BoxDecoration(
+            color: cc.raise,
             borderRadius: RadiusTokens.borderRadiusXl,
           ),
           child: Column(
             children: [
               _buildInfoRow(context, 'Subject', 'Operating Systems'),
-              const Divider(
-                height: SpacingTokens.xl,
-                color: ColorTokens.outlineVariant,
-              ),
+              Divider(height: SpacingTokens.xl, color: cc.line),
               _buildInfoRow(context, 'Semester', 'Semester 5'),
-              const Divider(
-                height: SpacingTokens.xl,
-                color: ColorTokens.outlineVariant,
-              ),
+              Divider(height: SpacingTokens.xl, color: cc.line),
               _buildInfoRow(context, 'Category', 'Lecture Notes'),
-              const Divider(
-                height: SpacingTokens.xl,
-                color: ColorTokens.outlineVariant,
-              ),
+              Divider(height: SpacingTokens.xl, color: cc.line),
               _buildInfoRow(context, 'Created', 'Oct 12, 2023'),
-              const Divider(
-                height: SpacingTokens.xl,
-                color: ColorTokens.outlineVariant,
-              ),
+              Divider(height: SpacingTokens.xl, color: cc.line),
               _buildInfoRow(context, 'Modified', 'Oct 14, 2023, 10:30 AM'),
-              const Divider(
-                height: SpacingTokens.xl,
-                color: ColorTokens.outlineVariant,
-              ),
+              Divider(height: SpacingTokens.xl, color: cc.line),
               _buildInfoRow(context, 'Storage', 'Local Device'),
             ],
           ),
@@ -262,19 +241,15 @@ class ResourceDetailsScreen extends StatelessWidget {
 
   Widget _buildInfoRow(BuildContext context, String label, String value) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: ColorTokens.onSurfaceVariant,
-          ),
-        ),
+        Text(label, style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut)),
         Text(
           value,
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: ColorTokens.onSurface,
+            color: cc.fg,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -284,19 +259,17 @@ class ResourceDetailsScreen extends StatelessWidget {
 
   Widget _buildStorageInformationCard(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Container(
       padding: const EdgeInsets.all(LayoutTokens.cardPadding),
-      decoration: const BoxDecoration(
-        color: ColorTokens.tertiaryContainer,
+      decoration: BoxDecoration(
+        color: cc.priSoft,
         borderRadius: RadiusTokens.borderRadiusLg,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
-            Symbols.offline_pin,
-            color: ColorTokens.onTertiaryContainer,
-          ),
+          Icon(Symbols.offline_pin, color: cc.pri),
           const SizedBox(width: SpacingTokens.md),
           Expanded(
             child: Column(
@@ -305,16 +278,14 @@ class ResourceDetailsScreen extends StatelessWidget {
                 Text(
                   'Stored locally',
                   style: theme.textTheme.titleSmall?.copyWith(
-                    color: ColorTokens.onTertiaryContainer,
+                    color: cc.pri,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: SpacingTokens.xs),
                 Text(
                   'This resource is available offline and remains only on this device.\n\nIt is never uploaded to your cloud account.',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: ColorTokens.onTertiaryContainer,
-                  ),
+                  style: theme.textTheme.bodySmall?.copyWith(color: cc.pri),
                 ),
               ],
             ),

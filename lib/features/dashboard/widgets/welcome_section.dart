@@ -8,7 +8,8 @@ import 'package:college_companion/features/authentication/models/auth_state.dart
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/features/dashboard/models/dashboard_snapshot.dart';
 import 'package:college_companion/features/dashboard/providers/dashboard_provider.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
+import 'package:college_companion/theme/typography_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -25,8 +26,7 @@ class WelcomeSection extends ConsumerWidget {
     final snapshot =
         ref.watch(dashboardSnapshotProvider(userId)).valueOrNull ??
         DashboardSnapshot.empty();
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final cc = context.cc;
 
     // Extract display name from authenticated state.
     final displayName = authState is AuthAuthenticated
@@ -40,8 +40,8 @@ class WelcomeSection extends ConsumerWidget {
         Expanded(
           child: Text(
             '${snapshot.greetingContext},\n$displayName.',
-            style: theme.textTheme.titleLarge?.copyWith(
-              color: colorScheme.onSurface,
+            style: TypographyTokens.serifTextTheme.titleLarge?.copyWith(
+              color: cc.fg,
               fontWeight: FontWeight.w500,
               height: 1.2,
             ),
@@ -53,17 +53,13 @@ class WelcomeSection extends ConsumerWidget {
           margin: const EdgeInsets.only(top: 8),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: ColorTokens.surfaceVariant,
-            border: Border.all(color: ColorTokens.surfaceVariant),
+            color: cc.raise2,
+            border: Border.all(color: cc.line),
           ),
           child: IconButton(
             padding: EdgeInsets.zero,
             onPressed: () {},
-            icon: Icon(
-              Symbols.notifications_rounded,
-              color: colorScheme.onSurface,
-              size: 20,
-            ),
+            icon: Icon(Symbols.notifications_rounded, color: cc.fg, size: 20),
           ),
         ),
       ],

@@ -1,20 +1,23 @@
 /// Today Schedule Section Widget
 ///
-/// Displays a chronological flow of today's events from the DashboardSnapshot.
+/// Displays today's chronological flow as a single vertical "spine"
+/// timeline (ADR-011 canvas) — a continuous line connecting each event's
+/// node, echoing the login screen's `_DaySpine` motif.
 library;
 
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/features/dashboard/models/dashboard_snapshot.dart';
 import 'package:college_companion/features/dashboard/providers/dashboard_provider.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
+import 'package:college_companion/theme/typography_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
-/// A section displaying today's chronological flow.
+/// A section displaying today's chronological flow as a spine timeline.
 class TodayOverviewSection extends ConsumerWidget {
   /// Creates a [TodayOverviewSection].
   const TodayOverviewSection({super.key});
@@ -27,6 +30,7 @@ class TodayOverviewSection extends ConsumerWidget {
         ref.watch(dashboardSnapshotProvider(userId)).valueOrNull ??
         DashboardSnapshot.empty();
     final theme = Theme.of(context);
+    final cc = context.cc;
     final events = snapshot.timelineEvents;
 
     return Column(
@@ -37,16 +41,12 @@ class TodayOverviewSection extends ConsumerWidget {
           children: [
             Text(
               "Today's Flow",
-              style: theme.textTheme.titleLarge?.copyWith(
+              style: TypographyTokens.serifTextTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onSurface,
+                color: cc.fg,
               ),
             ),
-            const Icon(
-              Symbols.tune_rounded,
-              color: ColorTokens.onSurfaceVariant,
-              size: 24,
-            ),
+            Icon(Symbols.tune_rounded, color: cc.mut, size: 24),
           ],
         ),
         const SizedBox(height: SpacingTokens.md),
@@ -54,117 +54,143 @@ class TodayOverviewSection extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(SpacingTokens.xl),
             decoration: BoxDecoration(
-              color: ColorTokens.surfaceContainerLow,
-              borderRadius: RadiusTokens.borderRadiusLg,
-              border: Border.all(
-                color: ColorTokens.outlineVariant.withValues(alpha: 0.2),
-              ),
+              color: cc.raise,
+              borderRadius: RadiusTokens.borderRadiusXxl,
+              border: Border.all(color: cc.line),
             ),
             alignment: Alignment.center,
             child: Column(
               children: [
-                const Icon(
-                  Symbols.event_available_rounded,
-                  size: 48,
-                  color: ColorTokens.primary,
-                ),
+                Icon(Symbols.event_available_rounded, size: 48, color: cc.pri),
                 const SizedBox(height: SpacingTokens.md),
                 Text(
                   'No classes scheduled for today',
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: ColorTokens.onSurface,
+                    color: cc.fg,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: SpacingTokens.xs),
                 Text(
                   'Take a break or catch up on assignments!',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: ColorTokens.onSurfaceVariant,
-                  ),
+                  style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
                 ),
               ],
             ),
           )
         else
-          ...events.map(
-            (event) => Padding(
-              padding: const EdgeInsets.only(bottom: SpacingTokens.xs),
-              child: _buildClassItem(
-                context,
-                timeText: event.timeString,
-                meridiem: event.meridiem,
-                className: event.title,
-                room: event.location,
-                isNow: event.isNow,
-                isPast: event.isPast,
-              ),
-            ),
+          Column(
+            children: [
+              for (var i = 0; i < events.length; i++)
+                _SpineRow(
+                  event: events[i],
+                  isFirst: i == 0,
+                  isLast: i == events.length - 1,
+                ),
+            ],
           ),
       ],
     );
   }
+}
 
-  Widget _buildClassItem(
-    BuildContext context, {
-    required String timeText,
-    required String meridiem,
-    required String className,
-    required String room,
-    required bool isNow,
-    required bool isPast,
-  }) {
+/// A single row of the spine timeline: a time label, a node on the
+/// continuous vertical spine, and the event's content card.
+class _SpineRow extends StatelessWidget {
+  const _SpineRow({
+    required this.event,
+    required this.isFirst,
+    required this.isLast,
+  });
+
+  final TimelineEvent event;
+  final bool isFirst;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // Visual fading for past events (Cognitive Relief)
-    final opacity = isPast ? 0.4 : 1.0;
+    final cc = context.cc;
+    final opacity = event.isPast ? 0.4 : 1.0;
+    final nodeColor = event.isNow ? cc.pri : cc.line2;
 
     return Opacity(
       opacity: opacity,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 52,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                const SizedBox(height: 12),
-                Text(
-                  timeText,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: isNow
-                        ? ColorTokens.onSurface
-                        : ColorTokens.onSurfaceVariant,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  meridiem,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: ColorTokens.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: SpacingTokens.sm),
-          Expanded(
-            child: Container(
-              decoration: isNow
-                  ? BoxDecoration(
-                      color: ColorTokens.surfaceContainer,
-                      borderRadius: RadiusTokens.borderRadiusMd,
-                      border: Border.all(
-                        color: ColorTokens.primary.withValues(alpha: 0.2),
-                        width: 1,
-                      ),
-                    )
-                  : const BoxDecoration(
-                      borderRadius: RadiusTokens.borderRadiusMd,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 52,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      event.timeString,
+                      style: TypographyTokens.mono(theme.textTheme.labelLarge)
+                          .copyWith(
+                            color: event.isNow ? cc.fg : cc.mut,
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
-              child: ClipRRect(
-                borderRadius: RadiusTokens.borderRadiusMd,
-                child: Padding(
+                    Text(
+                      event.meridiem,
+                      style: TypographyTokens.mono(
+                        theme.textTheme.labelSmall,
+                      ).copyWith(color: cc.dim),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: SpacingTokens.sm),
+            // ── The spine: a continuous vertical line with a node per event ──
+            SizedBox(
+              width: 16,
+              child: Column(
+                children: [
+                  Container(
+                    width: 1.5,
+                    height: 12,
+                    color: isFirst ? Colors.transparent : cc.line,
+                  ),
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: nodeColor,
+                      border: event.isNow
+                          ? null
+                          : Border.all(color: cc.line2, width: 1.5),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      width: 1.5,
+                      color: isLast ? Colors.transparent : cc.line,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: SpacingTokens.sm),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: SpacingTokens.md),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: event.isNow ? cc.raise2 : Colors.transparent,
+                    borderRadius: RadiusTokens.borderRadiusMd,
+                    border: event.isNow
+                        ? Border.all(
+                            color: cc.pri.withValues(alpha: 0.3),
+                            width: 1,
+                          )
+                        : null,
+                  ),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 12,
@@ -178,9 +204,9 @@ class TodayOverviewSection extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              className,
+                              event.title,
                               style: theme.textTheme.titleMedium?.copyWith(
-                                color: ColorTokens.onSurface,
+                                color: cc.fg,
                                 fontWeight: FontWeight.w600,
                               ),
                               maxLines: 1,
@@ -188,9 +214,9 @@ class TodayOverviewSection extends ConsumerWidget {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              room,
+                              event.location,
                               style: theme.textTheme.bodyMedium?.copyWith(
-                                color: ColorTokens.onSurfaceVariant,
+                                color: cc.mut,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -200,21 +226,23 @@ class TodayOverviewSection extends ConsumerWidget {
                       ),
                       Row(
                         children: [
-                          if (isNow)
+                          if (event.isNow)
                             Text(
                               'NOW',
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: ColorTokens.success,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 1.0,
-                              ),
+                              style:
+                                  TypographyTokens.mono(
+                                    theme.textTheme.labelSmall,
+                                  ).copyWith(
+                                    color: cc.pri,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing:
+                                        TypographyTokens.monoLabelSpacing,
+                                  ),
                             ),
                           const SizedBox(width: SpacingTokens.xs),
                           Icon(
                             Symbols.chevron_right_rounded,
-                            color: isNow
-                                ? ColorTokens.success
-                                : ColorTokens.onSurfaceVariant,
+                            color: event.isNow ? cc.pri : cc.mut,
                             size: 20,
                           ),
                         ],
@@ -224,8 +252,8 @@ class TodayOverviewSection extends ConsumerWidget {
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -129,10 +129,10 @@ class _QuickActionTile extends StatelessWidget {
 
     return Material(
       color: colorScheme.surfaceContainer,
-      borderRadius: RadiusTokens.borderRadiusMd,
+      borderRadius: RadiusTokens.borderRadiusXxl,
       child: InkWell(
         onTap: onPressed,
-        borderRadius: RadiusTokens.borderRadiusMd,
+        borderRadius: RadiusTokens.borderRadiusXxl,
         child: Container(
           padding: const EdgeInsets.symmetric(
             horizontal: SpacingTokens.sm,

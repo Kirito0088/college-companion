@@ -24,6 +24,9 @@ class DashboardSnapshot {
         workloadState: 'Clear',
         deadlinesState: 'All clear',
         nextBreakState: 'N/A',
+        attendancePercentage: 0,
+        isAttendanceSafe: true,
+        hasAttendanceData: false,
       ),
       upcomingAssignments: [],
     );
@@ -86,12 +89,25 @@ class AcademicSnapshot {
     required this.workloadState,
     required this.deadlinesState,
     required this.nextBreakState,
+    required this.attendancePercentage,
+    required this.isAttendanceSafe,
+    required this.hasAttendanceData,
   });
 
   final String attendanceState;
   final String workloadState;
   final String deadlinesState;
   final String nextBreakState;
+
+  /// Raw current attendance percentage (0-100), for the attendance ring.
+  final double attendancePercentage;
+
+  /// Whether [attendancePercentage] meets or exceeds the safe-bunk target.
+  final bool isAttendanceSafe;
+
+  /// Whether any attendance records exist yet. When false, the ring shows
+  /// a neutral "no data" state instead of a risk-colored 0%.
+  final bool hasAttendanceData;
 }
 
 /// Upcoming assignment representation.

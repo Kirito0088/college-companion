@@ -9,7 +9,7 @@ import 'package:college_companion/features/dashboard/models/dashboard_snapshot.d
 import 'package:college_companion/features/dashboard/providers/dashboard_provider.dart';
 import 'package:college_companion/routing/app_router.dart';
 import 'package:college_companion/shared/widgets/section_header.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +30,7 @@ class UpcomingAssignmentsSection extends ConsumerWidget {
         ref.watch(dashboardSnapshotProvider(userId)).valueOrNull ??
         DashboardSnapshot.empty();
     final theme = Theme.of(context);
+    final cc = context.cc;
     final assignments = snapshot.upcomingAssignments;
 
     return Column(
@@ -44,34 +45,30 @@ class UpcomingAssignmentsSection extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(SpacingTokens.xl),
             decoration: BoxDecoration(
-              color: ColorTokens.surfaceContainerLow,
-              borderRadius: RadiusTokens.borderRadiusLg,
-              border: Border.all(
-                color: ColorTokens.outlineVariant.withValues(alpha: 0.2),
-              ),
+              color: cc.raise,
+              borderRadius: RadiusTokens.borderRadiusXxl,
+              border: Border.all(color: cc.line),
             ),
             alignment: Alignment.center,
             child: Column(
               children: [
-                const Icon(
+                Icon(
                   Symbols.assignment_turned_in_rounded,
                   size: 48,
-                  color: ColorTokens.success,
+                  color: cc.pri,
                 ),
                 const SizedBox(height: SpacingTokens.md),
                 Text(
                   'No upcoming assignments',
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: ColorTokens.onSurface,
+                    color: cc.fg,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: SpacingTokens.xs),
                 Text(
                   "You're all caught up!",
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: ColorTokens.onSurfaceVariant,
-                  ),
+                  style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
                 ),
               ],
             ),
@@ -108,13 +105,14 @@ class UpcomingAssignmentsSection extends ConsumerWidget {
     required VoidCallback onTap,
   }) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     // Determine color based on urgency
-    Color indicatorColor = ColorTokens.primary;
+    Color indicatorColor = cc.pri;
     if (daysLeft <= 1) {
-      indicatorColor = ColorTokens.error;
+      indicatorColor = cc.risk;
     } else if (daysLeft <= 3) {
-      indicatorColor = ColorTokens.warning;
+      indicatorColor = cc.warn;
     }
 
     return InkWell(
@@ -123,11 +121,9 @@ class UpcomingAssignmentsSection extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.all(SpacingTokens.md),
         decoration: BoxDecoration(
-          color: ColorTokens.surfaceContainer,
+          color: cc.raise2,
           borderRadius: RadiusTokens.borderRadiusMd,
-          border: Border.all(
-            color: ColorTokens.outlineVariant.withValues(alpha: 0.2),
-          ),
+          border: Border.all(color: cc.line),
         ),
         child: Row(
           children: [
@@ -147,7 +143,7 @@ class UpcomingAssignmentsSection extends ConsumerWidget {
                   Text(
                     title,
                     style: theme.textTheme.titleMedium?.copyWith(
-                      color: ColorTokens.onSurface,
+                      color: cc.fg,
                       fontWeight: FontWeight.w600,
                     ),
                     maxLines: 1,
@@ -159,20 +155,16 @@ class UpcomingAssignmentsSection extends ConsumerWidget {
                       Text(
                         subject,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: ColorTokens.onSurfaceVariant,
+                          color: cc.mut,
                         ),
                       ),
                       const SizedBox(width: SpacingTokens.sm),
-                      const Icon(
-                        Symbols.circle,
-                        size: 4,
-                        color: ColorTokens.onSurfaceVariant,
-                      ),
+                      Icon(Symbols.circle, size: 4, color: cc.mut),
                       const SizedBox(width: SpacingTokens.sm),
                       Text(
                         dueDate,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: ColorTokens.onSurfaceVariant,
+                          color: cc.mut,
                         ),
                       ),
                     ],

@@ -8,9 +8,10 @@ import 'package:college_companion/features/authentication/providers/auth_provide
 import 'package:college_companion/features/dashboard/models/dashboard_snapshot.dart';
 import 'package:college_companion/features/dashboard/providers/dashboard_provider.dart';
 import 'package:college_companion/routing/app_router.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
+import 'package:college_companion/theme/typography_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -29,6 +30,7 @@ class NextLectureCard extends ConsumerWidget {
         ref.watch(dashboardSnapshotProvider(userId)).valueOrNull ??
         DashboardSnapshot.empty();
     final theme = Theme.of(context);
+    final cc = context.cc;
     final nextAction = snapshot.nextAction;
 
     if (nextAction == null) {
@@ -42,20 +44,15 @@ class NextLectureCard extends ConsumerWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              ColorTokens.surfaceContainerHigh.withValues(alpha: 0.6),
-              ColorTokens.surfaceContainer,
-            ],
+            colors: [cc.raise2, cc.raise],
           ),
-          border: Border.all(
-            color: ColorTokens.onSurface.withValues(alpha: 0.04),
-            width: 1,
-          ),
-          borderRadius: RadiusTokens.borderRadiusLg,
+          border: Border.all(color: cc.line, width: 1),
+          borderRadius: RadiusTokens.borderRadiusXxl,
+          boxShadow: cc.shadow,
         ),
         child: InkWell(
           onTap: () => context.push(RoutePaths.subjectDetails),
-          borderRadius: RadiusTokens.borderRadiusLg,
+          borderRadius: RadiusTokens.borderRadiusXxl,
           child: Padding(
             padding: const EdgeInsets.all(SpacingTokens.xl),
             child: Column(
@@ -67,24 +64,28 @@ class NextLectureCard extends ConsumerWidget {
                     Row(
                       children: [
                         Text(
-                          'Next Action',
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: ColorTokens.onSurfaceVariant,
-                            letterSpacing: 0.5,
-                          ),
+                          'NEXT ACTION',
+                          style:
+                              TypographyTokens.mono(
+                                theme.textTheme.labelMedium,
+                              ).copyWith(
+                                color: cc.mut,
+                                letterSpacing:
+                                    TypographyTokens.monoLabelSpacing,
+                              ),
                         ),
                         const SizedBox(width: SpacingTokens.xs),
-                        const Icon(
+                        Icon(
                           Symbols.arrow_forward_rounded,
                           size: 14,
-                          color: ColorTokens.onSurfaceVariant,
+                          color: cc.mut,
                         ),
                       ],
                     ),
                     Text(
                       nextAction.urgencyString,
                       style: theme.textTheme.labelMedium?.copyWith(
-                        color: ColorTokens.primary,
+                        color: cc.pri,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -93,40 +94,29 @@ class NextLectureCard extends ConsumerWidget {
                 const SizedBox(height: SpacingTokens.md),
                 Text(
                   nextAction.title,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    color: ColorTokens.onSurface,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.5,
-                  ),
+                  style: TypographyTokens.serifTextTheme.headlineSmall
+                      ?.copyWith(color: cc.fg, fontWeight: FontWeight.w600),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: SpacingTokens.xs),
                 Row(
                   children: [
-                    const Icon(
-                      Symbols.schedule,
-                      size: 16,
-                      color: ColorTokens.onSurfaceVariant,
-                    ),
+                    Icon(Symbols.schedule, size: 16, color: cc.mut),
                     const SizedBox(width: 4),
                     Text(
                       nextAction.timeString,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: ColorTokens.onSurfaceVariant,
-                      ),
+                      style: TypographyTokens.mono(
+                        theme.textTheme.bodyMedium,
+                      ).copyWith(color: cc.mut),
                     ),
                     const SizedBox(width: SpacingTokens.md),
-                    const Icon(
-                      Symbols.location_on,
-                      size: 16,
-                      color: ColorTokens.onSurfaceVariant,
-                    ),
+                    Icon(Symbols.location_on, size: 16, color: cc.mut),
                     const SizedBox(width: 4),
                     Text(
                       nextAction.location,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: ColorTokens.onSurfaceVariant,
+                        color: cc.mut,
                       ),
                     ),
                   ],

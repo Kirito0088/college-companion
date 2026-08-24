@@ -152,6 +152,10 @@ final dashboardSnapshotProvider =
         workloadState: workloadState,
         deadlinesState: deadlinesState,
         nextBreakState: 'In 2 hrs',
+        attendancePercentage: safeBunk.currentPercentage,
+        isAttendanceSafe:
+            safeBunk.currentPercentage >= safeBunk.targetPercentage,
+        hasAttendanceData: safeBunk.total > 0,
       );
 
       return DashboardSnapshot(

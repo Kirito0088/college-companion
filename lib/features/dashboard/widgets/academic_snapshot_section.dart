@@ -7,9 +7,11 @@ import 'package:college_companion/features/authentication/models/auth_state.dart
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/features/dashboard/models/dashboard_snapshot.dart';
 import 'package:college_companion/features/dashboard/providers/dashboard_provider.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/features/dashboard/widgets/attendance_ring.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
+import 'package:college_companion/theme/typography_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -27,22 +29,18 @@ class AcademicSnapshotSection extends ConsumerWidget {
         ref.watch(dashboardSnapshotProvider(userId)).valueOrNull ??
         DashboardSnapshot.empty();
     final theme = Theme.of(context);
+    final cc = context.cc;
     final stats = snapshot.academicSnapshot;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Academic Snapshot',
-              style: theme.textTheme.titleLarge?.copyWith(
-                color: ColorTokens.onSurface,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
+        Text(
+          'Academic Snapshot',
+          style: TypographyTokens.serifTextTheme.titleLarge?.copyWith(
+            color: cc.fg,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const SizedBox(height: SpacingTokens.md),
         Container(
@@ -51,35 +49,48 @@ class AcademicSnapshotSection extends ConsumerWidget {
             horizontal: SpacingTokens.sm,
           ),
           decoration: BoxDecoration(
-            color: ColorTokens.surfaceContainerLow,
-            borderRadius: RadiusTokens.borderRadiusLg,
-            border: Border.all(
-              color: ColorTokens.outlineVariant.withValues(alpha: 0.1),
-            ),
+            color: cc.raise,
+            borderRadius: RadiusTokens.borderRadiusXxl,
+            border: Border.all(color: cc.line),
           ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _buildStatCard(
-                context: context,
-                icon: Symbols.fact_check_rounded,
-                iconColor: ColorTokens.success,
-                value: stats.attendanceState,
-                label: 'Attendance',
-                valueColor: ColorTokens.success,
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    AttendanceRing(
+                      percentage: stats.attendancePercentage,
+                      isSafe: stats.isAttendanceSafe,
+                      hasData: stats.hasAttendanceData,
+                      size: 56,
+                    ),
+                    const SizedBox(height: SpacingTokens.xs),
+                    Text(
+                      'Attendance',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: cc.mut,
+                        height: 1.2,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                    ),
+                  ],
+                ),
               ),
               _buildStatCard(
                 context: context,
                 icon: Symbols.school_rounded,
-                iconColor: ColorTokens.warning, // Indicating heavy workload
+                iconColor: cc.warn,
                 value: stats.workloadState,
                 label: 'Workload',
-                valueColor: ColorTokens.warning,
+                valueColor: cc.warn,
               ),
               _buildStatCard(
                 context: context,
                 icon: Symbols.assignment_rounded,
-                iconColor: ColorTokens.primary,
+                iconColor: cc.pri,
                 value: stats.deadlinesState,
                 label: 'Deadlines',
               ),
@@ -87,7 +98,7 @@ class AcademicSnapshotSection extends ConsumerWidget {
                 context: context,
                 icon: Symbols
                     .coffee_rounded, // Replaced timer with coffee for break
-                iconColor: ColorTokens.primary,
+                iconColor: cc.pri,
                 value: stats.nextBreakState,
                 label: 'Next Break',
               ),
@@ -107,6 +118,7 @@ class AcademicSnapshotSection extends ConsumerWidget {
     Color? valueColor,
   }) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return Expanded(
       child: Column(
@@ -114,20 +126,22 @@ class AcademicSnapshotSection extends ConsumerWidget {
         children: [
           Icon(icon, color: iconColor, size: 24, fill: 1.0),
           const SizedBox(height: SpacingTokens.xs),
-          Text(
-            value,
-            style: theme.textTheme.titleMedium?.copyWith(
-              // Reduced from titleLarge to fit text like '1 Due Tonight'
-              fontWeight: FontWeight.w700,
-              color: valueColor ?? ColorTokens.onSurface,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: valueColor ?? cc.fg,
+              ),
+              maxLines: 1,
             ),
-            textAlign: TextAlign.center,
           ),
           const SizedBox(height: SpacingTokens.xxs),
           Text(
             label,
             style: theme.textTheme.labelSmall?.copyWith(
-              color: ColorTokens.onSurfaceVariant,
+              color: cc.mut,
               height: 1.2,
             ),
             textAlign: TextAlign.center,

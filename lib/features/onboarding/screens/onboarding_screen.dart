@@ -1,8 +1,10 @@
 import 'package:college_companion/features/onboarding/providers/onboarding_provider.dart';
 import 'package:college_companion/routing/app_router.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
+import 'package:college_companion/theme/typography_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -49,10 +51,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final cc = context.cc;
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: cc.bg,
       body: Stack(
         children: [
           PageView(
@@ -90,9 +92,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    theme.colorScheme.surface.withValues(alpha: 0),
-                    theme.colorScheme.surface.withValues(alpha: 0.8),
-                    theme.colorScheme.surface,
+                    cc.bg.withValues(alpha: 0),
+                    cc.bg.withValues(alpha: 0.8),
+                    cc.bg,
                   ],
                 ),
               ),
@@ -108,7 +110,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           ? _finishOnboarding
                           : null,
                       style: TextButton.styleFrom(
-                        foregroundColor: ColorTokens.onSurfaceVariant,
+                        foregroundColor: cc.mut,
                         padding: const EdgeInsets.symmetric(
                           horizontal: SpacingTokens.md,
                           vertical: SpacingTokens.sm,
@@ -130,9 +132,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         height: 8,
                         width: isActive ? 24 : 8,
                         decoration: BoxDecoration(
-                          color: isActive
-                              ? ColorTokens.primary
-                              : ColorTokens.surfaceContainerHighest,
+                          color: isActive ? cc.pri : cc.raise2,
                           borderRadius: BorderRadius.circular(4),
                         ),
                       );
@@ -147,8 +147,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             key: const ValueKey('next'),
                             onPressed: _nextPage,
                             style: IconButton.styleFrom(
-                              backgroundColor: ColorTokens.primary,
-                              foregroundColor: ColorTokens.onPrimary,
+                              backgroundColor: cc.pri,
+                              foregroundColor: cc.priFg,
                               padding: const EdgeInsets.all(SpacingTokens.md),
                             ),
                             icon: const Icon(Symbols.arrow_forward),
@@ -183,7 +183,7 @@ class _OnboardingPageLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final cc = context.cc;
     final topPadding = MediaQuery.of(context).padding.top + SpacingTokens.xxxl;
 
     return Padding(
@@ -215,17 +215,18 @@ class _OnboardingPageLayout extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: theme.textTheme.headlineLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: ColorTokens.onSurface,
-                      height: 1.2,
-                    ),
+                    style: TypographyTokens.serifTextTheme.headlineLarge
+                        ?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: cc.fg,
+                          height: 1.2,
+                        ),
                   ),
                   const SizedBox(height: SpacingTokens.lg),
                   Text(
                     subtitle,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: ColorTokens.onSurfaceVariant,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: cc.mut,
                       height: 1.5,
                     ),
                   ),
@@ -265,6 +266,8 @@ class _WelcomeHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cc = context.cc;
+
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
       duration: const Duration(milliseconds: 1200),
@@ -284,14 +287,11 @@ class _WelcomeHero extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              ColorTokens.primary.withValues(alpha: 0.2),
-              ColorTokens.primary.withValues(alpha: 0.05),
+              cc.pri.withValues(alpha: 0.2),
+              cc.pri.withValues(alpha: 0.05),
             ],
           ),
-          border: Border.all(
-            color: ColorTokens.primary.withValues(alpha: 0.2),
-            width: 2,
-          ),
+          border: Border.all(color: cc.pri.withValues(alpha: 0.2), width: 2),
         ),
         child: Stack(
           alignment: Alignment.center,
@@ -326,21 +326,17 @@ class _WelcomeHero extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(SpacingTokens.xl),
               decoration: BoxDecoration(
-                color: ColorTokens.primary,
+                color: cc.pri,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: ColorTokens.primary.withValues(alpha: 0.3),
+                    color: cc.pri.withValues(alpha: 0.3),
                     blurRadius: 24,
                     offset: const Offset(0, 8),
                   ),
                 ],
               ),
-              child: const Icon(
-                Symbols.school,
-                size: 48,
-                color: ColorTokens.onPrimary,
-              ),
+              child: Icon(Symbols.school, size: 48, color: cc.priFg),
             ),
           ],
         ),
@@ -375,7 +371,7 @@ class _FloatingIconCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(SpacingTokens.md),
         decoration: BoxDecoration(
-          color: ColorTokens.surfaceContainerHigh,
+          color: context.cc.raise,
           borderRadius: RadiusTokens.borderRadiusLg,
           boxShadow: [
             BoxShadow(
@@ -413,6 +409,8 @@ class _AttendanceHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cc = context.cc;
+
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
       duration: const Duration(milliseconds: 1500),
@@ -427,7 +425,7 @@ class _AttendanceHero extends StatelessWidget {
               child: CircularProgressIndicator(
                 value: 0.85 * value,
                 strokeWidth: 12,
-                backgroundColor: ColorTokens.surfaceContainerHighest,
+                backgroundColor: cc.raise2,
                 color: ColorTokens.success,
                 strokeCap: StrokeCap.round,
               ),
@@ -438,7 +436,7 @@ class _AttendanceHero extends StatelessWidget {
                 Text(
                   '${(85 * value).toInt()}%',
                   style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                    color: ColorTokens.onSurface,
+                    color: cc.fg,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -480,7 +478,7 @@ class _PlanningHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Stack(
+    return Stack(
       alignment: Alignment.center,
       clipBehavior: Clip.none,
       children: [
@@ -488,12 +486,12 @@ class _PlanningHero extends StatelessWidget {
           delay: 0,
           yOffset: -40,
           rotate: -0.05,
-          color: ColorTokens.primary,
+          color: context.cc.pri,
           icon: Symbols.assignment,
           title: 'Math Assignment',
           subtitle: 'Due Tomorrow',
         ),
-        _MockCard(
+        const _MockCard(
           delay: 200,
           yOffset: 40,
           rotate: 0.05,
@@ -548,60 +546,65 @@ class _MockCard extends StatelessWidget {
           ),
         );
       },
-      child: Container(
-        width: 220,
-        padding: const EdgeInsets.all(SpacingTokens.lg),
-        decoration: BoxDecoration(
-          color: ColorTokens.surfaceContainerHigh,
-          borderRadius: RadiusTokens.borderRadiusXl,
-          border: Border.all(color: ColorTokens.outlineVariant),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
-              blurRadius: 16,
-              offset: const Offset(0, 8),
+      child: Builder(
+        builder: (context) {
+          final cc = context.cc;
+          return Container(
+            width: 220,
+            padding: const EdgeInsets.all(SpacingTokens.lg),
+            decoration: BoxDecoration(
+              color: cc.raise,
+              borderRadius: RadiusTokens.borderRadiusXl,
+              border: Border.all(color: cc.line),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  blurRadius: 16,
+                  offset: const Offset(0, 8),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(SpacingTokens.sm),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                borderRadius: RadiusTokens.borderRadiusMd,
-              ),
-              child: Icon(icon, color: color, size: 24),
-            ),
-            const SizedBox(width: SpacingTokens.md),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: ColorTokens.onSurface,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(SpacingTokens.sm),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    borderRadius: RadiusTokens.borderRadiusMd,
                   ),
-                  const SizedBox(height: SpacingTokens.xxs),
-                  Text(
-                    subtitle,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: ColorTokens.onSurfaceVariant,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  child: Icon(icon, color: color, size: 24),
+                ),
+                const SizedBox(width: SpacingTokens.md),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: cc.fg,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: SpacingTokens.xxs),
+                      Text(
+                        subtitle,
+                        style: Theme.of(
+                          context,
+                        ).textTheme.labelSmall?.copyWith(color: cc.mut),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -629,6 +632,8 @@ class _StudyHubHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cc = context.cc;
+
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -679,9 +684,9 @@ class _StudyHubHero extends StatelessWidget {
             width: 180,
             padding: const EdgeInsets.all(SpacingTokens.lg),
             decoration: BoxDecoration(
-              color: ColorTokens.surfaceContainerHighest,
+              color: cc.raise2,
               borderRadius: RadiusTokens.borderRadiusXl,
-              border: Border.all(color: ColorTokens.outlineVariant, width: 2),
+              border: Border.all(color: cc.line2, width: 2),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.4),
@@ -696,21 +701,17 @@ class _StudyHubHero extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(SpacingTokens.xl),
                   decoration: BoxDecoration(
-                    color: ColorTokens.primary.withValues(alpha: 0.15),
+                    color: cc.priSoft,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Symbols.picture_as_pdf,
-                    size: 48,
-                    color: ColorTokens.primary,
-                  ),
+                  child: Icon(Symbols.picture_as_pdf, size: 48, color: cc.pri),
                 ),
                 const SizedBox(height: SpacingTokens.lg),
                 Container(
                   height: 8,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: ColorTokens.surfaceVariant,
+                    color: cc.raise,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -719,7 +720,7 @@ class _StudyHubHero extends StatelessWidget {
                   height: 8,
                   width: 80,
                   decoration: BoxDecoration(
-                    color: ColorTokens.surfaceVariant,
+                    color: cc.raise,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -775,8 +776,8 @@ class _ReadyPage extends StatelessWidget {
         child: FilledButton(
           onPressed: onFinish,
           style: FilledButton.styleFrom(
-            backgroundColor: ColorTokens.primary,
-            foregroundColor: ColorTokens.onPrimary,
+            backgroundColor: context.cc.pri,
+            foregroundColor: context.cc.priFg,
             padding: const EdgeInsets.symmetric(
               horizontal: SpacingTokens.xl,
               vertical: SpacingTokens.lg,

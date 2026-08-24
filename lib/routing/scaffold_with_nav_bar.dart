@@ -1,7 +1,11 @@
 /// Scaffold with Navigation Bar
 ///
 /// Wraps the [StatefulNavigationShell] with a [NavigationBar] providing
-/// the 5-tab bottom navigation per 05-navigation.md.
+/// the 5-tab bottom navigation per 05-navigation.md. Styling (background,
+/// pill-shaped indicator, icon/label colors) comes entirely from
+/// [AppTheme.theme]'s `navigationBarTheme` (ADR-011) — this widget stays a
+/// thin, stock-Material wrapper so it keeps Material's built-in ripple,
+/// adaptive sizing, and semantics for free.
 ///
 /// Tab order: Home, Attendance, Calendar, Assignments, Profile.
 /// Navigation items always contain both icon and label (per 02-design-system.md).

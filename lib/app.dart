@@ -11,6 +11,7 @@ library;
 import 'package:college_companion/core/constants/app_constants.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
+import 'package:college_companion/features/onboarding/providers/onboarding_provider.dart';
 import 'package:college_companion/providers/app_providers.dart';
 import 'package:college_companion/routing/app_router.dart';
 import 'package:college_companion/theme/app_theme.dart';
@@ -37,10 +38,17 @@ class CollegeCompanionApp extends ConsumerStatefulWidget {
 }
 
 class _CollegeCompanionAppState extends ConsumerState<CollegeCompanionApp> {
-  /// Notifies GoRouter to re-evaluate redirects when auth state changes.
+  /// Notifies GoRouter to re-evaluate redirects when auth or onboarding
+  /// state changes. Onboarding must be included: [OnboardingNotifier]
+  /// loads its persisted flag from SharedPreferences asynchronously, so
+  /// the redirect can fire once (still seeing the default `false`) before
+  /// that load resolves — without this listener nothing tells GoRouter to
+  /// re-evaluate once the real value arrives, leaving a returning user
+  /// stuck on the onboarding screen despite having already completed it.
   final _authRefreshNotifier = ValueNotifier<int>(0);
 
   late final ProviderSubscription<AuthState> _authStateSubscription;
+  late final ProviderSubscription<bool> _onboardingSubscription;
   late final GoRouter _router;
 
   @override
@@ -51,12 +59,17 @@ class _CollegeCompanionAppState extends ConsumerState<CollegeCompanionApp> {
       authStateProvider,
       (_, _) => _authRefreshNotifier.value++,
     );
+    _onboardingSubscription = ref.listenManual<bool>(
+      onboardingCompletedProvider,
+      (_, _) => _authRefreshNotifier.value++,
+    );
     _router = createRouter(ref, refreshListenable: _authRefreshNotifier);
   }
 
   @override
   void dispose() {
     _authStateSubscription.close();
+    _onboardingSubscription.close();
     _router.dispose();
     _authRefreshNotifier.dispose();
     super.dispose();

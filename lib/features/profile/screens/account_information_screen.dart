@@ -126,7 +126,8 @@ class _AccountInformationScreenState
     final cc = context.cc;
     final initial = profile.displayName.isNotEmpty
         ? profile.displayName[0].toUpperCase()
-        : 'J';
+        : '?';
+    final hasPhoto = profile.photoUrl != null && profile.photoUrl!.isNotEmpty;
 
     return Container(
       padding: const EdgeInsets.all(SpacingTokens.xl),
@@ -139,13 +140,16 @@ class _AccountInformationScreenState
           CircleAvatar(
             radius: 40,
             backgroundColor: cc.priSoft,
-            child: Text(
-              initial,
-              style: theme.textTheme.displaySmall?.copyWith(
-                color: cc.pri,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            backgroundImage: hasPhoto ? NetworkImage(profile.photoUrl!) : null,
+            child: hasPhoto
+                ? null
+                : Text(
+                    initial,
+                    style: theme.textTheme.displaySmall?.copyWith(
+                      color: cc.pri,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
           ),
           const SizedBox(height: SpacingTokens.lg),
           Text(

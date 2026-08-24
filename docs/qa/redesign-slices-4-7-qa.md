@@ -110,3 +110,42 @@ QA/reconciliation plan) rather than fixed as part of this QA pass:
 | D | No error-state path on Attendance / Timetable / Subject Details / Focus / Notifications | [#25](https://github.com/Kirito0088/college-companion/issues/25) |
 | E | ~317 un-migrated `ColorTokens.`/`RadiusTokens.` refs outside `lib/theme/` (worst: attendance evidence flow, `subjects/widgets`, `semester/screens`, shared `cc_dialogs.dart`/`cc_skeletons.dart`) | [#26](https://github.com/Kirito0088/college-companion/issues/26) |
 | F | `AppTheme.darkTheme`/`lightTheme` legacy aliases hardcode `Accent.jade` | [#27](https://github.com/Kirito0088/college-companion/issues/27) |
+| G | `notifications` table never created for databases upgrading from before it existed — raw `SqliteException` leaks to screen | [#28](https://github.com/Kirito0088/college-companion/issues/28) |
+| H | Dashboard notification bell has an empty `onPressed` callback — dead button | [#29](https://github.com/Kirito0088/college-companion/issues/29) |
+| I | `AttendanceTrendCard` renders a hardcoded fake trend line regardless of real attendance data | [#30](https://github.com/Kirito0088/college-companion/issues/30) |
+| J | Nav bar labels wrap mid-word on a 1080px device; Attendance's Subjects-tab empty state isn't the shared `EmptySubjects` widget | [#31](https://github.com/Kirito0088/college-companion/issues/31) |
+
+---
+
+## Manual run log — 2026-08-24, physical device (CPH2455, Android 14, 1080x2400 @480dpi)
+
+Executed live on the user's phone via `flutter run` + `adb`. Account had zero seeded
+subjects/semesters/assignments, which limited real-data checks on Subject Details, Safe Bunk, and
+Semester screens to their empty states only — a follow-up pass with seeded data is still needed to
+exercise those screens' real-data paths (marked ⚠️ below).
+
+**Verified working correctly** (Dark/Jade full pass + Light/Azure spot sweep): Home/Dashboard,
+Attendance Overview (`OverallGauge`, real 0% data, no hardcoded values), Attendance's own empty
+states, Calendar (agenda + month grid + empty state), Assignments (list, filters, `EmptyAssignments`,
+`NetworkErrorWidget` render correctly per the automated tests), Settings/Appearance (theme + all 3
+accent swatches switch correctly and persist).
+
+**New defects found and filed this pass** (G-J above, all novel — not previously known from static
+analysis or widget tests, since none of them are visible without a real device/real DB):
+- **G is the most severe finding of the whole QA effort**: the `notifications` table is missing
+  entirely from this (non-fresh) device's database because the Drift migration strategy never
+  creates it for upgrading installs, only for brand-new ones. The screen renders the raw
+  `SqliteException` as page content.
+- **H**: the dashboard's bell icon does nothing (`onPressed: () {}`) — `NotificationsScreen` is
+  reachable, just not from here.
+- **I**: `AttendanceTrendCard`'s chart is 100% decorative/hardcoded, unrelated to real attendance
+  data — violates this repo's "never synthesize fake data" rule and is easy to miss since it looks
+  legitimate.
+- **J**: nav bar text wraps mid-word at this (ordinary) device width; Attendance's Subjects tab uses
+  a plain-text empty state instead of the shared widget.
+
+**Not yet exercised** (needs seeded data or more session time): Subject Details real-data view,
+Safe Bunk screen real numbers, Lecture Record / evidence capture flow, Semester Details/List with
+real semesters, Resources, Focus Mode, Timetable, and the full Light/Sand and Dark/Sand accent
+combinations. Recommend a follow-up pass after seeding at least one semester + subject + a few
+attendance records.

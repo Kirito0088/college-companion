@@ -102,11 +102,11 @@ actual visual rendering, animation, and cross-accent readability.
 These were found during exploration and are tracked as separate GitHub issues (see Phase 5 of the
 QA/reconciliation plan) rather than fixed as part of this QA pass:
 
-| Ref | Defect |
-|---|---|
-| A | Fonts fetched at runtime, no offline fallback — breaks offline-first on first launch |
-| B | `EmptyNotifications` built but never wired into `NotificationsScreen` |
-| C | `SemesterDetailsScreen` shows its empty state on query error |
-| D | No error-state path on Attendance / Timetable / Subject Details / Focus / Notifications |
-| E | ~317 un-migrated `ColorTokens.`/`RadiusTokens.` refs outside `lib/theme/` (worst: attendance evidence flow, `subjects/widgets`, `semester/screens`, shared `cc_dialogs.dart`/`cc_skeletons.dart`) |
-| F | `AppTheme.darkTheme`/`lightTheme` legacy aliases hardcode `Accent.jade` |
+| Ref | Defect | Issue |
+|---|---|---|
+| A | Fonts fetched at runtime, no offline fallback — breaks offline-first on first launch | [#22](https://github.com/Kirito0088/college-companion/issues/22) |
+| B | `EmptyNotifications` built but never wired into `NotificationsScreen` | [#23](https://github.com/Kirito0088/college-companion/issues/23) |
+| C | `SemesterDetailsScreen` shows its empty state on query error | [#24](https://github.com/Kirito0088/college-companion/issues/24) |
+| D | No error-state path on Attendance / Timetable / Subject Details / Focus / Notifications | [#25](https://github.com/Kirito0088/college-companion/issues/25) |
+| E | ~317 un-migrated `ColorTokens.`/`RadiusTokens.` refs outside `lib/theme/` (worst: attendance evidence flow, `subjects/widgets`, `semester/screens`, shared `cc_dialogs.dart`/`cc_skeletons.dart`) | [#26](https://github.com/Kirito0088/college-companion/issues/26) |
+| F | `AppTheme.darkTheme`/`lightTheme` legacy aliases hardcode `Accent.jade` | [#27](https://github.com/Kirito0088/college-companion/issues/27) |

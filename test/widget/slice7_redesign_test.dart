@@ -338,7 +338,8 @@ void main() {
       },
       // Known defect: SemesterDetailsScreen renders EmptySubjects on error
       // instead of an error widget (semester_details_screen.dart:373).
-      // Filed as a follow-up issue; unskip once fixed.
+      // Filed as https://github.com/Kirito0088/college-companion/issues/24 —
+      // unskip once fixed.
       skip: true,
     );
   });

@@ -30,6 +30,30 @@ class Users extends Table {
   /// ISO 8601 formatted UTC timestamp.
   TextColumn get updatedAt => text()();
 
+  /// User-entered college/institution name. Nullable until the user fills it in.
+  TextColumn get collegeName => text().nullable()();
+
+  /// User-entered academic branch/major. Nullable until the user fills it in.
+  TextColumn get branch => text().nullable()();
+
+  /// User-entered current semester. Nullable until the user fills it in.
+  TextColumn get semester => text().nullable()();
+
+  /// User-entered student ID. Nullable until the user fills it in.
+  TextColumn get studentId => text().nullable()();
+
+  /// User-entered university name. Nullable until the user fills it in.
+  TextColumn get university => text().nullable()();
+
+  /// User-entered course/degree name. Nullable until the user fills it in.
+  TextColumn get course => text().nullable()();
+
+  /// User-entered department name. Nullable until the user fills it in.
+  TextColumn get department => text().nullable()();
+
+  /// User-entered expected graduation year. Nullable until the user fills it in.
+  TextColumn get graduationYear => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }

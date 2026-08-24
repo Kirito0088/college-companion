@@ -68,6 +68,90 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _collegeNameMeta = const VerificationMeta(
+    'collegeName',
+  );
+  @override
+  late final GeneratedColumn<String> collegeName = GeneratedColumn<String>(
+    'college_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _branchMeta = const VerificationMeta('branch');
+  @override
+  late final GeneratedColumn<String> branch = GeneratedColumn<String>(
+    'branch',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _semesterMeta = const VerificationMeta(
+    'semester',
+  );
+  @override
+  late final GeneratedColumn<String> semester = GeneratedColumn<String>(
+    'semester',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _studentIdMeta = const VerificationMeta(
+    'studentId',
+  );
+  @override
+  late final GeneratedColumn<String> studentId = GeneratedColumn<String>(
+    'student_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _universityMeta = const VerificationMeta(
+    'university',
+  );
+  @override
+  late final GeneratedColumn<String> university = GeneratedColumn<String>(
+    'university',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _courseMeta = const VerificationMeta('course');
+  @override
+  late final GeneratedColumn<String> course = GeneratedColumn<String>(
+    'course',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _departmentMeta = const VerificationMeta(
+    'department',
+  );
+  @override
+  late final GeneratedColumn<String> department = GeneratedColumn<String>(
+    'department',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _graduationYearMeta = const VerificationMeta(
+    'graduationYear',
+  );
+  @override
+  late final GeneratedColumn<String> graduationYear = GeneratedColumn<String>(
+    'graduation_year',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -76,6 +160,14 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
     profilePhoto,
     createdAt,
     updatedAt,
+    collegeName,
+    branch,
+    semester,
+    studentId,
+    university,
+    course,
+    department,
+    graduationYear,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -135,6 +227,60 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
+    if (data.containsKey('college_name')) {
+      context.handle(
+        _collegeNameMeta,
+        collegeName.isAcceptableOrUnknown(
+          data['college_name']!,
+          _collegeNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('branch')) {
+      context.handle(
+        _branchMeta,
+        branch.isAcceptableOrUnknown(data['branch']!, _branchMeta),
+      );
+    }
+    if (data.containsKey('semester')) {
+      context.handle(
+        _semesterMeta,
+        semester.isAcceptableOrUnknown(data['semester']!, _semesterMeta),
+      );
+    }
+    if (data.containsKey('student_id')) {
+      context.handle(
+        _studentIdMeta,
+        studentId.isAcceptableOrUnknown(data['student_id']!, _studentIdMeta),
+      );
+    }
+    if (data.containsKey('university')) {
+      context.handle(
+        _universityMeta,
+        university.isAcceptableOrUnknown(data['university']!, _universityMeta),
+      );
+    }
+    if (data.containsKey('course')) {
+      context.handle(
+        _courseMeta,
+        course.isAcceptableOrUnknown(data['course']!, _courseMeta),
+      );
+    }
+    if (data.containsKey('department')) {
+      context.handle(
+        _departmentMeta,
+        department.isAcceptableOrUnknown(data['department']!, _departmentMeta),
+      );
+    }
+    if (data.containsKey('graduation_year')) {
+      context.handle(
+        _graduationYearMeta,
+        graduationYear.isAcceptableOrUnknown(
+          data['graduation_year']!,
+          _graduationYearMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -168,6 +314,38 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
         DriftSqlType.string,
         data['${effectivePrefix}updated_at'],
       )!,
+      collegeName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}college_name'],
+      ),
+      branch: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}branch'],
+      ),
+      semester: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}semester'],
+      ),
+      studentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}student_id'],
+      ),
+      university: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}university'],
+      ),
+      course: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}course'],
+      ),
+      department: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}department'],
+      ),
+      graduationYear: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}graduation_year'],
+      ),
     );
   }
 
@@ -195,6 +373,30 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
 
   /// ISO 8601 formatted UTC timestamp.
   final String updatedAt;
+
+  /// User-entered college/institution name. Nullable until the user fills it in.
+  final String? collegeName;
+
+  /// User-entered academic branch/major. Nullable until the user fills it in.
+  final String? branch;
+
+  /// User-entered current semester. Nullable until the user fills it in.
+  final String? semester;
+
+  /// User-entered student ID. Nullable until the user fills it in.
+  final String? studentId;
+
+  /// User-entered university name. Nullable until the user fills it in.
+  final String? university;
+
+  /// User-entered course/degree name. Nullable until the user fills it in.
+  final String? course;
+
+  /// User-entered department name. Nullable until the user fills it in.
+  final String? department;
+
+  /// User-entered expected graduation year. Nullable until the user fills it in.
+  final String? graduationYear;
   const UserEntity({
     required this.id,
     required this.name,
@@ -202,6 +404,14 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     this.profilePhoto,
     required this.createdAt,
     required this.updatedAt,
+    this.collegeName,
+    this.branch,
+    this.semester,
+    this.studentId,
+    this.university,
+    this.course,
+    this.department,
+    this.graduationYear,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -214,6 +424,30 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     }
     map['created_at'] = Variable<String>(createdAt);
     map['updated_at'] = Variable<String>(updatedAt);
+    if (!nullToAbsent || collegeName != null) {
+      map['college_name'] = Variable<String>(collegeName);
+    }
+    if (!nullToAbsent || branch != null) {
+      map['branch'] = Variable<String>(branch);
+    }
+    if (!nullToAbsent || semester != null) {
+      map['semester'] = Variable<String>(semester);
+    }
+    if (!nullToAbsent || studentId != null) {
+      map['student_id'] = Variable<String>(studentId);
+    }
+    if (!nullToAbsent || university != null) {
+      map['university'] = Variable<String>(university);
+    }
+    if (!nullToAbsent || course != null) {
+      map['course'] = Variable<String>(course);
+    }
+    if (!nullToAbsent || department != null) {
+      map['department'] = Variable<String>(department);
+    }
+    if (!nullToAbsent || graduationYear != null) {
+      map['graduation_year'] = Variable<String>(graduationYear);
+    }
     return map;
   }
 
@@ -227,6 +461,30 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
           : Value(profilePhoto),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
+      collegeName: collegeName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(collegeName),
+      branch: branch == null && nullToAbsent
+          ? const Value.absent()
+          : Value(branch),
+      semester: semester == null && nullToAbsent
+          ? const Value.absent()
+          : Value(semester),
+      studentId: studentId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(studentId),
+      university: university == null && nullToAbsent
+          ? const Value.absent()
+          : Value(university),
+      course: course == null && nullToAbsent
+          ? const Value.absent()
+          : Value(course),
+      department: department == null && nullToAbsent
+          ? const Value.absent()
+          : Value(department),
+      graduationYear: graduationYear == null && nullToAbsent
+          ? const Value.absent()
+          : Value(graduationYear),
     );
   }
 
@@ -242,6 +500,14 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       profilePhoto: serializer.fromJson<String?>(json['profilePhoto']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
       updatedAt: serializer.fromJson<String>(json['updatedAt']),
+      collegeName: serializer.fromJson<String?>(json['collegeName']),
+      branch: serializer.fromJson<String?>(json['branch']),
+      semester: serializer.fromJson<String?>(json['semester']),
+      studentId: serializer.fromJson<String?>(json['studentId']),
+      university: serializer.fromJson<String?>(json['university']),
+      course: serializer.fromJson<String?>(json['course']),
+      department: serializer.fromJson<String?>(json['department']),
+      graduationYear: serializer.fromJson<String?>(json['graduationYear']),
     );
   }
   @override
@@ -254,6 +520,14 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       'profilePhoto': serializer.toJson<String?>(profilePhoto),
       'createdAt': serializer.toJson<String>(createdAt),
       'updatedAt': serializer.toJson<String>(updatedAt),
+      'collegeName': serializer.toJson<String?>(collegeName),
+      'branch': serializer.toJson<String?>(branch),
+      'semester': serializer.toJson<String?>(semester),
+      'studentId': serializer.toJson<String?>(studentId),
+      'university': serializer.toJson<String?>(university),
+      'course': serializer.toJson<String?>(course),
+      'department': serializer.toJson<String?>(department),
+      'graduationYear': serializer.toJson<String?>(graduationYear),
     };
   }
 
@@ -264,6 +538,14 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     Value<String?> profilePhoto = const Value.absent(),
     String? createdAt,
     String? updatedAt,
+    Value<String?> collegeName = const Value.absent(),
+    Value<String?> branch = const Value.absent(),
+    Value<String?> semester = const Value.absent(),
+    Value<String?> studentId = const Value.absent(),
+    Value<String?> university = const Value.absent(),
+    Value<String?> course = const Value.absent(),
+    Value<String?> department = const Value.absent(),
+    Value<String?> graduationYear = const Value.absent(),
   }) => UserEntity(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -271,6 +553,16 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     profilePhoto: profilePhoto.present ? profilePhoto.value : this.profilePhoto,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
+    collegeName: collegeName.present ? collegeName.value : this.collegeName,
+    branch: branch.present ? branch.value : this.branch,
+    semester: semester.present ? semester.value : this.semester,
+    studentId: studentId.present ? studentId.value : this.studentId,
+    university: university.present ? university.value : this.university,
+    course: course.present ? course.value : this.course,
+    department: department.present ? department.value : this.department,
+    graduationYear: graduationYear.present
+        ? graduationYear.value
+        : this.graduationYear,
   );
   UserEntity copyWithCompanion(UsersCompanion data) {
     return UserEntity(
@@ -282,6 +574,22 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
           : this.profilePhoto,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      collegeName: data.collegeName.present
+          ? data.collegeName.value
+          : this.collegeName,
+      branch: data.branch.present ? data.branch.value : this.branch,
+      semester: data.semester.present ? data.semester.value : this.semester,
+      studentId: data.studentId.present ? data.studentId.value : this.studentId,
+      university: data.university.present
+          ? data.university.value
+          : this.university,
+      course: data.course.present ? data.course.value : this.course,
+      department: data.department.present
+          ? data.department.value
+          : this.department,
+      graduationYear: data.graduationYear.present
+          ? data.graduationYear.value
+          : this.graduationYear,
     );
   }
 
@@ -293,14 +601,36 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
           ..write('email: $email, ')
           ..write('profilePhoto: $profilePhoto, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('collegeName: $collegeName, ')
+          ..write('branch: $branch, ')
+          ..write('semester: $semester, ')
+          ..write('studentId: $studentId, ')
+          ..write('university: $university, ')
+          ..write('course: $course, ')
+          ..write('department: $department, ')
+          ..write('graduationYear: $graduationYear')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, email, profilePhoto, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+    id,
+    name,
+    email,
+    profilePhoto,
+    createdAt,
+    updatedAt,
+    collegeName,
+    branch,
+    semester,
+    studentId,
+    university,
+    course,
+    department,
+    graduationYear,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -310,7 +640,15 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
           other.email == this.email &&
           other.profilePhoto == this.profilePhoto &&
           other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.collegeName == this.collegeName &&
+          other.branch == this.branch &&
+          other.semester == this.semester &&
+          other.studentId == this.studentId &&
+          other.university == this.university &&
+          other.course == this.course &&
+          other.department == this.department &&
+          other.graduationYear == this.graduationYear);
 }
 
 class UsersCompanion extends UpdateCompanion<UserEntity> {
@@ -320,6 +658,14 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
   final Value<String?> profilePhoto;
   final Value<String> createdAt;
   final Value<String> updatedAt;
+  final Value<String?> collegeName;
+  final Value<String?> branch;
+  final Value<String?> semester;
+  final Value<String?> studentId;
+  final Value<String?> university;
+  final Value<String?> course;
+  final Value<String?> department;
+  final Value<String?> graduationYear;
   final Value<int> rowid;
   const UsersCompanion({
     this.id = const Value.absent(),
@@ -328,6 +674,14 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     this.profilePhoto = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.collegeName = const Value.absent(),
+    this.branch = const Value.absent(),
+    this.semester = const Value.absent(),
+    this.studentId = const Value.absent(),
+    this.university = const Value.absent(),
+    this.course = const Value.absent(),
+    this.department = const Value.absent(),
+    this.graduationYear = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   UsersCompanion.insert({
@@ -337,6 +691,14 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     this.profilePhoto = const Value.absent(),
     required String createdAt,
     required String updatedAt,
+    this.collegeName = const Value.absent(),
+    this.branch = const Value.absent(),
+    this.semester = const Value.absent(),
+    this.studentId = const Value.absent(),
+    this.university = const Value.absent(),
+    this.course = const Value.absent(),
+    this.department = const Value.absent(),
+    this.graduationYear = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name),
@@ -350,6 +712,14 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     Expression<String>? profilePhoto,
     Expression<String>? createdAt,
     Expression<String>? updatedAt,
+    Expression<String>? collegeName,
+    Expression<String>? branch,
+    Expression<String>? semester,
+    Expression<String>? studentId,
+    Expression<String>? university,
+    Expression<String>? course,
+    Expression<String>? department,
+    Expression<String>? graduationYear,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -359,6 +729,14 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
       if (profilePhoto != null) 'profile_photo': profilePhoto,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (collegeName != null) 'college_name': collegeName,
+      if (branch != null) 'branch': branch,
+      if (semester != null) 'semester': semester,
+      if (studentId != null) 'student_id': studentId,
+      if (university != null) 'university': university,
+      if (course != null) 'course': course,
+      if (department != null) 'department': department,
+      if (graduationYear != null) 'graduation_year': graduationYear,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -370,6 +748,14 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     Value<String?>? profilePhoto,
     Value<String>? createdAt,
     Value<String>? updatedAt,
+    Value<String?>? collegeName,
+    Value<String?>? branch,
+    Value<String?>? semester,
+    Value<String?>? studentId,
+    Value<String?>? university,
+    Value<String?>? course,
+    Value<String?>? department,
+    Value<String?>? graduationYear,
     Value<int>? rowid,
   }) {
     return UsersCompanion(
@@ -379,6 +765,14 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
       profilePhoto: profilePhoto ?? this.profilePhoto,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      collegeName: collegeName ?? this.collegeName,
+      branch: branch ?? this.branch,
+      semester: semester ?? this.semester,
+      studentId: studentId ?? this.studentId,
+      university: university ?? this.university,
+      course: course ?? this.course,
+      department: department ?? this.department,
+      graduationYear: graduationYear ?? this.graduationYear,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -404,6 +798,30 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<String>(updatedAt.value);
     }
+    if (collegeName.present) {
+      map['college_name'] = Variable<String>(collegeName.value);
+    }
+    if (branch.present) {
+      map['branch'] = Variable<String>(branch.value);
+    }
+    if (semester.present) {
+      map['semester'] = Variable<String>(semester.value);
+    }
+    if (studentId.present) {
+      map['student_id'] = Variable<String>(studentId.value);
+    }
+    if (university.present) {
+      map['university'] = Variable<String>(university.value);
+    }
+    if (course.present) {
+      map['course'] = Variable<String>(course.value);
+    }
+    if (department.present) {
+      map['department'] = Variable<String>(department.value);
+    }
+    if (graduationYear.present) {
+      map['graduation_year'] = Variable<String>(graduationYear.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -419,6 +837,14 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
           ..write('profilePhoto: $profilePhoto, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('collegeName: $collegeName, ')
+          ..write('branch: $branch, ')
+          ..write('semester: $semester, ')
+          ..write('studentId: $studentId, ')
+          ..write('university: $university, ')
+          ..write('course: $course, ')
+          ..write('department: $department, ')
+          ..write('graduationYear: $graduationYear, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -9645,6 +10071,14 @@ typedef $$UsersTableCreateCompanionBuilder =
       Value<String?> profilePhoto,
       required String createdAt,
       required String updatedAt,
+      Value<String?> collegeName,
+      Value<String?> branch,
+      Value<String?> semester,
+      Value<String?> studentId,
+      Value<String?> university,
+      Value<String?> course,
+      Value<String?> department,
+      Value<String?> graduationYear,
       Value<int> rowid,
     });
 typedef $$UsersTableUpdateCompanionBuilder =
@@ -9655,6 +10089,14 @@ typedef $$UsersTableUpdateCompanionBuilder =
       Value<String?> profilePhoto,
       Value<String> createdAt,
       Value<String> updatedAt,
+      Value<String?> collegeName,
+      Value<String?> branch,
+      Value<String?> semester,
+      Value<String?> studentId,
+      Value<String?> university,
+      Value<String?> course,
+      Value<String?> department,
+      Value<String?> graduationYear,
       Value<int> rowid,
     });
 
@@ -9693,6 +10135,46 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
 
   ColumnFilters<String> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get collegeName => $composableBuilder(
+    column: $table.collegeName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get branch => $composableBuilder(
+    column: $table.branch,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get semester => $composableBuilder(
+    column: $table.semester,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get studentId => $composableBuilder(
+    column: $table.studentId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get university => $composableBuilder(
+    column: $table.university,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get course => $composableBuilder(
+    column: $table.course,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get department => $composableBuilder(
+    column: $table.department,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get graduationYear => $composableBuilder(
+    column: $table.graduationYear,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -9735,6 +10217,46 @@ class $$UsersTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get collegeName => $composableBuilder(
+    column: $table.collegeName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get branch => $composableBuilder(
+    column: $table.branch,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get semester => $composableBuilder(
+    column: $table.semester,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get studentId => $composableBuilder(
+    column: $table.studentId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get university => $composableBuilder(
+    column: $table.university,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get course => $composableBuilder(
+    column: $table.course,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get department => $composableBuilder(
+    column: $table.department,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get graduationYear => $composableBuilder(
+    column: $table.graduationYear,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$UsersTableAnnotationComposer
@@ -9765,6 +10287,38 @@ class $$UsersTableAnnotationComposer
 
   GeneratedColumn<String> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get collegeName => $composableBuilder(
+    column: $table.collegeName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get branch =>
+      $composableBuilder(column: $table.branch, builder: (column) => column);
+
+  GeneratedColumn<String> get semester =>
+      $composableBuilder(column: $table.semester, builder: (column) => column);
+
+  GeneratedColumn<String> get studentId =>
+      $composableBuilder(column: $table.studentId, builder: (column) => column);
+
+  GeneratedColumn<String> get university => $composableBuilder(
+    column: $table.university,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get course =>
+      $composableBuilder(column: $table.course, builder: (column) => column);
+
+  GeneratedColumn<String> get department => $composableBuilder(
+    column: $table.department,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get graduationYear => $composableBuilder(
+    column: $table.graduationYear,
+    builder: (column) => column,
+  );
 }
 
 class $$UsersTableTableManager
@@ -9801,6 +10355,14 @@ class $$UsersTableTableManager
                 Value<String?> profilePhoto = const Value.absent(),
                 Value<String> createdAt = const Value.absent(),
                 Value<String> updatedAt = const Value.absent(),
+                Value<String?> collegeName = const Value.absent(),
+                Value<String?> branch = const Value.absent(),
+                Value<String?> semester = const Value.absent(),
+                Value<String?> studentId = const Value.absent(),
+                Value<String?> university = const Value.absent(),
+                Value<String?> course = const Value.absent(),
+                Value<String?> department = const Value.absent(),
+                Value<String?> graduationYear = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UsersCompanion(
                 id: id,
@@ -9809,6 +10371,14 @@ class $$UsersTableTableManager
                 profilePhoto: profilePhoto,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                collegeName: collegeName,
+                branch: branch,
+                semester: semester,
+                studentId: studentId,
+                university: university,
+                course: course,
+                department: department,
+                graduationYear: graduationYear,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -9819,6 +10389,14 @@ class $$UsersTableTableManager
                 Value<String?> profilePhoto = const Value.absent(),
                 required String createdAt,
                 required String updatedAt,
+                Value<String?> collegeName = const Value.absent(),
+                Value<String?> branch = const Value.absent(),
+                Value<String?> semester = const Value.absent(),
+                Value<String?> studentId = const Value.absent(),
+                Value<String?> university = const Value.absent(),
+                Value<String?> course = const Value.absent(),
+                Value<String?> department = const Value.absent(),
+                Value<String?> graduationYear = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UsersCompanion.insert(
                 id: id,
@@ -9827,6 +10405,14 @@ class $$UsersTableTableManager
                 profilePhoto: profilePhoto,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                collegeName: collegeName,
+                branch: branch,
+                semester: semester,
+                studentId: studentId,
+                university: university,
+                course: course,
+                department: department,
+                graduationYear: graduationYear,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

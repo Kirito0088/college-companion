@@ -111,7 +111,7 @@ class _AccountInformationScreenState
             const SizedBox(height: LayoutTokens.sectionGap),
             _buildAcademicInformation(context),
             const SizedBox(height: LayoutTokens.sectionGap),
-            _buildAccountStatus(context),
+            _buildAccountStatus(context, profile),
             const SizedBox(height: LayoutTokens.sectionGap),
             _buildSaveChangesButton(profile),
             const SizedBox(height: SpacingTokens.xxl),
@@ -198,8 +198,9 @@ class _AccountInformationScreenState
         children: [
           _buildTextField(
             context: context,
-            label: 'Display Name',
+            label: 'Display Name (from Google)',
             controller: _displayNameController,
+            readOnly: true,
           ),
           const SizedBox(height: SpacingTokens.md),
           _buildTextField(
@@ -275,7 +276,31 @@ class _AccountInformationScreenState
     );
   }
 
-  Widget _buildAccountStatus(BuildContext context) {
+  String _formatTimestamp(String? isoUtc) {
+    if (isoUtc == null || isoUtc.isEmpty) return 'Not yet synced';
+    final parsed = DateTime.tryParse(isoUtc)?.toLocal();
+    if (parsed == null) return 'Not yet synced';
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    final hour12 = parsed.hour % 12 == 0 ? 12 : parsed.hour % 12;
+    final minute = parsed.minute.toString().padLeft(2, '0');
+    final period = parsed.hour >= 12 ? 'PM' : 'AM';
+    return '${parsed.day} ${months[parsed.month - 1]} ${parsed.year}, $hour12:$minute $period';
+  }
+
+  Widget _buildAccountStatus(BuildContext context, UserProfileDetails profile) {
     final cc = context.cc;
     return _buildSectionContainer(
       context: context,
@@ -301,7 +326,7 @@ class _AccountInformationScreenState
           _buildStatusRow(
             context,
             'Account Created',
-            '12 June 2026',
+            _formatTimestamp(profile.createdAt),
             Symbols.calendar_today,
             cc.mut,
           ),
@@ -309,7 +334,7 @@ class _AccountInformationScreenState
           _buildStatusRow(
             context,
             'Last Sync',
-            'Today, 9:30 AM',
+            _formatTimestamp(profile.updatedAt),
             Symbols.sync,
             cc.mut,
           ),
@@ -353,16 +378,18 @@ class _AccountInformationScreenState
     required String label,
     required TextEditingController controller,
     TextInputType keyboardType = TextInputType.text,
+    bool readOnly = false,
   }) {
     final cc = context.cc;
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
+      readOnly: readOnly,
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(color: cc.mut),
         filled: true,
-        fillColor: cc.bg,
+        fillColor: readOnly ? cc.raise2 : cc.bg,
         border: OutlineInputBorder(
           borderRadius: RadiusTokens.borderRadiusMd,
           borderSide: BorderSide(color: cc.line2),
@@ -388,7 +415,6 @@ class _AccountInformationScreenState
     return FilledButton(
       onPressed: () async {
         final updated = currentProfile.copyWith(
-          displayName: _displayNameController.text.trim(),
           collegeName: _collegeNameController.text.trim(),
           branch: _branchController.text.trim(),
           semester: _semesterController.text.trim(),
@@ -398,13 +424,23 @@ class _AccountInformationScreenState
           department: _departmentController.text.trim(),
           gradYear: _gradYearController.text.trim(),
         );
-        await ref.read(userProfileProvider.notifier).updateProfile(updated);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Account information updated successfully!'),
-            ),
-          );
+        try {
+          await ref.read(userProfileProvider.notifier).updateProfile(updated);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Account information updated successfully!'),
+              ),
+            );
+          }
+        } on Exception {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Could not save changes. Please try again.'),
+              ),
+            );
+          }
         }
       },
       style: FilledButton.styleFrom(

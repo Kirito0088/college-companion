@@ -17,8 +17,8 @@ void main() {
   });
 
   group('Database Migration & Schema Tests', () {
-    test('Drift database instantiates with schema version 3', () {
-      expect(database.schemaVersion, 3);
+    test('Drift database instantiates with schema version 4', () {
+      expect(database.schemaVersion, 4);
     });
 
     test('All tables are registered in database schema', () {
@@ -59,6 +59,14 @@ void main() {
           'profile_photo',
           'created_at',
           'updated_at',
+          'college_name',
+          'branch',
+          'semester',
+          'student_id',
+          'university',
+          'course',
+          'department',
+          'graduation_year',
         ]),
       );
 
@@ -333,6 +341,17 @@ void main() {
 
         final raw = sqlite3.sqlite3.open(dbFile.path);
         raw.execute('''
+          CREATE TABLE users (
+            id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            profile_photo TEXT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            PRIMARY KEY (id)
+          );
+        ''');
+        raw.execute('''
           CREATE TABLE user_settings (
             id TEXT NOT NULL,
             user_id TEXT NOT NULL,
@@ -366,6 +385,51 @@ void main() {
             .getSingle();
 
         expect(row.data['lecture_reminders_enabled'], 1);
+      },
+    );
+
+    test(
+      'upgrading from a v3 db missing academic profile columns backfills them as null',
+      () async {
+        // Reproduces a real on-device schema (schema_version 3, users row
+        // created before the academic-profile columns existed in the Dart
+        // table definition) and asserts the v3 -> v4 migration adds them.
+        final tempDir = await Directory.systemTemp.createTemp('cc_migration');
+        final dbFile = File('${tempDir.path}/legacy_v3.db');
+        addTearDown(() => tempDir.delete(recursive: true));
+
+        final raw = sqlite3.sqlite3.open(dbFile.path);
+        raw.execute('''
+          CREATE TABLE users (
+            id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            profile_photo TEXT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            PRIMARY KEY (id)
+          );
+        ''');
+        raw.execute('''
+          INSERT INTO users (id, name, email, created_at, updated_at)
+          VALUES
+            ('legacy_user', 'Legacy User', 'legacy@college.edu', '2026-01-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z');
+        ''');
+        raw.execute('PRAGMA user_version = 3;');
+        raw.close();
+
+        final migrated = AppDatabase.forTesting(NativeDatabase(dbFile));
+        addTearDown(migrated.close);
+
+        final row = await migrated
+            .customSelect(
+              "SELECT college_name, branch, semester FROM users WHERE id = 'legacy_user'",
+            )
+            .getSingle();
+
+        expect(row.data['college_name'], isNull);
+        expect(row.data['branch'], isNull);
+        expect(row.data['semester'], isNull);
       },
     );
   });

@@ -151,6 +151,70 @@ void main() {
     },
   );
 
+  test(
+    'update persists academic profile fields and enqueues sync UPDATE',
+    () async {
+      const appUser = AppUser(
+        uid: 'user_1',
+        displayName: 'Alex Smith',
+        email: 'alex@college.edu',
+      );
+      await repository.upsertUser(appUser);
+
+      final now = DateTime.now().toUtc().toIso8601String();
+      await repository.update(
+        'user_1',
+        UsersCompanion(
+          collegeName: const Value('ABC College of Engineering'),
+          branch: const Value('Computer Science'),
+          semester: const Value('6'),
+          studentId: const Value('12345678'),
+          university: const Value('Mumbai University'),
+          course: const Value('Bachelor of Engineering'),
+          department: const Value('Computer Science (AI & ML)'),
+          graduationYear: const Value('2028'),
+          updatedAt: Value(now),
+        ),
+      );
+
+      final updated = await repository.getById('user_1');
+      expect(updated?.collegeName, 'ABC College of Engineering');
+      expect(updated?.branch, 'Computer Science');
+      expect(updated?.semester, '6');
+      expect(updated?.studentId, '12345678');
+      expect(updated?.university, 'Mumbai University');
+      expect(updated?.course, 'Bachelor of Engineering');
+      expect(updated?.department, 'Computer Science (AI & ML)');
+      expect(updated?.graduationYear, '2028');
+
+      final pendingSync = await syncQueueRepository.getPendingItems();
+      expect(pendingSync.last.operation, 'UPDATE');
+      expect(pendingSync.last.recordId, 'user_1');
+    },
+  );
+
+  test(
+    'new users have null academic profile fields, not synthesized fake data',
+    () async {
+      const appUser = AppUser(
+        uid: 'user_new_signin',
+        displayName: 'Priya Rao',
+        email: 'priya@college.edu',
+      );
+      await repository.upsertUser(appUser);
+
+      final fetched = await repository.getById('user_new_signin');
+      expect(fetched?.collegeName, isNull);
+      expect(fetched?.branch, isNull);
+      expect(fetched?.semester, isNull);
+      expect(fetched?.studentId, isNull);
+      expect(fetched?.university, isNull);
+      expect(fetched?.course, isNull);
+      expect(fetched?.department, isNull);
+      expect(fetched?.graduationYear, isNull);
+    },
+  );
+
   test('wraps database errors in DatabaseException', () async {
     expect(
       () async => repository.create(const UsersCompanion()),

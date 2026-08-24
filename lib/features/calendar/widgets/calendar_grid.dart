@@ -1,4 +1,4 @@
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
 
@@ -8,6 +8,7 @@ class CalendarGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     // Mock dates representing May 2025 like in Stitch design
     final daysOfWeek = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -25,7 +26,7 @@ class CalendarGrid extends StatelessWidget {
                   child: Text(
                     day,
                     style: theme.textTheme.labelLarge?.copyWith(
-                      color: ColorTokens.onSurfaceVariant,
+                      color: cc.mut,
                       letterSpacing: 1.5,
                     ),
                   ),
@@ -71,15 +72,15 @@ class CalendarGrid extends StatelessWidget {
               isCurrentMonth: isCurrentMonth,
               isToday: isToday,
               eventColor: isRedEvent
-                  ? ColorTokens.error
+                  ? cc.risk
                   : isYellowEvent
-                  ? ColorTokens.warning
+                  ? cc.warn
                   : isBlueEvent
-                  ? ColorTokens.info
+                  ? theme.colorScheme.tertiary
                   : isVioletEvent
-                  ? ColorTokens.primary
+                  ? cc.pri
                   : isVioletEventFaded
-                  ? ColorTokens.primary.withValues(alpha: 0.5)
+                  ? cc.pri.withValues(alpha: 0.5)
                   : null,
             );
           },
@@ -91,10 +92,7 @@ class CalendarGrid extends StatelessWidget {
             left: SpacingTokens.huge,
             right: SpacingTokens.huge,
           ),
-          child: Divider(
-            color: ColorTokens.primary.withValues(alpha: 0.15),
-            thickness: 0.5,
-          ),
+          child: Divider(color: cc.pri.withValues(alpha: 0.15), thickness: 0.5),
         ),
       ],
     );
@@ -117,6 +115,7 @@ class _CalendarDateCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return InkWell(
       onTap: () {},
@@ -129,11 +128,11 @@ class _CalendarDateCell extends StatelessWidget {
               width: 32, // w-8
               height: 32, // h-8
               decoration: BoxDecoration(
-                color: ColorTokens.primary,
+                color: cc.pri,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: ColorTokens.primary.withValues(alpha: 0.4),
+                    color: cc.pri.withValues(alpha: 0.4),
                     blurRadius: 15,
                     spreadRadius: 0,
                   ),
@@ -144,13 +143,11 @@ class _CalendarDateCell extends StatelessWidget {
             date,
             style: isToday
                 ? theme.textTheme.titleMedium?.copyWith(
-                    color: ColorTokens.onPrimary,
+                    color: cc.priFg,
                     fontWeight: FontWeight.bold,
                   )
                 : theme.textTheme.bodyMedium?.copyWith(
-                    color: isCurrentMonth
-                        ? ColorTokens.onSurface
-                        : ColorTokens.surfaceContainerHighest,
+                    color: isCurrentMonth ? cc.fg : cc.dim,
                   ),
           ),
           if (eventColor != null)

@@ -1,4 +1,4 @@
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -9,6 +9,7 @@ class CalendarMonthSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.xs),
@@ -17,25 +18,17 @@ class CalendarMonthSelector extends StatelessWidget {
         children: [
           IconButton(
             onPressed: () {},
-            icon: const Icon(
-              Symbols.chevron_left,
-              color: ColorTokens.onSurface,
-            ),
-            style: IconButton.styleFrom(hoverColor: ColorTokens.surfaceVariant),
+            icon: Icon(Symbols.chevron_left, color: cc.fg),
+            style: IconButton.styleFrom(hoverColor: cc.raise),
           ),
           Text(
             'May 2025',
-            style: theme.textTheme.titleLarge?.copyWith(
-              color: theme.colorScheme.onSurface,
-            ),
+            style: theme.textTheme.titleLarge?.copyWith(color: cc.fg),
           ),
           IconButton(
             onPressed: () {},
-            icon: const Icon(
-              Symbols.chevron_right,
-              color: ColorTokens.onSurface,
-            ),
-            style: IconButton.styleFrom(hoverColor: ColorTokens.surfaceVariant),
+            icon: Icon(Symbols.chevron_right, color: cc.fg),
+            style: IconButton.styleFrom(hoverColor: cc.raise),
           ),
         ],
       ),

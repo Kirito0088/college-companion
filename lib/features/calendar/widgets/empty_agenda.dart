@@ -1,4 +1,4 @@
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -9,6 +9,7 @@ class EmptyAgenda extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
@@ -33,32 +34,24 @@ class EmptyAgenda extends StatelessWidget {
                 width: 72,
                 height: 72,
                 decoration: BoxDecoration(
-                  color: ColorTokens.surfaceContainerHighest.withValues(
-                    alpha: 0.5,
-                  ),
+                  color: cc.raise2.withValues(alpha: 0.5),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Symbols.event_upcoming,
-                  size: 32,
-                  color: ColorTokens.primary,
-                ),
+                child: Icon(Symbols.event_upcoming, size: 32, color: cc.pri),
               ),
               const SizedBox(height: SpacingTokens.lg),
               Text(
                 'Nothing scheduled today.',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: ColorTokens.onSurface,
+                  color: cc.fg,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: SpacingTokens.xxs),
               Text(
                 'Enjoy your free day, or add a new event.',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: ColorTokens.onSurfaceVariant,
-                ),
+                style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
                 textAlign: TextAlign.center,
               ),
             ],

@@ -1,4 +1,4 @@
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
 
@@ -7,28 +7,29 @@ class CalendarEventList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    final cc = context.cc;
+    return Column(
       children: [
         _EventCard(
           day: '14',
           month: 'MAY',
           title: 'AI Mini Project Report',
           subtitle: 'Due Tomorrow, 11:59 PM',
-          indicatorColor: ColorTokens.error,
+          indicatorColor: cc.risk,
         ),
         _EventCard(
           day: '16',
           month: 'MAY',
           title: 'DevOps Lab Record',
           subtitle: 'Due in 2 days',
-          indicatorColor: ColorTokens.warning,
+          indicatorColor: cc.warn,
         ),
         _EventCard(
           day: '20',
           month: 'MAY',
           title: 'Internal Test - CN',
           subtitle: '10:00 AM - 12:00 PM',
-          indicatorColor: ColorTokens.info,
+          indicatorColor: Theme.of(context).colorScheme.tertiary,
           isLast: true,
         ),
       ],
@@ -56,6 +57,7 @@ class _EventCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs), // py-2
@@ -71,7 +73,7 @@ class _EventCard extends StatelessWidget {
                 Text(
                   day,
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: ColorTokens.primary,
+                    color: cc.pri,
                     fontWeight: FontWeight.bold,
                     height: 1, // leading-none
                   ),
@@ -80,7 +82,7 @@ class _EventCard extends StatelessWidget {
                 Text(
                   month,
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: ColorTokens.onSurfaceVariant,
+                    color: cc.mut,
                     letterSpacing: 2, // tracking-widest
                   ),
                 ),
@@ -97,12 +99,7 @@ class _EventCard extends StatelessWidget {
               decoration: BoxDecoration(
                 border: isLast
                     ? null
-                    : const Border(
-                        bottom: BorderSide(
-                          color: ColorTokens.surfaceVariant,
-                          width: 1,
-                        ),
-                      ),
+                    : Border(bottom: BorderSide(color: cc.line, width: 1)),
               ),
               child: Stack(
                 children: [
@@ -113,14 +110,14 @@ class _EventCard extends StatelessWidget {
                       Text(
                         title,
                         style: theme.textTheme.titleLarge?.copyWith(
-                          color: ColorTokens.onSurface,
+                          color: cc.fg,
                         ),
                       ),
                       const SizedBox(height: SpacingTokens.xxs), // mt-1
                       Text(
                         subtitle,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: ColorTokens.onSurfaceVariant,
+                          color: cc.mut,
                         ),
                       ),
                     ],

@@ -1,4 +1,4 @@
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +10,7 @@ class CalendarAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -28,16 +29,12 @@ class CalendarAppBar extends StatelessWidget {
                   }
                 },
                 icon: const Icon(Symbols.arrow_back),
-                style: IconButton.styleFrom(
-                  hoverColor: ColorTokens.surfaceContainerHigh,
-                ),
+                style: IconButton.styleFrom(hoverColor: cc.raise2),
               ),
               const SizedBox(width: SpacingTokens.sm),
               Text(
                 'Calendar',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  color: theme.colorScheme.onSurface,
-                ),
+                style: theme.textTheme.titleLarge?.copyWith(color: cc.fg),
               ),
             ],
           ),
@@ -45,24 +42,14 @@ class CalendarAppBar extends StatelessWidget {
             children: [
               IconButton(
                 onPressed: () {},
-                icon: const Icon(
-                  Symbols.event,
-                  color: ColorTokens.onSurfaceVariant,
-                ),
-                style: IconButton.styleFrom(
-                  hoverColor: ColorTokens.surfaceContainerHigh,
-                ),
+                icon: Icon(Symbols.event, color: cc.mut),
+                style: IconButton.styleFrom(hoverColor: cc.raise2),
               ),
               const SizedBox(width: SpacingTokens.xs),
               IconButton(
                 onPressed: () {},
-                icon: const Icon(
-                  Symbols.more_vert,
-                  color: ColorTokens.onSurfaceVariant,
-                ),
-                style: IconButton.styleFrom(
-                  hoverColor: ColorTokens.surfaceContainerHigh,
-                ),
+                icon: Icon(Symbols.more_vert, color: cc.mut),
+                style: IconButton.styleFrom(hoverColor: cc.raise2),
               ),
             ],
           ),

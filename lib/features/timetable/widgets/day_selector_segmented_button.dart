@@ -3,7 +3,7 @@
 /// Segmented button / tabs widget for switching between days of the week (Monday=0 to Sunday=6).
 library;
 
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -36,14 +36,15 @@ class DaySelectorSegmentedButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return Container(
       height: 48,
       padding: const EdgeInsets.all(SpacingTokens.xs),
       decoration: BoxDecoration(
-        color: ColorTokens.surfaceContainer,
+        color: cc.raise,
         borderRadius: RadiusTokens.borderRadiusPill,
-        border: Border.all(color: ColorTokens.outlineVariant, width: 1),
+        border: Border.all(color: cc.line, width: 1),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -64,17 +65,13 @@ class DaySelectorSegmentedButton extends StatelessWidget {
                       curve: Curves.easeInOut,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: isSelected
-                            ? ColorTokens.primary
-                            : Colors.transparent,
+                        color: isSelected ? cc.pri : Colors.transparent,
                         borderRadius: RadiusTokens.borderRadiusPill,
                       ),
                       child: Text(
                         _dayLabels[index],
                         style: theme.textTheme.labelMedium?.copyWith(
-                          color: isSelected
-                              ? ColorTokens.onPrimary
-                              : ColorTokens.onSurfaceVariant,
+                          color: isSelected ? cc.priFg : cc.mut,
                           fontWeight: isSelected
                               ? FontWeight.w700
                               : FontWeight.w500,

@@ -1,6 +1,6 @@
 import 'package:college_companion/database/app_database.dart';
 import 'package:college_companion/features/calendar/widgets/agenda_card.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
 
@@ -46,7 +46,7 @@ class CalendarMonthView extends StatelessWidget {
                   child: Text(
                     day,
                     style: theme.textTheme.labelLarge?.copyWith(
-                      color: ColorTokens.onSurfaceVariant,
+                      color: context.cc.mut,
                       letterSpacing: 1.5,
                     ),
                   ),
@@ -121,20 +121,21 @@ class _CalendarDateCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     Color textColor;
     if (isSelected) {
-      textColor = ColorTokens.onPrimary;
+      textColor = cc.priFg;
     } else if (isCurrentMonth) {
-      textColor = isToday ? ColorTokens.primary : ColorTokens.onSurface;
+      textColor = isToday ? cc.pri : cc.fg;
     } else {
-      textColor = ColorTokens.surfaceContainerHighest;
+      textColor = cc.dim;
     }
 
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(99),
-      splashColor: ColorTokens.primary.withValues(alpha: 0.1),
+      splashColor: cc.pri.withValues(alpha: 0.1),
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -142,7 +143,7 @@ class _CalendarDateCell extends StatelessWidget {
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeOutCubic,
             decoration: BoxDecoration(
-              color: isSelected ? ColorTokens.primary : Colors.transparent,
+              color: isSelected ? cc.pri : Colors.transparent,
               shape: BoxShape.circle,
             ),
             width: isSelected ? 40 : 0,
@@ -170,8 +171,8 @@ class _CalendarDateCell extends StatelessWidget {
                       height: 5,
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? ColorTokens.onPrimary.withValues(alpha: 0.8)
-                            : event.typeColor,
+                            ? cc.priFg.withValues(alpha: 0.8)
+                            : event.typeColor(context),
                         shape: BoxShape.circle,
                       ),
                     ),

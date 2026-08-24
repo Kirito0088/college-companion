@@ -12,7 +12,7 @@ import 'package:college_companion/features/timetable/widgets/add_edit_timetable_
 import 'package:college_companion/features/timetable/widgets/day_selector_segmented_button.dart';
 import 'package:college_companion/features/timetable/widgets/lecture_card.dart';
 import 'package:college_companion/shared/widgets/cc_empty_state.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -42,8 +42,8 @@ class TimetableScreen extends ConsumerWidget {
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: ColorTokens.error,
-              foregroundColor: ColorTokens.onError,
+              backgroundColor: ctx.cc.risk,
+              foregroundColor: ctx.cc.bg,
             ),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: const Text('Delete'),
@@ -70,6 +70,7 @@ class TimetableScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     final selectedDay = ref.watch(selectedDayProvider);
     final lecturesAsync = ref.watch(timetableForDayProvider(selectedDay));
 
@@ -117,16 +118,12 @@ class TimetableScreen extends ConsumerWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
-                          Symbols.error_outline,
-                          size: 40,
-                          color: ColorTokens.error,
-                        ),
+                        Icon(Symbols.error_outline, size: 40, color: cc.risk),
                         const SizedBox(height: SpacingTokens.sm),
                         Text(
                           'Failed to load timetable',
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: ColorTokens.onSurface,
+                            color: cc.fg,
                           ),
                         ),
                       ],
@@ -176,8 +173,8 @@ class TimetableScreen extends ConsumerWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: ColorTokens.primary,
-        foregroundColor: ColorTokens.onPrimary,
+        backgroundColor: cc.pri,
+        foregroundColor: cc.priFg,
         icon: const Icon(Symbols.add),
         label: const Text(
           'Add Class',

@@ -1,8 +1,9 @@
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/features/calendar/providers/calendar_provider.dart';
+import 'package:college_companion/features/calendar/widgets/agenda_card.dart';
 import 'package:college_companion/shared/widgets/dialogs/cc_dialogs.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ class EventDetailsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     final authState = ref.read(authStateProvider);
     if (authState is! AuthAuthenticated) {
       return const Scaffold(body: Center(child: Text('Not authenticated')));
@@ -62,17 +64,11 @@ class EventDetailsScreen extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Symbols.event_busy,
-                    size: 64,
-                    color: ColorTokens.onSurfaceVariant,
-                  ),
+                  Icon(Symbols.event_busy, size: 64, color: cc.mut),
                   const SizedBox(height: SpacingTokens.md),
                   Text(
                     'Event not found',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: ColorTokens.onSurfaceVariant,
-                    ),
+                    style: theme.textTheme.titleMedium?.copyWith(color: cc.mut),
                   ),
                 ],
               ),
@@ -97,6 +93,8 @@ class EventDetailsScreen extends ConsumerWidget {
             ? '${DateFormat.jm().format(startDate)}${endDate != null ? ' – ${DateFormat.jm().format(endDate)}' : ''}'
             : 'No time';
 
+        final typeColor = event.typeColor(context);
+
         return Scaffold(
           backgroundColor: theme.colorScheme.surface,
           appBar: AppBar(
@@ -118,7 +116,7 @@ class EventDetailsScreen extends ConsumerWidget {
                     event.title,
                     style: theme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: ColorTokens.onSurface,
+                      color: cc.fg,
                     ),
                   ),
                   const SizedBox(height: SpacingTokens.md),
@@ -131,15 +129,13 @@ class EventDetailsScreen extends ConsumerWidget {
                             vertical: SpacingTokens.xs,
                           ),
                           decoration: BoxDecoration(
-                            color: _eventTypeColor(
-                              event.eventType,
-                            ).withValues(alpha: 0.1),
+                            color: typeColor.withValues(alpha: 0.1),
                             borderRadius: RadiusTokens.borderRadiusSm,
                           ),
                           child: Text(
-                            _capitalizeFirst(event.eventType),
+                            event.typeLabel,
                             style: theme.textTheme.labelMedium?.copyWith(
-                              color: _eventTypeColor(event.eventType),
+                              color: typeColor,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -148,20 +144,17 @@ class EventDetailsScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: SpacingTokens.xl),
                   _buildInfoCard(
-                    theme: theme,
+                    context: context,
                     children: [
                       _buildInfoRow(
-                        theme: theme,
+                        context: context,
                         icon: Symbols.calendar_today,
                         label: 'Date',
                         value: dateStr,
                       ),
-                      const Divider(
-                        height: SpacingTokens.lg,
-                        color: ColorTokens.surfaceVariant,
-                      ),
+                      Divider(height: SpacingTokens.lg, color: cc.line),
                       _buildInfoRow(
-                        theme: theme,
+                        context: context,
                         icon: Symbols.schedule,
                         label: 'Time',
                         value: timeStr,
@@ -172,20 +165,16 @@ class EventDetailsScreen extends ConsumerWidget {
                       event.description!.isNotEmpty) ...[
                     const SizedBox(height: SpacingTokens.lg),
                     _buildInfoCard(
-                      theme: theme,
+                      context: context,
                       children: [
                         Row(
                           children: [
-                            const Icon(
-                              Symbols.notes,
-                              size: 20,
-                              color: ColorTokens.onSurfaceVariant,
-                            ),
+                            Icon(Symbols.notes, size: 20, color: cc.mut),
                             const SizedBox(width: SpacingTokens.md),
                             Text(
                               'Description',
                               style: theme.textTheme.titleSmall?.copyWith(
-                                color: ColorTokens.onSurfaceVariant,
+                                color: cc.mut,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -195,7 +184,7 @@ class EventDetailsScreen extends ConsumerWidget {
                         Text(
                           event.description!,
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: ColorTokens.onSurface,
+                            color: cc.fg,
                             height: 1.5,
                           ),
                         ),
@@ -217,8 +206,8 @@ class EventDetailsScreen extends ConsumerWidget {
                       }
                     },
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: ColorTokens.error,
-                      side: const BorderSide(color: ColorTokens.error),
+                      foregroundColor: cc.risk,
+                      side: BorderSide(color: cc.risk),
                       padding: const EdgeInsets.symmetric(
                         vertical: SpacingTokens.md,
                       ),
@@ -239,29 +228,17 @@ class EventDetailsScreen extends ConsumerWidget {
     );
   }
 
-  Color _eventTypeColor(String type) {
-    return switch (type.toLowerCase()) {
-      'exam' => ColorTokens.error,
-      'assignment' => ColorTokens.warning,
-      'holiday' => ColorTokens.success,
-      'lecture' => ColorTokens.primary,
-      _ => ColorTokens.tertiary,
-    };
-  }
-
-  String _capitalizeFirst(String s) =>
-      s.isEmpty ? s : '${s[0].toUpperCase()}${s.substring(1)}';
-
   Widget _buildInfoCard({
-    required ThemeData theme,
+    required BuildContext context,
     required List<Widget> children,
   }) {
+    final cc = context.cc;
     return Container(
       padding: const EdgeInsets.all(SpacingTokens.lg),
       decoration: BoxDecoration(
-        color: ColorTokens.surfaceContainer,
-        borderRadius: RadiusTokens.borderRadiusLg,
-        border: Border.all(color: ColorTokens.surfaceVariant),
+        color: cc.raise,
+        borderRadius: RadiusTokens.borderRadiusXxl,
+        border: Border.all(color: cc.line),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -271,15 +248,17 @@ class EventDetailsScreen extends ConsumerWidget {
   }
 
   Widget _buildInfoRow({
-    required ThemeData theme,
+    required BuildContext context,
     required IconData icon,
     required String label,
     required String value,
   }) {
+    final theme = Theme.of(context);
+    final cc = context.cc;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 20, color: ColorTokens.onSurfaceVariant),
+        Icon(icon, size: 20, color: cc.mut),
         const SizedBox(width: SpacingTokens.md),
         Expanded(
           child: Column(
@@ -287,15 +266,13 @@ class EventDetailsScreen extends ConsumerWidget {
             children: [
               Text(
                 label,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: ColorTokens.onSurfaceVariant,
-                ),
+                style: theme.textTheme.labelMedium?.copyWith(color: cc.mut),
               ),
               const SizedBox(height: SpacingTokens.xxs),
               Text(
                 value,
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: ColorTokens.onSurface,
+                  color: cc.fg,
                   fontWeight: FontWeight.w500,
                 ),
               ),

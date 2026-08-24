@@ -1,4 +1,4 @@
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +20,7 @@ class EventTypeChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return AnimatedTheme(
       data: theme.copyWith(canvasColor: Colors.transparent),
@@ -27,15 +28,13 @@ class EventTypeChip extends StatelessWidget {
         label: Text(label),
         selected: isSelected,
         onSelected: onSelected,
-        backgroundColor: ColorTokens.surfaceContainer,
+        backgroundColor: cc.raise,
         selectedColor: color.withValues(alpha: 0.15),
         labelStyle: theme.textTheme.labelMedium?.copyWith(
-          color: isSelected ? color : ColorTokens.onSurfaceVariant,
+          color: isSelected ? color : cc.mut,
           fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
         ),
-        side: BorderSide(
-          color: isSelected ? Colors.transparent : ColorTokens.outlineVariant,
-        ),
+        side: BorderSide(color: isSelected ? Colors.transparent : cc.line),
         shape: const RoundedRectangleBorder(
           borderRadius: RadiusTokens.borderRadiusMd,
         ),

@@ -5,7 +5,7 @@
 library;
 
 import 'package:college_companion/features/timetable/models/lecture_schedule_item.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -37,24 +37,23 @@ class LectureCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     final isCurrent = lecture.isCurrent;
 
     return Material(
       color: Colors.transparent,
       child: Ink(
         decoration: BoxDecoration(
-          color: isCurrent
-              ? ColorTokens.surfaceContainerHigh
-              : ColorTokens.surfaceContainer,
-          borderRadius: RadiusTokens.borderRadiusLg,
+          color: isCurrent ? cc.raise2 : cc.raise,
+          borderRadius: RadiusTokens.borderRadiusXxl,
           border: Border.all(
-            color: isCurrent ? ColorTokens.primary : ColorTokens.outlineVariant,
+            color: isCurrent ? cc.pri : cc.line,
             width: isCurrent ? 1.5 : 1.0,
           ),
         ),
         child: InkWell(
           onTap: onTap,
-          borderRadius: RadiusTokens.borderRadiusLg,
+          borderRadius: RadiusTokens.borderRadiusXxl,
           child: Padding(
             padding: const EdgeInsets.all(SpacingTokens.base),
             child: Column(
@@ -74,8 +73,8 @@ class LectureCard extends StatelessWidget {
                               horizontal: SpacingTokens.sm,
                               vertical: SpacingTokens.xxs,
                             ),
-                            decoration: const BoxDecoration(
-                              color: ColorTokens.primary,
+                            decoration: BoxDecoration(
+                              color: cc.pri,
                               borderRadius: RadiusTokens.borderRadiusPill,
                             ),
                             child: Row(
@@ -84,8 +83,8 @@ class LectureCard extends StatelessWidget {
                                 Container(
                                   width: 6,
                                   height: 6,
-                                  decoration: const BoxDecoration(
-                                    color: ColorTokens.onPrimary,
+                                  decoration: BoxDecoration(
+                                    color: cc.priFg,
                                     shape: BoxShape.circle,
                                   ),
                                 ),
@@ -93,7 +92,7 @@ class LectureCard extends StatelessWidget {
                                 Text(
                                   'NOW',
                                   style: theme.textTheme.labelSmall?.copyWith(
-                                    color: ColorTokens.onPrimary,
+                                    color: cc.priFg,
                                     fontWeight: FontWeight.w700,
                                     letterSpacing: 0.8,
                                   ),
@@ -106,11 +105,7 @@ class LectureCard extends StatelessWidget {
                     ),
                     if (onEdit != null || onDelete != null)
                       PopupMenuButton<String>(
-                        icon: const Icon(
-                          Symbols.more_vert,
-                          size: 20,
-                          color: ColorTokens.onSurfaceVariant,
-                        ),
+                        icon: Icon(Symbols.more_vert, size: 20, color: cc.mut),
                         onSelected: (value) {
                           if (value == 'edit') onEdit?.call();
                           if (value == 'delete') onDelete?.call();
@@ -128,19 +123,19 @@ class LectureCard extends StatelessWidget {
                               ),
                             ),
                           if (onDelete != null)
-                            const PopupMenuItem(
+                            PopupMenuItem(
                               value: 'delete',
                               child: Row(
                                 children: [
                                   Icon(
                                     Symbols.delete,
                                     size: 18,
-                                    color: ColorTokens.error,
+                                    color: cc.risk,
                                   ),
-                                  SizedBox(width: SpacingTokens.sm),
+                                  const SizedBox(width: SpacingTokens.sm),
                                   Text(
                                     'Delete',
-                                    style: TextStyle(color: ColorTokens.error),
+                                    style: TextStyle(color: cc.risk),
                                   ),
                                 ],
                               ),
@@ -156,7 +151,7 @@ class LectureCard extends StatelessWidget {
                   lecture.subjectName,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: ColorTokens.onSurface,
+                    color: cc.fg,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -175,17 +170,13 @@ class LectureCard extends StatelessWidget {
                         Icon(
                           Symbols.schedule,
                           size: 16,
-                          color: isCurrent
-                              ? ColorTokens.primary
-                              : ColorTokens.onSurfaceVariant,
+                          color: isCurrent ? cc.pri : cc.mut,
                         ),
                         const SizedBox(width: SpacingTokens.xs),
                         Text(
                           lecture.formattedTimeRange,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: isCurrent
-                                ? ColorTokens.primary
-                                : ColorTokens.onSurfaceVariant,
+                            color: isCurrent ? cc.pri : cc.mut,
                             fontWeight: isCurrent
                                 ? FontWeight.w600
                                 : FontWeight.w400,
@@ -199,16 +190,12 @@ class LectureCard extends StatelessWidget {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
-                            Symbols.location_on,
-                            size: 16,
-                            color: ColorTokens.onSurfaceVariant,
-                          ),
+                          Icon(Symbols.location_on, size: 16, color: cc.mut),
                           const SizedBox(width: SpacingTokens.xs),
                           Text(
                             lecture.room!,
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: ColorTokens.onSurfaceVariant,
+                              color: cc.mut,
                             ),
                           ),
                         ],
@@ -219,16 +206,12 @@ class LectureCard extends StatelessWidget {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
-                            Symbols.person,
-                            size: 16,
-                            color: ColorTokens.onSurfaceVariant,
-                          ),
+                          Icon(Symbols.person, size: 16, color: cc.mut),
                           const SizedBox(width: SpacingTokens.xs),
                           Text(
                             lecture.faculty!,
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: ColorTokens.onSurfaceVariant,
+                              color: cc.mut,
                             ),
                           ),
                         ],
@@ -252,18 +235,20 @@ class _LectureTypeChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
+    final colorScheme = Theme.of(context).colorScheme;
     final isPractical = lectureType.toLowerCase() == 'practical';
     final isTutorial = lectureType.toLowerCase() == 'tutorial';
 
-    Color chipBg = ColorTokens.surfaceContainerHighest;
-    Color chipFg = ColorTokens.onSurfaceVariant;
+    Color chipBg = cc.raise2;
+    Color chipFg = cc.mut;
 
     if (isPractical) {
-      chipBg = ColorTokens.secondaryContainer;
-      chipFg = ColorTokens.onSecondaryContainer;
+      chipBg = colorScheme.secondaryContainer;
+      chipFg = colorScheme.onSecondaryContainer;
     } else if (isTutorial) {
-      chipBg = ColorTokens.tertiaryContainer;
-      chipFg = ColorTokens.onTertiaryContainer;
+      chipBg = colorScheme.tertiaryContainer;
+      chipFg = colorScheme.onTertiaryContainer;
     }
 
     return Container(
@@ -274,7 +259,7 @@ class _LectureTypeChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: chipBg,
         borderRadius: RadiusTokens.borderRadiusSm,
-        border: Border.all(color: ColorTokens.outlineVariant, width: 1),
+        border: Border.all(color: cc.line, width: 1),
       ),
       child: Text(
         lectureType.toUpperCase(),

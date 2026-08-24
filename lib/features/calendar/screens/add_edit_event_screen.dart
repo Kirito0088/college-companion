@@ -2,10 +2,11 @@ import 'package:college_companion/database/app_database.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/features/calendar/providers/calendar_provider.dart';
+import 'package:college_companion/features/calendar/widgets/agenda_card.dart';
 import 'package:college_companion/features/calendar/widgets/event_type_chip.dart';
 import 'package:college_companion/features/subjects/providers/subjects_provider.dart';
 import 'package:college_companion/shared/widgets/dialogs/cc_dialogs.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:drift/drift.dart' hide Column;
@@ -25,11 +26,15 @@ class AddEditEventScreen extends ConsumerStatefulWidget {
 
 class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
   int _selectedTypeIndex = 0;
-  final List<Map<String, dynamic>> _eventTypes = [
-    {'label': 'Academic', 'color': ColorTokens.primary},
-    {'label': 'Assignment', 'color': ColorTokens.warning},
-    {'label': 'Exam', 'color': ColorTokens.error},
-    {'label': 'Personal', 'color': ColorTokens.info},
+
+  /// Type key -> display label. Colors are resolved at build time via
+  /// [calendarEventTypeColor], the same function every other calendar
+  /// surface uses, so the picker matches what the saved event renders as.
+  static const List<(String key, String label)> _eventTypes = [
+    ('academic', 'Academic'),
+    ('assignment', 'Assignment'),
+    ('exam', 'Exam'),
+    ('personal', 'Personal'),
   ];
 
   final _titleController = TextEditingController();
@@ -123,7 +128,7 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
       );
 
       final nowIso = DateTime.now().toUtc().toIso8601String();
-      final eventTypeStr = _eventTypes[_selectedTypeIndex]['label'] as String;
+      final eventTypeStr = _eventTypes[_selectedTypeIndex].$1;
 
       final notesText = _notesController.text.trim();
       final locText = _locationController.text.trim();
@@ -168,6 +173,7 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     final authState = ref.watch(authStateProvider);
     final userId =
         authState is AuthAuthenticated && authState.user.uid.isNotEmpty
@@ -217,21 +223,21 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _buildSectionTitle(theme, 'Event Type'),
+                    _buildSectionTitle(context, 'Event Type'),
                     const SizedBox(height: SpacingTokens.sm),
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       clipBehavior: Clip.none,
                       child: Row(
                         children: List.generate(_eventTypes.length, (index) {
-                          final type = _eventTypes[index];
+                          final (key, label) = _eventTypes[index];
                           return Padding(
                             padding: const EdgeInsets.only(
                               right: SpacingTokens.sm,
                             ),
                             child: EventTypeChip(
-                              label: type['label'] as String,
-                              color: type['color'] as Color,
+                              label: label,
+                              color: calendarEventTypeColor(context, key),
                               isSelected: _selectedTypeIndex == index,
                               onSelected: (selected) {
                                 if (selected) {
@@ -247,40 +253,37 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
                     ),
                     const SizedBox(height: SpacingTokens.xl),
                     _buildTextField(
-                      theme: theme,
+                      context: context,
                       label: 'Title',
                       hint: 'Event title',
                       controller: _titleController,
                     ),
                     const SizedBox(height: SpacingTokens.lg),
-                    _buildDropdown(theme: theme, subjects: subjectNames),
+                    _buildDropdown(context: context, subjects: subjectNames),
                     const SizedBox(height: SpacingTokens.xl),
                     Container(
                       padding: const EdgeInsets.all(SpacingTokens.lg),
                       decoration: BoxDecoration(
-                        color: ColorTokens.surfaceContainer,
-                        borderRadius: RadiusTokens.borderRadiusLg,
-                        border: Border.all(color: ColorTokens.surfaceVariant),
+                        color: cc.raise,
+                        borderRadius: RadiusTokens.borderRadiusXxl,
+                        border: Border.all(color: cc.line),
                       ),
                       child: Column(
                         children: [
                           _buildDateTimePicker(
-                            theme: theme,
+                            context: context,
                             label: 'Date',
                             value: dateStr,
                             icon: Symbols.calendar_today,
                             onTap: _pickDate,
                             isCardStyle: false,
                           ),
-                          const Divider(
-                            height: SpacingTokens.xl,
-                            color: ColorTokens.outlineVariant,
-                          ),
+                          Divider(height: SpacingTokens.xl, color: cc.line),
                           Row(
                             children: [
                               Expanded(
                                 child: _buildDateTimePicker(
-                                  theme: theme,
+                                  context: context,
                                   label: 'Start Time',
                                   value: startTimeStr,
                                   icon: Symbols.schedule,
@@ -291,7 +294,7 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
                               const SizedBox(width: SpacingTokens.md),
                               Expanded(
                                 child: _buildDateTimePicker(
-                                  theme: theme,
+                                  context: context,
                                   label: 'End Time',
                                   value: endTimeStr,
                                   icon: Symbols.schedule,
@@ -306,14 +309,14 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
                     ),
                     const SizedBox(height: SpacingTokens.xl),
                     _buildTextField(
-                      theme: theme,
+                      context: context,
                       label: 'Location (Optional)',
                       hint: 'Room, building, or link',
                       controller: _locationController,
                     ),
                     const SizedBox(height: SpacingTokens.lg),
                     _buildTextField(
-                      theme: theme,
+                      context: context,
                       label: 'Notes (Optional)',
                       hint: 'Add any extra details here...',
                       controller: _notesController,
@@ -329,8 +332,8 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
               child: FilledButton(
                 onPressed: _isSaving ? null : _saveEvent,
                 style: FilledButton.styleFrom(
-                  backgroundColor: ColorTokens.primary,
-                  foregroundColor: ColorTokens.onPrimary,
+                  backgroundColor: cc.pri,
+                  foregroundColor: cc.priFg,
                   minimumSize: const Size(double.infinity, 56),
                   shape: const RoundedRectangleBorder(
                     borderRadius: RadiusTokens.borderRadiusMd,
@@ -354,27 +357,31 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
     );
   }
 
-  Widget _buildSectionTitle(ThemeData theme, String title) {
+  Widget _buildSectionTitle(BuildContext context, String title) {
+    final theme = Theme.of(context);
+    final cc = context.cc;
     return Text(
       title,
       style: theme.textTheme.titleSmall?.copyWith(
         fontWeight: FontWeight.bold,
-        color: ColorTokens.onSurfaceVariant,
+        color: cc.mut,
       ),
     );
   }
 
   Widget _buildTextField({
-    required ThemeData theme,
+    required BuildContext context,
     required String label,
     required String hint,
     required TextEditingController controller,
     int maxLines = 1,
   }) {
+    final theme = Theme.of(context);
+    final cc = context.cc;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle(theme, label),
+        _buildSectionTitle(context, label),
         const SizedBox(height: SpacingTokens.sm),
         TextField(
           controller: controller,
@@ -382,21 +389,21 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: theme.textTheme.bodyLarge?.copyWith(
-              color: ColorTokens.onSurfaceVariant.withValues(alpha: 0.5),
+              color: cc.mut.withValues(alpha: 0.5),
             ),
             filled: true,
-            fillColor: ColorTokens.surfaceContainer,
+            fillColor: cc.raise,
             border: const OutlineInputBorder(
               borderRadius: RadiusTokens.borderRadiusMd,
               borderSide: BorderSide.none,
             ),
-            enabledBorder: const OutlineInputBorder(
+            enabledBorder: OutlineInputBorder(
               borderRadius: RadiusTokens.borderRadiusMd,
-              borderSide: BorderSide(color: ColorTokens.outlineVariant),
+              borderSide: BorderSide(color: cc.line),
             ),
-            focusedBorder: const OutlineInputBorder(
+            focusedBorder: OutlineInputBorder(
               borderRadius: RadiusTokens.borderRadiusMd,
-              borderSide: BorderSide(color: ColorTokens.primary),
+              borderSide: BorderSide(color: cc.pri),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: SpacingTokens.lg,
@@ -409,20 +416,22 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
   }
 
   Widget _buildDropdown({
-    required ThemeData theme,
+    required BuildContext context,
     required List<String> subjects,
   }) {
+    final theme = Theme.of(context);
+    final cc = context.cc;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle(theme, 'Linked Subject (Optional)'),
+        _buildSectionTitle(context, 'Linked Subject (Optional)'),
         const SizedBox(height: SpacingTokens.sm),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.lg),
           decoration: BoxDecoration(
-            color: ColorTokens.surfaceContainer,
+            color: cc.raise,
             borderRadius: RadiusTokens.borderRadiusMd,
-            border: Border.all(color: ColorTokens.outlineVariant),
+            border: Border.all(color: cc.line),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
@@ -432,14 +441,11 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
               hint: Text(
                 'None',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: ColorTokens.onSurfaceVariant.withValues(alpha: 0.5),
+                  color: cc.mut.withValues(alpha: 0.5),
                 ),
               ),
               isExpanded: true,
-              icon: const Icon(
-                Symbols.expand_more,
-                color: ColorTokens.onSurfaceVariant,
-              ),
+              icon: Icon(Symbols.expand_more, color: cc.mut),
               items: subjects.map((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
@@ -459,23 +465,23 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
   }
 
   Widget _buildDateTimePicker({
-    required ThemeData theme,
+    required BuildContext context,
     required String label,
     required String value,
     required IconData icon,
     required VoidCallback onTap,
     bool isCardStyle = true,
   }) {
+    final theme = Theme.of(context);
+    final cc = context.cc;
     final inner = Row(
       children: [
-        Icon(icon, size: 20, color: ColorTokens.onSurfaceVariant),
+        Icon(icon, size: 20, color: cc.mut),
         const SizedBox(width: SpacingTokens.sm),
         Expanded(
           child: Text(
             value,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: ColorTokens.onSurface,
-            ),
+            style: theme.textTheme.bodyLarge?.copyWith(color: cc.fg),
           ),
         ),
       ],
@@ -484,7 +490,7 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle(theme, label),
+        _buildSectionTitle(context, label),
         const SizedBox(height: SpacingTokens.sm),
         InkWell(
           onTap: onTap,
@@ -496,9 +502,9 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
                     vertical: SpacingTokens.md,
                   ),
                   decoration: BoxDecoration(
-                    color: ColorTokens.surfaceContainer,
+                    color: cc.raise,
                     borderRadius: RadiusTokens.borderRadiusMd,
-                    border: Border.all(color: ColorTokens.outlineVariant),
+                    border: Border.all(color: cc.line),
                   ),
                   child: inner,
                 )

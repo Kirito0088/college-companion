@@ -8,7 +8,7 @@ import 'package:college_companion/routing/app_router.dart';
 import 'package:college_companion/shared/widgets/empty_states/cc_empty_states.dart';
 import 'package:college_companion/shared/widgets/errors/cc_errors.dart';
 import 'package:college_companion/shared/widgets/loading/cc_skeletons.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -60,6 +60,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     final authState = ref.watch(authStateProvider);
     final userId =
         authState is AuthAuthenticated && authState.user.uid.isNotEmpty
@@ -73,7 +74,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(theme, userId),
+            _buildHeader(context, theme, cc),
             Expanded(
               child: eventsAsync.when(
                 data: (entities) {
@@ -98,7 +99,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                           },
                         ),
                         const SizedBox(height: SpacingTokens.xxl),
-                        _buildAgendaSection(theme, eventsMap),
+                        _buildAgendaSection(context, theme, cc, eventsMap),
                         const SizedBox(height: 100),
                       ],
                     ),
@@ -127,15 +128,15 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         onPressed: () {
           context.push(RoutePaths.addEditEvent);
         },
-        backgroundColor: ColorTokens.primary,
-        foregroundColor: ColorTokens.onPrimary,
+        backgroundColor: cc.pri,
+        foregroundColor: cc.priFg,
         elevation: 2,
         child: const Icon(Symbols.add),
       ),
     );
   }
 
-  Widget _buildHeader(ThemeData theme, String userId) {
+  Widget _buildHeader(BuildContext context, ThemeData theme, CCTokens cc) {
     final monthLabel =
         '${_monthNames[_selectedMonth.month - 1]} ${_selectedMonth.year}';
 
@@ -158,7 +159,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   'Calendar',
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: ColorTokens.onSurface,
+                    color: cc.fg,
                   ),
                 ),
                 const SizedBox(height: SpacingTokens.xs),
@@ -176,16 +177,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                         Text(
                           monthLabel,
                           style: theme.textTheme.titleMedium?.copyWith(
-                            color: ColorTokens.primary,
+                            color: cc.pri,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         const SizedBox(width: SpacingTokens.xxs),
-                        const Icon(
-                          Symbols.arrow_drop_down,
-                          size: 24,
-                          color: ColorTokens.primary,
-                        ),
+                        Icon(Symbols.arrow_drop_down, size: 24, color: cc.pri),
                       ],
                     ),
                   ),
@@ -206,7 +203,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   });
                 },
                 icon: const Icon(Symbols.today, size: 24),
-                color: ColorTokens.onSurfaceVariant,
+                color: cc.mut,
                 tooltip: 'Today',
               ),
               IconButton(
@@ -219,7 +216,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   });
                 },
                 icon: const Icon(Symbols.chevron_left, size: 28),
-                color: ColorTokens.onSurface,
+                color: cc.fg,
               ),
               IconButton(
                 onPressed: () {
@@ -231,7 +228,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   });
                 },
                 icon: const Icon(Symbols.chevron_right, size: 28),
-                color: ColorTokens.onSurface,
+                color: cc.fg,
               ),
             ],
           ),
@@ -241,7 +238,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   }
 
   Widget _buildAgendaSection(
+    BuildContext context,
     ThemeData theme,
+    CCTokens cc,
     Map<int, List<CalendarEventEntity>> eventsMap,
   ) {
     final eventsForSelected = eventsMap[_selectedDate] ?? [];
@@ -276,16 +275,14 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               'Agenda',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: ColorTokens.onSurface,
+                color: cc.fg,
                 letterSpacing: 0.5,
               ),
             ),
             if (eventsForSelected.isNotEmpty)
               Text(
                 '${eventsForSelected.length} event${eventsForSelected.length == 1 ? '' : 's'}',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: ColorTokens.onSurfaceVariant,
-                ),
+                style: theme.textTheme.labelMedium?.copyWith(color: cc.mut),
               ),
           ],
         ),

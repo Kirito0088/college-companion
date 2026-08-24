@@ -9,7 +9,7 @@ import 'package:college_companion/features/authentication/providers/auth_provide
 import 'package:college_companion/features/subjects/providers/subjects_provider.dart';
 import 'package:college_companion/features/timetable/models/lecture_schedule_item.dart';
 import 'package:college_companion/features/timetable/providers/timetable_provider.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:drift/drift.dart' hide Column;
@@ -266,6 +266,7 @@ class _AddEditTimetableEntryDialogState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     final authState = ref.watch(authStateProvider);
     final userId =
         authState is AuthAuthenticated && authState.user.uid.isNotEmpty
@@ -301,7 +302,7 @@ class _AddEditTimetableEntryDialogState
                 width: 32,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: ColorTokens.onSurfaceVariant.withValues(alpha: 0.4),
+                  color: cc.mut.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -316,7 +317,7 @@ class _AddEditTimetableEntryDialogState
                   isEditing ? 'Edit Class' : 'Add Class',
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: ColorTokens.onSurface,
+                    color: cc.fg,
                   ),
                 ),
                 IconButton(
@@ -334,11 +335,11 @@ class _AddEditTimetableEntryDialogState
                 initialValue: subjects.any((s) => s.id == _selectedSubjectId)
                     ? _selectedSubjectId
                     : null,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Subject *',
                   filled: true,
-                  fillColor: ColorTokens.surfaceContainer,
-                  border: OutlineInputBorder(
+                  fillColor: cc.raise,
+                  border: const OutlineInputBorder(
                     borderRadius: RadiusTokens.borderRadiusMd,
                   ),
                 ),
@@ -355,12 +356,12 @@ class _AddEditTimetableEntryDialogState
               TextField(
                 key: const Key('timetable_custom_subject_field'),
                 controller: _customSubjectController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Subject Name *',
                   hintText: 'e.g. Data Structures',
                   filled: true,
-                  fillColor: ColorTokens.surfaceContainer,
-                  border: OutlineInputBorder(
+                  fillColor: cc.raise,
+                  border: const OutlineInputBorder(
                     borderRadius: RadiusTokens.borderRadiusMd,
                   ),
                 ),
@@ -371,11 +372,11 @@ class _AddEditTimetableEntryDialogState
             DropdownButtonFormField<int>(
               key: const Key('timetable_day_dropdown'),
               initialValue: _selectedDayOfWeek,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Day of Week *',
                 filled: true,
-                fillColor: ColorTokens.surfaceContainer,
-                border: OutlineInputBorder(
+                fillColor: cc.raise,
+                border: const OutlineInputBorder(
                   borderRadius: RadiusTokens.borderRadiusMd,
                 ),
               ),
@@ -404,9 +405,9 @@ class _AddEditTimetableEntryDialogState
                     child: Container(
                       padding: const EdgeInsets.all(SpacingTokens.md),
                       decoration: BoxDecoration(
-                        color: ColorTokens.surfaceContainer,
+                        color: cc.raise,
                         borderRadius: RadiusTokens.borderRadiusMd,
-                        border: Border.all(color: ColorTokens.outlineVariant),
+                        border: Border.all(color: cc.line),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -414,22 +415,18 @@ class _AddEditTimetableEntryDialogState
                           Text(
                             'Start Time',
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: ColorTokens.onSurfaceVariant,
+                              color: cc.mut,
                             ),
                           ),
                           const SizedBox(height: SpacingTokens.xs),
                           Row(
                             children: [
-                              const Icon(
-                                Symbols.schedule,
-                                size: 18,
-                                color: ColorTokens.primary,
-                              ),
+                              Icon(Symbols.schedule, size: 18, color: cc.pri),
                               const SizedBox(width: SpacingTokens.xs),
                               Text(
                                 _startTime.format(context),
                                 style: theme.textTheme.titleMedium?.copyWith(
-                                  color: ColorTokens.onSurface,
+                                  color: cc.fg,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -448,9 +445,9 @@ class _AddEditTimetableEntryDialogState
                     child: Container(
                       padding: const EdgeInsets.all(SpacingTokens.md),
                       decoration: BoxDecoration(
-                        color: ColorTokens.surfaceContainer,
+                        color: cc.raise,
                         borderRadius: RadiusTokens.borderRadiusMd,
-                        border: Border.all(color: ColorTokens.outlineVariant),
+                        border: Border.all(color: cc.line),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -458,22 +455,18 @@ class _AddEditTimetableEntryDialogState
                           Text(
                             'End Time',
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: ColorTokens.onSurfaceVariant,
+                              color: cc.mut,
                             ),
                           ),
                           const SizedBox(height: SpacingTokens.xs),
                           Row(
                             children: [
-                              const Icon(
-                                Symbols.schedule,
-                                size: 18,
-                                color: ColorTokens.primary,
-                              ),
+                              Icon(Symbols.schedule, size: 18, color: cc.pri),
                               const SizedBox(width: SpacingTokens.xs),
                               Text(
                                 _endTime.format(context),
                                 style: theme.textTheme.titleMedium?.copyWith(
-                                  color: ColorTokens.onSurface,
+                                  color: cc.fg,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -492,12 +485,12 @@ class _AddEditTimetableEntryDialogState
             TextField(
               key: const Key('timetable_room_field'),
               controller: _roomController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Room / Location (Optional)',
                 hintText: 'e.g. Room 302, Lab 1',
                 filled: true,
-                fillColor: ColorTokens.surfaceContainer,
-                border: OutlineInputBorder(
+                fillColor: cc.raise,
+                border: const OutlineInputBorder(
                   borderRadius: RadiusTokens.borderRadiusMd,
                 ),
               ),
@@ -508,11 +501,11 @@ class _AddEditTimetableEntryDialogState
             DropdownButtonFormField<String>(
               key: const Key('timetable_type_dropdown'),
               initialValue: _selectedLectureType,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Lecture Type',
                 filled: true,
-                fillColor: ColorTokens.surfaceContainer,
-                border: OutlineInputBorder(
+                fillColor: cc.raise,
+                border: const OutlineInputBorder(
                   borderRadius: RadiusTokens.borderRadiusMd,
                 ),
               ),
@@ -540,8 +533,8 @@ class _AddEditTimetableEntryDialogState
                 key: const Key('timetable_save_button'),
                 onPressed: _isSaving ? null : _saveEntry,
                 style: FilledButton.styleFrom(
-                  backgroundColor: ColorTokens.primary,
-                  foregroundColor: ColorTokens.onPrimary,
+                  backgroundColor: cc.pri,
+                  foregroundColor: cc.priFg,
                   shape: const RoundedRectangleBorder(
                     borderRadius: RadiusTokens.borderRadiusMd,
                   ),

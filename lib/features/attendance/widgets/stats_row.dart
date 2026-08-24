@@ -1,5 +1,6 @@
 import 'package:college_companion/features/attendance/providers/attendance_provider.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
+import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
 
@@ -10,38 +11,42 @@ class StatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final presentStr = safeBunk != null ? '${safeBunk!.attended}' : '148';
+    final cc = context.cc;
+    final presentStr = safeBunk != null ? '${safeBunk!.attended}' : '–';
     final absentStr = safeBunk != null
         ? '${safeBunk!.total - safeBunk!.attended}'
-        : '32';
-    final totalStr = safeBunk != null ? '${safeBunk!.total}' : '180';
+        : '–';
+    final totalStr = safeBunk != null ? '${safeBunk!.total}' : '–';
 
     return Row(
       children: [
         Expanded(
           child: _buildStatCard(
             context,
+            cc: cc,
             value: presentStr,
             label: 'Present',
-            valueColor: ColorTokens.success,
+            valueColor: cc.pri,
           ),
         ),
         const SizedBox(width: SpacingTokens.base),
         Expanded(
           child: _buildStatCard(
             context,
+            cc: cc,
             value: absentStr,
             label: 'Absent',
-            valueColor: ColorTokens.error,
+            valueColor: cc.risk,
           ),
         ),
         const SizedBox(width: SpacingTokens.base),
         Expanded(
           child: _buildStatCard(
             context,
+            cc: cc,
             value: totalStr,
             label: 'Total',
-            valueColor: ColorTokens.onSurface,
+            valueColor: cc.fg,
           ),
         ),
       ],
@@ -50,6 +55,7 @@ class StatsRow extends StatelessWidget {
 
   Widget _buildStatCard(
     BuildContext context, {
+    required CCTokens cc,
     required String value,
     required String label,
     required Color valueColor,
@@ -58,12 +64,9 @@ class StatsRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(SpacingTokens.base),
       decoration: BoxDecoration(
-        color: ColorTokens.surfaceContainer,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: ColorTokens.outlineVariant.withValues(alpha: 0.15),
-          width: 1,
-        ),
+        color: cc.raise,
+        borderRadius: RadiusTokens.borderRadiusXxl,
+        border: Border.all(color: cc.line),
       ),
       child: Column(
         children: [
@@ -79,7 +82,7 @@ class StatsRow extends StatelessWidget {
           Text(
             label,
             style: theme.textTheme.labelMedium?.copyWith(
-              color: ColorTokens.onSurfaceVariant,
+              color: cc.mut,
               fontWeight: FontWeight.w500,
               letterSpacing: 0.5,
             ),

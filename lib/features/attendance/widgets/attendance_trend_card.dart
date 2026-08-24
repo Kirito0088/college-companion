@@ -1,4 +1,5 @@
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
+import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -9,16 +10,14 @@ class AttendanceTrendCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return Container(
       padding: const EdgeInsets.all(SpacingTokens.base),
       decoration: BoxDecoration(
-        color: ColorTokens.surfaceContainer,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: ColorTokens.outlineVariant.withValues(alpha: 0.15),
-          width: 1,
-        ),
+        color: cc.raise,
+        borderRadius: RadiusTokens.borderRadiusXxl,
+        border: Border.all(color: cc.line),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -30,23 +29,17 @@ class AttendanceTrendCard extends StatelessWidget {
                 'Attendance Trend',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: ColorTokens.onSurface,
+                  color: cc.fg,
                 ),
               ),
               Row(
                 children: [
                   Text(
                     'This Week',
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: ColorTokens.onSurfaceVariant,
-                    ),
+                    style: theme.textTheme.labelLarge?.copyWith(color: cc.mut),
                   ),
                   const SizedBox(width: 4),
-                  const Icon(
-                    Symbols.expand_more_rounded,
-                    color: ColorTokens.onSurfaceVariant,
-                    size: 18,
-                  ),
+                  Icon(Symbols.expand_more_rounded, color: cc.mut, size: 18),
                 ],
               ),
             ],
@@ -67,11 +60,11 @@ class AttendanceTrendCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildYLabel(context, '100%'),
-                        _buildYLabel(context, '75%'),
-                        _buildYLabel(context, '50%'),
-                        _buildYLabel(context, '25%'),
-                        _buildYLabel(context, '0%'),
+                        _buildYLabel(context, cc, '100%'),
+                        _buildYLabel(context, cc, '75%'),
+                        _buildYLabel(context, cc, '50%'),
+                        _buildYLabel(context, cc, '25%'),
+                        _buildYLabel(context, cc, '0%'),
                       ],
                     ),
                   ),
@@ -91,12 +84,7 @@ class AttendanceTrendCard extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: List.generate(5, (_) {
-                            return Container(
-                              height: 1,
-                              color: ColorTokens.outlineVariant.withValues(
-                                alpha: 0.1,
-                              ),
-                            );
+                            return Container(height: 1, color: cc.line);
                           }),
                         ),
                       ),
@@ -105,7 +93,9 @@ class AttendanceTrendCard extends StatelessWidget {
                         right: 0,
                         top: 0,
                         bottom: 24,
-                        child: CustomPaint(painter: _TrendChartPainter()),
+                        child: CustomPaint(
+                          painter: _TrendChartPainter(lineColor: cc.pri),
+                        ),
                       ),
                       Positioned(
                         left: 0,
@@ -115,13 +105,13 @@ class AttendanceTrendCard extends StatelessWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            _buildXLabel(context, 'Mon'),
-                            _buildXLabel(context, 'Tue'),
-                            _buildXLabel(context, 'Wed'),
-                            _buildXLabel(context, 'Thu'),
-                            _buildXLabel(context, 'Fri'),
-                            _buildXLabel(context, 'Sat'),
-                            _buildXLabel(context, 'Sun'),
+                            _buildXLabel(context, cc, 'Mon'),
+                            _buildXLabel(context, cc, 'Tue'),
+                            _buildXLabel(context, cc, 'Wed'),
+                            _buildXLabel(context, cc, 'Thu'),
+                            _buildXLabel(context, cc, 'Fri'),
+                            _buildXLabel(context, cc, 'Sat'),
+                            _buildXLabel(context, cc, 'Sun'),
                           ],
                         ),
                       ),
@@ -136,21 +126,21 @@ class AttendanceTrendCard extends StatelessWidget {
     );
   }
 
-  Widget _buildYLabel(BuildContext context, String text) {
+  Widget _buildYLabel(BuildContext context, CCTokens cc, String text) {
     return Text(
       text,
       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-        color: ColorTokens.onSurfaceVariant,
+        color: cc.mut,
         fontWeight: FontWeight.w500,
       ),
     );
   }
 
-  Widget _buildXLabel(BuildContext context, String text) {
+  Widget _buildXLabel(BuildContext context, CCTokens cc, String text) {
     return Text(
       text,
       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-        color: ColorTokens.onSurfaceVariant,
+        color: cc.mut,
         fontWeight: FontWeight.w500,
       ),
     );
@@ -158,6 +148,10 @@ class AttendanceTrendCard extends StatelessWidget {
 }
 
 class _TrendChartPainter extends CustomPainter {
+  _TrendChartPainter({required this.lineColor});
+
+  final Color lineColor;
+
   @override
   void paint(Canvas canvas, Size size) {
     const points = [
@@ -171,7 +165,7 @@ class _TrendChartPainter extends CustomPainter {
     ];
 
     final paint = Paint()
-      ..color = ColorTokens.primary
+      ..color = lineColor
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
@@ -192,7 +186,7 @@ class _TrendChartPainter extends CustomPainter {
     canvas.drawPath(path, paint);
 
     final dotPaint = Paint()
-      ..color = ColorTokens.primary
+      ..color = lineColor
       ..style = PaintingStyle.fill;
 
     for (final p in points) {
@@ -203,5 +197,6 @@ class _TrendChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _TrendChartPainter oldDelegate) =>
+      oldDelegate.lineColor != lineColor;
 }

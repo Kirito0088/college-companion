@@ -1,38 +1,49 @@
+import 'package:college_companion/features/attendance/providers/attendance_provider.dart';
 import 'package:college_companion/features/attendance/widgets/safe_bunk_app_bar.dart';
 import 'package:college_companion/features/attendance/widgets/safe_bunk_ring.dart';
 import 'package:college_companion/features/attendance/widgets/safe_bunk_stats.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/features/authentication/models/auth_state.dart';
+import 'package:college_companion/features/authentication/providers/auth_provider.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SafeBunkScreen extends StatelessWidget {
+class SafeBunkScreen extends ConsumerWidget {
   const SafeBunkScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final authState = ref.watch(authStateProvider);
+    final userId =
+        authState is AuthAuthenticated && authState.user.uid.isNotEmpty
+        ? authState.user.uid
+        : 'default_user';
+
+    final safeBunkAsync = ref.watch(safeBunkStreamProvider(userId));
+    final safeBunk = safeBunkAsync.valueOrNull;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
-      body: const SafeArea(
+      body: SafeArea(
         child: Column(
           children: [
-            SafeBunkAppBar(),
+            const SafeBunkAppBar(),
             Expanded(
               child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(
-                  horizontal:
-                      LayoutTokens.screenPadding, // 20px screen edge usually
+                padding: const EdgeInsets.symmetric(
+                  horizontal: LayoutTokens.screenPadding,
                   vertical: SpacingTokens.md,
                 ),
                 child: Column(
                   children: [
-                    SafeBunkRing(),
-                    SizedBox(height: LayoutTokens.sectionGap),
-                    SafeBunkStats(),
-                    SizedBox(height: SpacingTokens.md),
-                    _SafeBunkNote(),
-                    SizedBox(height: SpacingTokens.xxxl),
+                    SafeBunkRing(safeBunk: safeBunk),
+                    const SizedBox(height: LayoutTokens.sectionGap),
+                    SafeBunkStats(safeBunk: safeBunk),
+                    const SizedBox(height: SpacingTokens.md),
+                    const _SafeBunkNote(),
+                    const SizedBox(height: SpacingTokens.xxxl),
                   ],
                 ),
               ),
@@ -50,6 +61,7 @@ class _SafeBunkNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.xs),
       child: Align(
@@ -57,7 +69,7 @@ class _SafeBunkNote extends StatelessWidget {
         child: Text(
           'Note: This is an estimate.\nActual attendance may vary.',
           style: theme.textTheme.bodySmall?.copyWith(
-            color: ColorTokens.onSurfaceVariant.withValues(alpha: 0.6),
+            color: cc.mut.withValues(alpha: 0.6),
             fontSize: 12,
           ),
         ),

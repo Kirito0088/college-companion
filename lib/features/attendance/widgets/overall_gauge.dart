@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:college_companion/features/attendance/providers/attendance_provider.dart';
 import 'package:college_companion/routing/app_router.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -15,20 +15,22 @@ class OverallGauge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final pct = safeBunk != null ? safeBunk!.currentPercentage : 82.0;
+    final cc = context.cc;
+    final pct = safeBunk != null ? safeBunk!.currentPercentage : 0.0;
     final progress = (pct / 100.0).clamp(0.0, 1.0);
-    final pctText = '${pct.round()}%';
+    final pctText = safeBunk != null ? '${pct.round()}%' : '–';
     final isSafe =
         safeBunk == null ||
+        safeBunk!.total == 0 ||
         safeBunk!.currentPercentage >= safeBunk!.targetPercentage;
-    final badgeColor = isSafe ? ColorTokens.success : ColorTokens.error;
+    final badgeColor = isSafe ? cc.pri : cc.risk;
     final badgeText = safeBunk != null
         ? (safeBunk!.safeBunks > 0
               ? 'You can miss ${safeBunk!.safeBunks} lectures'
               : (safeBunk!.mustAttend > 0
                     ? 'Must attend ${safeBunk!.mustAttend} lectures'
                     : 'On target (${safeBunk!.targetPercentage.round()}%)'))
-        : 'You can miss 12 lectures';
+        : 'Loading...';
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xl),
@@ -46,7 +48,7 @@ class OverallGauge extends StatelessWidget {
                   child: CustomPaint(
                     painter: _GaugePainter(
                       progress: progress,
-                      backgroundColor: ColorTokens.surfaceContainer,
+                      backgroundColor: cc.line,
                       progressColor: badgeColor,
                       strokeWidth: 12,
                     ),
@@ -59,7 +61,7 @@ class OverallGauge extends StatelessWidget {
                       Text(
                         pctText,
                         style: theme.textTheme.displayLarge?.copyWith(
-                          color: ColorTokens.onSurface,
+                          color: cc.fg,
                           fontWeight: FontWeight.w700,
                           height: 1.0,
                           letterSpacing: -2.0,
@@ -69,7 +71,7 @@ class OverallGauge extends StatelessWidget {
                       Text(
                         'Overall Attendance',
                         style: theme.textTheme.titleSmall?.copyWith(
-                          color: ColorTokens.onSurfaceVariant,
+                          color: cc.mut,
                           fontWeight: FontWeight.w500,
                         ),
                       ),

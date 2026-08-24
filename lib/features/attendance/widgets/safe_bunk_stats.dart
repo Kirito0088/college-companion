@@ -1,45 +1,53 @@
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/features/attendance/providers/attendance_provider.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
 
 class SafeBunkStats extends StatelessWidget {
-  const SafeBunkStats({super.key});
+  const SafeBunkStats({super.key, this.safeBunk});
+
+  final SafeBunkResult? safeBunk;
 
   @override
   Widget build(BuildContext context) {
+    final cc = context.cc;
+    final currentStr = safeBunk != null
+        ? '${safeBunk!.currentPercentage.round()}%'
+        : '–';
+    final totalStr = safeBunk != null ? '${safeBunk!.total}' : '–';
+    final attendedStr = safeBunk != null ? '${safeBunk!.attended}' : '–';
+    final safeBunksStr = safeBunk != null ? '${safeBunk!.safeBunks}' : '–';
+
     return Container(
       decoration: BoxDecoration(
-        color: ColorTokens
-            .surfaceContainer, // surface-container-lowest mapped to surfaceContainer
-        borderRadius: RadiusTokens.borderRadiusXl,
-        border: Border.all(
-          color: ColorTokens.outlineVariant.withValues(alpha: 0.2),
-        ),
+        color: cc.raise,
+        borderRadius: RadiusTokens.borderRadiusXxl,
+        border: Border.all(color: cc.line),
       ),
-      child: const Column(
+      child: Column(
         children: [
           _StatRow(
             label: 'Current Attendance',
-            value: '82%',
+            value: currentStr,
             showBorder: true,
             isImportant: false,
           ),
           _StatRow(
             label: 'Total Lectures',
-            value: '180',
+            value: totalStr,
             showBorder: true,
             isImportant: false,
           ),
           _StatRow(
             label: 'Lectures Attended',
-            value: '148',
+            value: attendedStr,
             showBorder: true,
             isImportant: false,
           ),
           _StatRow(
             label: 'Lectures You Can Bunk',
-            value: '8',
+            value: safeBunksStr,
             showBorder: false,
             isImportant: true,
           ),
@@ -65,20 +73,15 @@ class _StatRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return Container(
       padding: const EdgeInsets.symmetric(
-        vertical: SpacingTokens.md, // py-4
-        horizontal: SpacingTokens.base, // px-card-padding -> 16px
+        vertical: SpacingTokens.md,
+        horizontal: SpacingTokens.base,
       ),
       decoration: BoxDecoration(
-        border: showBorder
-            ? Border(
-                bottom: BorderSide(
-                  color: ColorTokens.outlineVariant.withValues(alpha: 0.3),
-                ),
-              )
-            : null,
+        border: showBorder ? Border(bottom: BorderSide(color: cc.line)) : null,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -88,21 +91,19 @@ class _StatRow extends StatelessWidget {
               label,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: isImportant || label == 'Current Attendance'
-                    ? ColorTokens.onSurface
-                    : ColorTokens.onSurfaceVariant,
+                    ? cc.fg
+                    : cc.mut,
               ),
             ),
           ),
           const SizedBox(width: SpacingTokens.md),
           SizedBox(
-            width: 60, // w-[60px]
+            width: 60,
             child: Text(
               value,
               textAlign: TextAlign.right,
               style: theme.textTheme.titleMedium?.copyWith(
-                color: isImportant
-                    ? ColorTokens.success
-                    : ColorTokens.onSurface,
+                color: isImportant ? cc.pri : cc.fg,
                 fontWeight: isImportant ? FontWeight.bold : FontWeight.w600,
               ),
             ),

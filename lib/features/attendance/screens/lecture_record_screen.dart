@@ -3,7 +3,7 @@ import 'package:college_companion/features/attendance/providers/attendance_provi
 import 'package:college_companion/features/attendance/widgets/evidence_thumbnail_strip.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:drift/drift.dart' as drift;
@@ -99,6 +99,7 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
 
     return Scaffold(
@@ -108,7 +109,7 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Symbols.close, color: ColorTokens.onSurface),
+          icon: Icon(Symbols.close, color: cc.fg),
           onPressed: () => context.pop(),
         ),
       ),
@@ -126,16 +127,16 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _buildHeroAnchor(theme),
+                  _buildHeroAnchor(theme, cc),
                   const SizedBox(height: SpacingTokens.xxl),
-                  _buildLectureInformation(theme),
+                  _buildLectureInformation(theme, cc),
                   const SizedBox(height: SpacingTokens.xxl),
-                  _buildPrimaryStatusSection(theme),
-                  _buildSecondaryStatusSection(theme),
+                  _buildPrimaryStatusSection(theme, cc),
+                  _buildSecondaryStatusSection(theme, cc),
                   const SizedBox(height: SpacingTokens.xxl),
-                  _buildOptionalNote(theme),
+                  _buildOptionalNote(theme, cc),
                   const SizedBox(height: SpacingTokens.xxl),
-                  _buildEvidenceSection(theme),
+                  _buildEvidenceSection(theme, cc),
                   SizedBox(height: bottomPadding), // Keyboard avoidance
                 ],
               ),
@@ -147,35 +148,31 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
             left: 0,
             right: 0,
             bottom: 0,
-            child: _buildStickySaveBar(theme),
+            child: _buildStickySaveBar(theme, cc),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildHeroAnchor(ThemeData theme) {
+  Widget _buildHeroAnchor(ThemeData theme, CCTokens cc) {
     return Center(
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.all(SpacingTokens.lg),
             decoration: BoxDecoration(
-              color: ColorTokens.surfaceContainerHighest,
+              color: cc.raise2,
               shape: BoxShape.circle,
-              border: Border.all(color: ColorTokens.outlineVariant, width: 1),
+              border: Border.all(color: cc.line, width: 1),
             ),
-            child: const Icon(
-              Symbols.history_edu,
-              size: 32,
-              color: ColorTokens.primary,
-            ),
+            child: Icon(Symbols.history_edu, size: 32, color: cc.pri),
           ),
           const SizedBox(height: SpacingTokens.md),
           Text(
             'Lecture Record',
             style: theme.textTheme.titleMedium?.copyWith(
-              color: ColorTokens.onSurfaceVariant,
+              color: cc.mut,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -184,13 +181,13 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
     );
   }
 
-  Widget _buildLectureInformation(ThemeData theme) {
+  Widget _buildLectureInformation(ThemeData theme, CCTokens cc) {
     return Container(
       padding: const EdgeInsets.all(SpacingTokens.lg),
       decoration: BoxDecoration(
-        color: ColorTokens.surfaceContainerHigh,
-        borderRadius: RadiusTokens.borderRadiusXl,
-        border: Border.all(color: ColorTokens.outlineVariant),
+        color: cc.raise,
+        borderRadius: RadiusTokens.borderRadiusXxl,
+        border: Border.all(color: cc.line),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,7 +195,7 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
           Text(
             'Advanced Mathematics II',
             style: theme.textTheme.headlineSmall?.copyWith(
-              color: ColorTokens.onSurface,
+              color: cc.fg,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -211,68 +208,50 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
                   vertical: 2,
                 ),
                 decoration: BoxDecoration(
-                  color: ColorTokens.primary.withValues(alpha: 0.15),
+                  color: cc.priSoft,
                   borderRadius: RadiusTokens.borderRadiusSm,
                 ),
                 child: Text(
                   'Theory',
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: ColorTokens.primary,
+                    color: cc.pri,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
               const SizedBox(width: SpacingTokens.md),
-              const Icon(
-                Symbols.schedule,
-                size: 16,
-                color: ColorTokens.onSurfaceVariant,
-              ),
+              Icon(Symbols.schedule, size: 16, color: cc.mut),
               const SizedBox(width: 4),
               Text(
                 '09:00 AM - 10:00 AM',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: ColorTokens.onSurfaceVariant,
-                ),
+                style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
               ),
             ],
           ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: SpacingTokens.md),
-            child: Divider(color: ColorTokens.outlineVariant),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: SpacingTokens.md),
+            child: Divider(color: cc.line),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
                 children: [
-                  const Icon(
-                    Symbols.meeting_room,
-                    size: 18,
-                    color: ColorTokens.onSurfaceVariant,
-                  ),
+                  Icon(Symbols.meeting_room, size: 18, color: cc.mut),
                   const SizedBox(width: SpacingTokens.sm),
                   Text(
                     'Room 402',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: ColorTokens.onSurface,
-                    ),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: cc.fg),
                   ),
                 ],
               ),
               Row(
                 children: [
-                  const Icon(
-                    Symbols.person,
-                    size: 18,
-                    color: ColorTokens.onSurfaceVariant,
-                  ),
+                  Icon(Symbols.person, size: 18, color: cc.mut),
                   const SizedBox(width: SpacingTokens.sm),
                   Text(
                     'Dr. A. Sharma',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: ColorTokens.onSurface,
-                    ),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: cc.fg),
                   ),
                 ],
               ),
@@ -281,17 +260,11 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
           const SizedBox(height: SpacingTokens.sm),
           Row(
             children: [
-              const Icon(
-                Symbols.calendar_today,
-                size: 18,
-                color: ColorTokens.onSurfaceVariant,
-              ),
+              Icon(Symbols.calendar_today, size: 18, color: cc.mut),
               const SizedBox(width: SpacingTokens.sm),
               Text(
                 'Mon, Sep 15, 2025',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: ColorTokens.onSurface,
-                ),
+                style: theme.textTheme.bodyMedium?.copyWith(color: cc.fg),
               ),
             ],
           ),
@@ -300,14 +273,14 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
     );
   }
 
-  Widget _buildPrimaryStatusSection(ThemeData theme) {
+  Widget _buildPrimaryStatusSection(ThemeData theme, CCTokens cc) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Attendance Status',
           style: theme.textTheme.titleMedium?.copyWith(
-            color: ColorTokens.onSurface,
+            color: cc.fg,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -319,7 +292,8 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
                 title: 'Present',
                 description: 'You attended this lecture.',
                 icon: Symbols.check_circle,
-                color: SemanticColorTokens.present,
+                color: cc.pri,
+                mutedColor: cc.mut,
                 isSelected: _primaryStatus == PrimaryStatus.present,
                 onTap: () => _selectPrimaryStatus(PrimaryStatus.present),
               ),
@@ -330,7 +304,8 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
                 title: 'Absent',
                 description: 'You missed this lecture.',
                 icon: Symbols.cancel,
-                color: SemanticColorTokens.absent,
+                color: cc.risk,
+                mutedColor: cc.mut,
                 isSelected: _primaryStatus == PrimaryStatus.absent,
                 onTap: () => _selectPrimaryStatus(PrimaryStatus.absent),
               ),
@@ -341,7 +316,8 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
                 title: 'Cancelled',
                 description: 'This lecture did not take place.',
                 icon: Symbols.block,
-                color: SemanticColorTokens.cancelled,
+                color: cc.warn,
+                mutedColor: cc.mut,
                 isSelected: _primaryStatus == PrimaryStatus.cancelled,
                 onTap: () => _selectPrimaryStatus(PrimaryStatus.cancelled),
               ),
@@ -352,7 +328,7 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
     );
   }
 
-  Widget _buildSecondaryStatusSection(ThemeData theme) {
+  Widget _buildSecondaryStatusSection(ThemeData theme, CCTokens cc) {
     final available = _availableSecondaryStatuses;
 
     return AnimatedSize(
@@ -367,9 +343,7 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
                 children: [
                   Text(
                     'Context (Optional)',
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      color: ColorTokens.onSurfaceVariant,
-                    ),
+                    style: theme.textTheme.titleSmall?.copyWith(color: cc.mut),
                   ),
                   const SizedBox(height: SpacingTokens.md),
                   Wrap(
@@ -390,20 +364,16 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
                             });
                           }
                         },
-                        backgroundColor: ColorTokens.surfaceContainerHighest,
-                        selectedColor: ColorTokens.primary.withValues(
-                          alpha: 0.2,
-                        ),
-                        checkmarkColor: ColorTokens.primary,
+                        backgroundColor: cc.raise2,
+                        selectedColor: cc.priSoft,
+                        checkmarkColor: cc.pri,
                         labelStyle: theme.textTheme.bodyMedium?.copyWith(
-                          color: isSelected
-                              ? ColorTokens.primary
-                              : ColorTokens.onSurface,
+                          color: isSelected ? cc.pri : cc.fg,
                           fontWeight: isSelected ? FontWeight.bold : null,
                         ),
                         side: BorderSide(
                           color: isSelected
-                              ? ColorTokens.primary.withValues(alpha: 0.5)
+                              ? cc.pri.withValues(alpha: 0.5)
                               : Colors.transparent,
                         ),
                         shape: const RoundedRectangleBorder(
@@ -423,21 +393,17 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
                             child: TextField(
                               controller: _otherReasonController,
                               focusNode: _otherFocusNode,
-                              style: const TextStyle(
-                                color: ColorTokens.onSurface,
-                              ),
-                              decoration: const InputDecoration(
+                              style: TextStyle(color: cc.fg),
+                              decoration: InputDecoration(
                                 hintText: 'What happened?',
-                                hintStyle: TextStyle(
-                                  color: ColorTokens.onSurfaceVariant,
-                                ),
+                                hintStyle: TextStyle(color: cc.mut),
                                 filled: true,
-                                fillColor: ColorTokens.surfaceContainerHighest,
-                                border: OutlineInputBorder(
+                                fillColor: cc.raise2,
+                                border: const OutlineInputBorder(
                                   borderRadius: RadiusTokens.borderRadiusMd,
                                   borderSide: BorderSide.none,
                                 ),
-                                contentPadding: EdgeInsets.all(
+                                contentPadding: const EdgeInsets.all(
                                   SpacingTokens.md,
                                 ),
                               ),
@@ -451,14 +417,14 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
     );
   }
 
-  Widget _buildOptionalNote(ThemeData theme) {
+  Widget _buildOptionalNote(ThemeData theme, CCTokens cc) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Note (Optional)',
           style: theme.textTheme.titleMedium?.copyWith(
-            color: ColorTokens.onSurface,
+            color: cc.fg,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -467,55 +433,53 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
           controller: _noteController,
           maxLines: 4,
           minLines: 3,
-          style: const TextStyle(color: ColorTokens.onSurface),
-          decoration: const InputDecoration(
+          style: TextStyle(color: cc.fg),
+          decoration: InputDecoration(
             hintText: 'Anything worth remembering about today\'s lecture?',
-            hintStyle: TextStyle(color: ColorTokens.onSurfaceVariant),
+            hintStyle: TextStyle(color: cc.mut),
             filled: true,
-            fillColor: ColorTokens.surfaceContainerHigh,
-            border: OutlineInputBorder(
+            fillColor: cc.raise,
+            border: const OutlineInputBorder(
               borderRadius: RadiusTokens.borderRadiusLg,
               borderSide: BorderSide.none,
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: RadiusTokens.borderRadiusLg,
-              borderSide: BorderSide(color: ColorTokens.primary, width: 2),
+              borderSide: BorderSide(color: cc.pri, width: 2),
             ),
-            contentPadding: EdgeInsets.all(SpacingTokens.lg),
+            contentPadding: const EdgeInsets.all(SpacingTokens.lg),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildEvidenceSection(ThemeData theme) {
+  Widget _buildEvidenceSection(ThemeData theme, CCTokens cc) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Evidence (Optional)',
           style: theme.textTheme.titleMedium?.copyWith(
-            color: ColorTokens.onSurface,
+            color: cc.fg,
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: SpacingTokens.xs),
         Text(
           'Capture a classroom photo as a personal reference for this lecture.',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: ColorTokens.onSurfaceVariant,
-          ),
+          style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
         ),
         const SizedBox(height: SpacingTokens.md),
 
         // Compact indicators
         Row(
           children: [
-            _buildIndicator(theme, Symbols.photo_camera, 'Camera only'),
+            _buildIndicator(theme, cc, Symbols.photo_camera, 'Camera only'),
             const SizedBox(width: SpacingTokens.md),
-            _buildIndicator(theme, Symbols.sd_card, 'Stored locally'),
+            _buildIndicator(theme, cc, Symbols.sd_card, 'Stored locally'),
             const SizedBox(width: SpacingTokens.md),
-            _buildIndicator(theme, Symbols.cloud_off, 'Never synced'),
+            _buildIndicator(theme, cc, Symbols.cloud_off, 'Never synced'),
           ],
         ),
         const SizedBox(height: SpacingTokens.lg),
@@ -524,23 +488,23 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
     );
   }
 
-  Widget _buildIndicator(ThemeData theme, IconData icon, String text) {
+  Widget _buildIndicator(
+    ThemeData theme,
+    CCTokens cc,
+    IconData icon,
+    String text,
+  ) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 14, color: ColorTokens.onSurfaceVariant),
+        Icon(icon, size: 14, color: cc.mut),
         const SizedBox(width: 4),
-        Text(
-          text,
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: ColorTokens.onSurfaceVariant,
-          ),
-        ),
+        Text(text, style: theme.textTheme.labelSmall?.copyWith(color: cc.mut)),
       ],
     );
   }
 
-  Widget _buildStickySaveBar(ThemeData theme) {
+  Widget _buildStickySaveBar(ThemeData theme, CCTokens cc) {
     return Container(
       padding: EdgeInsets.only(
         left: LayoutTokens.screenPadding,
@@ -549,13 +513,11 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
         bottom: MediaQuery.of(context).padding.bottom + SpacingTokens.md,
       ),
       decoration: BoxDecoration(
-        color: ColorTokens.surface,
-        border: const Border(
-          top: BorderSide(color: ColorTokens.outlineVariant),
-        ),
+        color: cc.surf,
+        border: Border(top: BorderSide(color: cc.line)),
         boxShadow: [
           BoxShadow(
-            color: ColorTokens.background.withValues(alpha: 0.8),
+            color: cc.bg.withValues(alpha: 0.8),
             blurRadius: 24,
             offset: const Offset(0, -8),
           ),
@@ -566,9 +528,7 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
         children: [
           Text(
             'Once saved, this Lecture Record becomes a permanent part of your semester history.',
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: ColorTokens.onSurfaceVariant,
-            ),
+            style: theme.textTheme.labelSmall?.copyWith(color: cc.mut),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: SpacingTokens.md),
@@ -621,10 +581,10 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
                       }
                     },
               style: FilledButton.styleFrom(
-                backgroundColor: ColorTokens.primary,
-                foregroundColor: ColorTokens.onPrimary,
-                disabledBackgroundColor: ColorTokens.surfaceContainerHighest,
-                disabledForegroundColor: ColorTokens.onSurfaceVariant,
+                backgroundColor: cc.pri,
+                foregroundColor: cc.priFg,
+                disabledBackgroundColor: cc.raise2,
+                disabledForegroundColor: cc.mut,
                 padding: const EdgeInsets.symmetric(vertical: SpacingTokens.lg),
                 shape: const RoundedRectangleBorder(
                   borderRadius: RadiusTokens.borderRadiusLg,
@@ -648,6 +608,7 @@ class _PrimaryStatusCard extends StatelessWidget {
     required this.description,
     required this.icon,
     required this.color,
+    required this.mutedColor,
     required this.isSelected,
     required this.onTap,
   });
@@ -656,12 +617,14 @@ class _PrimaryStatusCard extends StatelessWidget {
   final String description;
   final IconData icon;
   final Color color;
+  final Color mutedColor;
   final bool isSelected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return GestureDetector(
       onTap: onTap,
@@ -670,9 +633,7 @@ class _PrimaryStatusCard extends StatelessWidget {
         curve: Curves.easeOutCubic,
         padding: const EdgeInsets.all(SpacingTokens.sm),
         decoration: BoxDecoration(
-          color: isSelected
-              ? color.withValues(alpha: 0.1)
-              : ColorTokens.surfaceContainerHigh,
+          color: isSelected ? color.withValues(alpha: 0.1) : cc.raise2,
           borderRadius: RadiusTokens.borderRadiusLg,
           border: Border.all(
             color: isSelected
@@ -700,7 +661,7 @@ class _PrimaryStatusCard extends StatelessWidget {
                   child: Icon(
                     isSelected ? Symbols.check_circle : icon,
                     key: ValueKey(isSelected),
-                    color: isSelected ? color : ColorTokens.onSurfaceVariant,
+                    color: isSelected ? color : mutedColor,
                     size: 20,
                   ),
                 ),
@@ -709,7 +670,7 @@ class _PrimaryStatusCard extends StatelessWidget {
                   child: Text(
                     title,
                     style: theme.textTheme.labelLarge?.copyWith(
-                      color: isSelected ? color : ColorTokens.onSurface,
+                      color: isSelected ? color : cc.fg,
                       fontWeight: FontWeight.bold,
                     ),
                     maxLines: 1,
@@ -722,9 +683,7 @@ class _PrimaryStatusCard extends StatelessWidget {
             Text(
               description,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: isSelected
-                    ? ColorTokens.onSurface
-                    : ColorTokens.onSurfaceVariant,
+                color: isSelected ? cc.fg : mutedColor,
                 fontSize: 10,
               ),
               maxLines: 2,

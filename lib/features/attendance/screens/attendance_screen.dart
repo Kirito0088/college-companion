@@ -9,7 +9,7 @@ import 'package:college_companion/features/attendance/widgets/stats_row.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/features/subjects/providers/subjects_provider.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -137,6 +137,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
     final subjectsAsync = ref.watch(subjectsStreamProvider(userId));
     final repo = ref.watch(attendanceRepositoryProvider);
     final recordsStream = repo.watchAll(userId);
+    final cc = context.cc;
 
     return [
       _buildSearchPlaceholder(context),
@@ -163,9 +164,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                       _subjectSearchQuery.isEmpty
                           ? 'No subjects added yet.'
                           : 'No subjects found matching query.',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: ColorTokens.onSurfaceVariant,
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyLarge?.copyWith(color: cc.mut),
                     ),
                   ),
                 );
@@ -208,7 +209,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
             'Error loading subjects: $err',
             style: Theme.of(
               context,
-            ).textTheme.bodyMedium?.copyWith(color: ColorTokens.error),
+            ).textTheme.bodyMedium?.copyWith(color: cc.risk),
           ),
         ),
       ),
@@ -217,11 +218,13 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
 
   Widget _buildHealthCard(BuildContext context, SafeBunkResult? safeBunk) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     final isSafe =
         safeBunk == null ||
+        safeBunk.total == 0 ||
         safeBunk.currentPercentage >= safeBunk.targetPercentage;
     final title = isSafe ? 'Safe' : 'Action Required';
-    final color = isSafe ? ColorTokens.success : ColorTokens.error;
+    final color = isSafe ? cc.pri : cc.risk;
     final message = safeBunk != null
         ? (isSafe
               ? 'You can miss approximately ${safeBunk.safeBunks} more lectures before reaching ${safeBunk.targetPercentage.round()}%.'
@@ -232,7 +235,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
       padding: const EdgeInsets.all(LayoutTokens.cardPadding),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
-        borderRadius: RadiusTokens.borderRadiusLg,
+        borderRadius: RadiusTokens.borderRadiusXxl,
         border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
       ),
       child: Row(
@@ -243,7 +246,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
             decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             child: Icon(
               isSafe ? Symbols.check : Symbols.warning,
-              color: isSafe ? ColorTokens.onSuccess : ColorTokens.onError,
+              color: cc.priFg,
               size: 24,
             ),
           ),
@@ -255,16 +258,14 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                 Text(
                   title,
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: ColorTokens.onSurface,
+                    color: cc.fg,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: SpacingTokens.xxs),
                 Text(
                   message,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: ColorTokens.onSurfaceVariant,
-                  ),
+                  style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
                 ),
               ],
             ),
@@ -279,6 +280,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
     AttendanceInsights? insights,
   ) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     final avgPctStr = insights != null
         ? '${insights.averagePercentage.round()}%'
         : '--%';
@@ -294,7 +296,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
           child: Text(
             'Attendance Insights',
             style: theme.textTheme.titleMedium?.copyWith(
-              color: ColorTokens.onSurface,
+              color: cc.fg,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -302,12 +304,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
         Container(
           padding: const EdgeInsets.all(LayoutTokens.cardPadding),
           decoration: BoxDecoration(
-            color: ColorTokens.surfaceContainer,
-            borderRadius: RadiusTokens.borderRadiusXl,
-            border: Border.all(
-              color: ColorTokens.outlineVariant.withValues(alpha: 0.15),
-              width: 1,
-            ),
+            color: cc.raise,
+            borderRadius: RadiusTokens.borderRadiusXxl,
+            border: Border.all(color: cc.line),
           ),
           child: Column(
             children: [
@@ -365,20 +364,19 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
 
   Widget _buildInsightStat(BuildContext context, String label, String value) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: theme.textTheme.labelMedium?.copyWith(
-            color: ColorTokens.onSurfaceVariant,
-          ),
+          style: theme.textTheme.labelMedium?.copyWith(color: cc.mut),
         ),
         const SizedBox(height: SpacingTokens.xxs),
         Text(
           value,
           style: theme.textTheme.titleMedium?.copyWith(
-            color: ColorTokens.onSurface,
+            color: cc.fg,
             fontWeight: FontWeight.w600,
           ),
           maxLines: 1,
@@ -390,6 +388,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
 
   Widget _buildRequirementCard(BuildContext context, SafeBunkResult? safeBunk) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     final targetStr = safeBunk != null
         ? '${safeBunk.targetPercentage.round()}%'
         : '--%';
@@ -397,15 +396,14 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
         ? '${safeBunk.currentPercentage.round()}%'
         : '--%';
     final statusStr = safeBunk != null
-        ? (safeBunk.currentPercentage >= safeBunk.targetPercentage
+        ? (safeBunk.total == 0 ||
+                  safeBunk.currentPercentage >= safeBunk.targetPercentage
               ? 'Eligible'
               : 'Ineligible')
         : '--';
     final statusColor = statusStr == 'Eligible'
-        ? ColorTokens.success
-        : (statusStr == '--'
-              ? ColorTokens.onSurfaceVariant
-              : ColorTokens.error);
+        ? cc.pri
+        : (statusStr == '--' ? cc.mut : cc.risk);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -418,7 +416,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
           child: Text(
             'Attendance Requirement',
             style: theme.textTheme.titleMedium?.copyWith(
-              color: ColorTokens.onSurface,
+              color: cc.fg,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -426,12 +424,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
         Container(
           padding: const EdgeInsets.all(LayoutTokens.cardPadding),
           decoration: BoxDecoration(
-            color: ColorTokens.surfaceContainer,
-            borderRadius: RadiusTokens.borderRadiusXl,
-            border: Border.all(
-              color: ColorTokens.outlineVariant.withValues(alpha: 0.15),
-              width: 1,
-            ),
+            color: cc.raise,
+            borderRadius: RadiusTokens.borderRadiusXxl,
+            border: Border.all(color: cc.line),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -440,14 +435,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                 context,
                 'Minimum Required',
                 targetStr,
-                ColorTokens.onSurface,
+                cc.fg,
               ),
-              _buildRequirementStat(
-                context,
-                'Current',
-                currentStr,
-                ColorTokens.onSurface,
-              ),
+              _buildRequirementStat(context, 'Current', currentStr, cc.fg),
               _buildRequirementStat(context, 'Status', statusStr, statusColor),
             ],
           ),
@@ -463,13 +453,12 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
     Color valueColor,
   ) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Column(
       children: [
         Text(
           label,
-          style: theme.textTheme.labelMedium?.copyWith(
-            color: ColorTokens.onSurfaceVariant,
-          ),
+          style: theme.textTheme.labelMedium?.copyWith(color: cc.mut),
         ),
         const SizedBox(height: SpacingTokens.xs),
         Text(
@@ -485,6 +474,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
 
   Widget _buildQuickActions(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -496,7 +486,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
           child: Text(
             'Quick Actions',
             style: theme.textTheme.titleMedium?.copyWith(
-              color: ColorTokens.onSurface,
+              color: cc.fg,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -512,16 +502,14 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
 
   Widget _buildActionCard(BuildContext context, String title, IconData icon) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return Material(
-      color: ColorTokens.surfaceContainer,
+      color: cc.raise,
       elevation: 0,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
-        borderRadius: RadiusTokens.borderRadiusLg,
-        side: BorderSide(
-          color: ColorTokens.outlineVariant.withValues(alpha: 0.15),
-          width: 1,
-        ),
+        borderRadius: RadiusTokens.borderRadiusXxl,
+        side: BorderSide(color: cc.line, width: 1),
       ),
       child: InkWell(
         onTap: () {},
@@ -530,21 +518,18 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Icon(icon, color: ColorTokens.primary, size: 24),
+              Icon(icon, color: cc.pri, size: 24),
               const SizedBox(width: SpacingTokens.lg),
               Expanded(
                 child: Text(
                   title,
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: ColorTokens.onSurface,
+                    color: cc.fg,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
-              const Icon(
-                Symbols.chevron_right,
-                color: ColorTokens.onSurfaceVariant,
-              ),
+              Icon(Symbols.chevron_right, color: cc.mut),
             ],
           ),
         ),
@@ -554,6 +539,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
 
   Widget _buildSearchPlaceholder(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
     return TextField(
       onChanged: (val) {
         setState(() {
@@ -562,30 +548,21 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
       },
       decoration: InputDecoration(
         hintText: 'Search subjects...',
-        hintStyle: theme.textTheme.bodyMedium?.copyWith(
-          color: ColorTokens.onSurfaceVariant,
-        ),
-        prefixIcon: const Icon(
-          Symbols.search,
-          color: ColorTokens.onSurfaceVariant,
-        ),
+        hintStyle: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
+        prefixIcon: Icon(Symbols.search, color: cc.mut),
         filled: true,
-        fillColor: ColorTokens.surfaceContainer,
+        fillColor: cc.raise,
         border: OutlineInputBorder(
-          borderRadius: RadiusTokens.borderRadiusXl,
-          borderSide: BorderSide(
-            color: ColorTokens.outlineVariant.withValues(alpha: 0.2),
-          ),
+          borderRadius: RadiusTokens.borderRadiusXxl,
+          borderSide: BorderSide(color: cc.line),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: RadiusTokens.borderRadiusXl,
-          borderSide: BorderSide(
-            color: ColorTokens.outlineVariant.withValues(alpha: 0.2),
-          ),
+          borderRadius: RadiusTokens.borderRadiusXxl,
+          borderSide: BorderSide(color: cc.line),
         ),
-        focusedBorder: const OutlineInputBorder(
-          borderRadius: RadiusTokens.borderRadiusXl,
-          borderSide: BorderSide(color: ColorTokens.primary),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: RadiusTokens.borderRadiusXxl,
+          borderSide: BorderSide(color: cc.pri),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: SpacingTokens.lg,
@@ -607,24 +584,17 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
     String userId,
   ) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
-    Color progressColor;
-    if (progress >= 0.75) {
-      progressColor = ColorTokens.success;
-    } else {
-      progressColor = ColorTokens.error;
-    }
+    final progressColor = progress >= 0.75 ? cc.pri : cc.risk;
 
     return Material(
-      color: ColorTokens.surfaceContainer,
+      color: cc.raise,
       elevation: 0,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
-        borderRadius: RadiusTokens.borderRadiusXl,
-        side: BorderSide(
-          color: ColorTokens.outlineVariant.withValues(alpha: 0.15),
-          width: 1,
-        ),
+        borderRadius: RadiusTokens.borderRadiusXxl,
+        side: BorderSide(color: cc.line, width: 1),
       ),
       child: InkWell(
         onTap: () => context.push('/subject-details/$subjectId'),
@@ -640,7 +610,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                     child: Text(
                       name,
                       style: theme.textTheme.titleMedium?.copyWith(
-                        color: ColorTokens.onSurface,
+                        color: cc.fg,
                         fontWeight: FontWeight.w600,
                       ),
                       maxLines: 1,
@@ -670,17 +640,12 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                 children: [
                   Text(
                     '$present / $total Lectures Attended',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: ColorTokens.onSurfaceVariant,
-                    ),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
                   ),
                   Row(
                     children: [
                       IconButton(
-                        icon: const Icon(
-                          Symbols.check_circle,
-                          color: ColorTokens.success,
-                        ),
+                        icon: Icon(Symbols.check_circle, color: cc.pri),
                         tooltip: 'Mark Present',
                         onPressed: () async {
                           await repo.create(
@@ -706,10 +671,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                         },
                       ),
                       IconButton(
-                        icon: const Icon(
-                          Symbols.cancel,
-                          color: ColorTokens.error,
-                        ),
+                        icon: Icon(Symbols.cancel, color: cc.risk),
                         tooltip: 'Mark Absent',
                         onPressed: () async {
                           await repo.create(
@@ -735,10 +697,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                         },
                       ),
                       const SizedBox(width: SpacingTokens.xs),
-                      const Icon(
-                        Symbols.chevron_right,
-                        color: ColorTokens.onSurfaceVariant,
-                      ),
+                      Icon(Symbols.chevron_right, color: cc.mut),
                     ],
                   ),
                 ],

@@ -1,4 +1,4 @@
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +10,7 @@ class AttendanceHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cc = context.cc;
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -31,11 +32,11 @@ class AttendanceHeader extends StatelessWidget {
                         context.pop();
                       }
                     },
-                    child: const Padding(
-                      padding: EdgeInsets.all(SpacingTokens.sm),
+                    child: Padding(
+                      padding: const EdgeInsets.all(SpacingTokens.sm),
                       child: Icon(
                         Symbols.arrow_back_rounded,
-                        color: ColorTokens.onSurfaceVariant,
+                        color: cc.mut,
                         size: 24,
                       ),
                     ),
@@ -46,7 +47,7 @@ class AttendanceHeader extends StatelessWidget {
                   'Attendance',
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: ColorTokens.onSurface,
+                    color: cc.fg,
                   ),
                 ),
               ],
@@ -57,26 +58,22 @@ class AttendanceHeader extends StatelessWidget {
                 vertical: 8,
               ),
               decoration: BoxDecoration(
-                color: ColorTokens.surface,
+                color: cc.surf,
                 borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: ColorTokens.outlineVariant),
+                border: Border.all(color: cc.line),
               ),
               child: Row(
                 children: [
                   Text(
                     'SEM 5',
                     style: theme.textTheme.labelLarge?.copyWith(
-                      color: ColorTokens.onSurfaceVariant,
+                      color: cc.mut,
                       letterSpacing: 0.5,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(width: SpacingTokens.xs),
-                  const Icon(
-                    Symbols.expand_more_rounded,
-                    color: ColorTokens.onSurfaceVariant,
-                    size: 18,
-                  ),
+                  Icon(Symbols.expand_more_rounded, color: cc.mut, size: 18),
                 ],
               ),
             ),

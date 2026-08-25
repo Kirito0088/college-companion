@@ -3,6 +3,7 @@
 /// Riverpod providers for timetable-related state and reactive streams.
 library;
 
+import 'package:college_companion/database/app_database.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/features/timetable/models/lecture_schedule_item.dart';
@@ -67,3 +68,18 @@ final weeklyTimetableStreamProvider = StreamProvider<List<LectureScheduleItem>>(
     return repo.watchAllWeeklyLectures(userId);
   },
 );
+
+/// Watches a single timetable slot by ID for the currently authenticated
+/// user (raw entry — subject fields are not joined; combine with
+/// `subjectByIdStreamProvider`).
+final timetableEntryByIdProvider =
+    StreamProvider.family<TimetableEntryEntity?, String>((ref, timetableId) {
+      final authState = ref.watch(authStateProvider);
+      final userId = authState is AuthAuthenticated ? authState.user.uid : '';
+      if (userId.isEmpty) {
+        return Stream.value(null);
+      }
+
+      final repo = ref.watch(timetableRepositoryProvider);
+      return repo.watchById(userId, timetableId);
+    });

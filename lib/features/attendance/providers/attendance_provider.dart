@@ -6,6 +6,7 @@ library;
 import 'package:college_companion/database/app_database.dart';
 import 'package:college_companion/database/daos/attendance_dao.dart';
 import 'package:college_companion/features/attendance/repositories/attendance_repository.dart';
+import 'package:college_companion/features/attendance/repositories/lecture_record_repository.dart';
 import 'package:college_companion/features/subjects/providers/subjects_provider.dart';
 import 'package:college_companion/providers/app_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,6 +23,29 @@ final attendanceRepositoryProvider = Provider<AttendanceRepository>((ref) {
   final syncQueueRepository = ref.watch(syncQueueRepositoryProvider);
   return AttendanceRepository(database, syncQueueRepository);
 });
+
+/// Provides the [LectureRecordRepository] instance — the immutable ledger
+/// (Layer 1 of the three-layer immutability model). Never use
+/// [attendanceRepositoryProvider] to record a lecture; that writes the
+/// legacy, mutable `attendance` table.
+final lectureRecordRepositoryProvider = Provider<LectureRecordRepository>((
+  ref,
+) {
+  final database = ref.watch(databaseProvider);
+  final syncRepository = ref.watch(syncRepositoryProvider);
+  return LectureRecordRepository(database, syncRepository);
+});
+
+/// Watches whether a lecture record already exists for a given timetable
+/// slot — drives the locked/read-only ledger view.
+final lectureRecordByTimetableIdProvider =
+    StreamProvider.family<
+      LectureRecordEntity?,
+      ({String userId, String timetableId})
+    >((ref, params) {
+      final repo = ref.watch(lectureRecordRepositoryProvider);
+      return repo.watchByTimetableId(params.userId, params.timetableId);
+    });
 
 /// Result of a safe bunk calculation.
 class SafeBunkResult {

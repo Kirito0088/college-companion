@@ -6,6 +6,9 @@ library;
 
 import 'package:college_companion/core/repositories/sync_queue_repository.dart';
 import 'package:college_companion/database/app_database.dart';
+import 'package:college_companion/database/daos/sync_metadata_dao.dart';
+import 'package:college_companion/database/daos/sync_queue_dao.dart';
+import 'package:college_companion/features/attendance/repositories/sync_repository.dart';
 import 'package:college_companion/features/settings/repositories/user_settings_repository.dart';
 import 'package:college_companion/services/connectivity_service.dart';
 import 'package:college_companion/services/supabase_service.dart';
@@ -37,6 +40,13 @@ final supabaseClientProvider = Provider<SupabaseClient>((ref) {
 final syncQueueRepositoryProvider = Provider<SyncQueueRepository>((ref) {
   final database = ref.watch(databaseProvider);
   return SyncQueueRepository(database);
+});
+
+/// Provides the sync repository (queue + metadata bookkeeping) used by
+/// repositories that own an immutable ledger, e.g. [LectureRecordRepository].
+final syncRepositoryProvider = Provider<SyncRepository>((ref) {
+  final database = ref.watch(databaseProvider);
+  return SyncRepository(SyncQueueDao(database), SyncMetadataDao(database));
 });
 
 /// Provides the user settings repository.

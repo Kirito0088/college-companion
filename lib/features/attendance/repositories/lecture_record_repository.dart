@@ -38,7 +38,11 @@ class LectureRecordRepository {
 
   /// Creates an immutable lecture record for a specific timetable slot.
   ///
-  /// Returns the new record's UUID.
+  /// Pass [id] to reuse a UUID minted before this call (e.g. one already
+  /// used to key evidence captured mid-flow, before the record itself is
+  /// saved); omit it to have one generated here.
+  ///
+  /// Returns the record's UUID.
   /// Throws [LectureRecordExistsException] if this timetable slot already
   /// has a record (1:1 UNIQUE constraint).
   Future<String> create({
@@ -50,6 +54,7 @@ class LectureRecordRepository {
     String? note,
     required String deviceTimezone,
     required String appVersion,
+    String? id,
   }) async {
     // Validate 1:1 — each timetable slot gets one record.
     final existing = await _dao.getByTimetableId(userId, timetableId);
@@ -57,14 +62,14 @@ class LectureRecordRepository {
       throw LectureRecordExistsException(timetableId);
     }
 
-    final id = _uuid.v4();
+    final recordId = id ?? _uuid.v4();
     final now = DateTime.now().toUtc();
 
     await _database
         .into(_database.lectureRecords)
         .insert(
           LectureRecordsCompanion(
-            id: Value(id),
+            id: Value(recordId),
             timetableId: Value(timetableId),
             subjectId: Value(subjectId),
             semesterId: Value(semesterId),
@@ -87,11 +92,11 @@ class LectureRecordRepository {
     // Phase 4 enqueue (Phase 5 engine executes the push).
     await _syncRepository.enqueue(
       tableName: 'lecture_records',
-      recordId: id,
+      recordId: recordId,
       operation: 'INSERT',
     );
 
-    return id;
+    return recordId;
   }
 
   /// Batch-creates Absent records for every timetable slot on a given
@@ -140,6 +145,11 @@ class LectureRecordRepository {
     String userId,
     String timetableId,
   ) => _dao.getByTimetableId(userId, timetableId);
+
+  Stream<LectureRecordEntity?> watchByTimetableId(
+    String userId,
+    String timetableId,
+  ) => _dao.watchByTimetableId(userId, timetableId);
 
   Stream<List<LectureRecordEntity>> watchBySubject(
     String userId,

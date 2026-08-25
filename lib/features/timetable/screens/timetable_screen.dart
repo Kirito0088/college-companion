@@ -16,6 +16,7 @@ import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 /// Dedicated Timetable Screen for viewing and managing weekly class schedules.
@@ -156,6 +157,8 @@ class TimetableScreen extends ConsumerWidget {
                         final item = lectures[index];
                         return LectureCard(
                           lecture: item,
+                          onRecord: () =>
+                              context.push('/lecture-record/${item.id}'),
                           onEdit: () => AddEditTimetableEntryDialog.show(
                             context,
                             initialItem: item,

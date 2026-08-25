@@ -1,35 +1,60 @@
 import 'package:college_companion/database/app_database.dart';
 import 'package:college_companion/features/attendance/providers/attendance_provider.dart';
+import 'package:college_companion/features/attendance/repositories/lecture_record_repository.dart';
 import 'package:college_companion/features/attendance/widgets/evidence_thumbnail_strip.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
+import 'package:college_companion/features/subjects/providers/subject_detail_provider.dart';
+import 'package:college_companion/features/timetable/models/lecture_schedule_item.dart';
+import 'package:college_companion/features/timetable/providers/timetable_provider.dart';
+import 'package:college_companion/shared/app_metadata.dart' as app_metadata;
+import 'package:college_companion/shared/models/lecture_status.dart';
+import 'package:college_companion/shared/widgets/cc_empty_state.dart';
+import 'package:college_companion/shared/widgets/errors/cc_errors.dart';
 import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
-import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:uuid/uuid.dart';
 
 enum PrimaryStatus { present, absent, cancelled }
 
 enum SecondaryStatus {
-  facultyAbsent('Faculty Absent'),
-  holiday('Holiday'),
-  practicalCancelled('Practical Cancelled'),
-  extraLecture('Extra Lecture'),
-  other('Other');
+  facultyAbsent('Faculty Absent', 'faculty_absent'),
+  holiday('Holiday', 'holiday'),
+  practicalCancelled('Practical Cancelled', 'practical_cancelled'),
+  extraLecture('Extra Lecture', 'extra_lecture'),
+  other('Other', 'other');
 
-  const SecondaryStatus(this.label);
+  const SecondaryStatus(this.label, this.wireKey);
+
+  /// Display label shown in the UI.
   final String label;
+
+  /// Key persisted in `lecture_records.status_text` (see
+  /// [LectureStatus] — must stay in sync with its documented vocabulary).
+  final String wireKey;
+
+  /// Resolves the enum value for a wire key decoded from storage, if any.
+  static SecondaryStatus? fromWireKey(String? key) {
+    if (key == null) return null;
+    for (final value in SecondaryStatus.values) {
+      if (value.wireKey == key) return value;
+    }
+    return null;
+  }
 }
 
 class LectureRecordScreen extends ConsumerStatefulWidget {
-  const LectureRecordScreen({super.key, this.subjectId});
+  const LectureRecordScreen({super.key, required this.timetableId});
 
-  final String? subjectId;
+  /// The timetable slot this record is for — identifies which lecture is
+  /// being recorded (spec §3: 1:1 with `lecture_records.timetable_id`).
+  final String timetableId;
 
   @override
   ConsumerState<LectureRecordScreen> createState() =>
@@ -43,6 +68,7 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
   final TextEditingController _noteController = TextEditingController();
   final TextEditingController _otherReasonController = TextEditingController();
   final FocusNode _otherFocusNode = FocusNode();
+  bool _saving = false;
 
   @override
   void dispose() {
@@ -96,11 +122,85 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
     }
   }
 
+  LectureStatus _buildStatus() {
+    // `LectureStatus.encode()` joins fields with `|` (see
+    // lecture_status.dart) — a `|` in free text would corrupt the decode
+    // of this immutable, unfixable-after-the-fact record.
+    final otherText = _secondaryStatus == SecondaryStatus.other
+        ? _otherReasonController.text.trim().replaceAll('|', '/')
+        : null;
+
+    switch (_primaryStatus!) {
+      case PrimaryStatus.present:
+        return _secondaryStatus == SecondaryStatus.other
+            ? LectureStatus.presentWithOther(otherText)
+            : const LectureStatus.present();
+      case PrimaryStatus.absent:
+        return _secondaryStatus != null
+            ? LectureStatus.absentWith(_secondaryStatus!.wireKey, otherText)
+            : const LectureStatus.absent();
+      case PrimaryStatus.cancelled:
+        return _secondaryStatus != null
+            ? LectureStatus.cancelledWith(_secondaryStatus!.wireKey, otherText)
+            : const LectureStatus.cancelled();
+    }
+  }
+
+  Future<void> _save({
+    required String userId,
+    required TimetableEntryEntity timetableEntry,
+    required SubjectEntity subject,
+  }) async {
+    setState(() => _saving = true);
+    final repo = ref.read(lectureRecordRepositoryProvider);
+
+    try {
+      await repo.create(
+        id: _recordId,
+        userId: userId,
+        timetableId: widget.timetableId,
+        subjectId: timetableEntry.subjectId,
+        semesterId: subject.semesterId,
+        status: _buildStatus(),
+        note: _noteController.text.trim().isNotEmpty
+            ? _noteController.text.trim()
+            : null,
+        deviceTimezone: app_metadata.currentDeviceTimezone(),
+        appVersion: app_metadata.appVersion,
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Lecture Record saved.')));
+      context.pop();
+    } on LectureRecordExistsException {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('This lecture already has a record.')),
+      );
+      context.pop();
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not save this record. Please try again.'),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cc = context.cc;
-    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
+    final authState = ref.watch(authStateProvider);
+    final userId = authState is AuthAuthenticated ? authState.user.uid : '';
+
+    final timetableAsync = ref.watch(
+      timetableEntryByIdProvider(widget.timetableId),
+    );
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -113,45 +213,273 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
           onPressed: () => context.pop(),
         ),
       ),
-      body: Stack(
+      body: timetableAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => NetworkErrorWidget(
+          onRetry: () =>
+              ref.invalidate(timetableEntryByIdProvider(widget.timetableId)),
+        ),
+        data: (timetableEntry) {
+          if (userId.isEmpty) {
+            return const CcEmptyState(
+              icon: Symbols.lock_person,
+              title: 'Sign in required',
+              subtitle: 'Sign in to record this lecture.',
+            );
+          }
+          if (timetableEntry == null) {
+            return const CcEmptyState(
+              icon: Symbols.event_busy,
+              title: 'Lecture slot not found',
+              subtitle: 'This class may have been removed from your timetable.',
+            );
+          }
+          return _buildForTimetableEntry(
+            context,
+            theme,
+            cc,
+            userId,
+            timetableEntry,
+          );
+        },
+      ),
+    );
+  }
+
+  /// Watches the subject and any existing record in parallel — both depend
+  /// only on [timetableEntry]/[userId], not on each other, so there is no
+  /// reason to resolve them sequentially.
+  Widget _buildForTimetableEntry(
+    BuildContext context,
+    ThemeData theme,
+    CCTokens cc,
+    String userId,
+    TimetableEntryEntity timetableEntry,
+  ) {
+    final subjectParams = (userId: userId, subjectId: timetableEntry.subjectId);
+    final recordParams = (userId: userId, timetableId: widget.timetableId);
+
+    final subjectAsync = ref.watch(subjectByIdStreamProvider(subjectParams));
+    final existingRecordAsync = ref.watch(
+      lectureRecordByTimetableIdProvider(recordParams),
+    );
+
+    if (subjectAsync.isLoading || existingRecordAsync.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (subjectAsync.hasError) {
+      return NetworkErrorWidget(
+        onRetry: () => ref.invalidate(subjectByIdStreamProvider(subjectParams)),
+      );
+    }
+    if (existingRecordAsync.hasError) {
+      return NetworkErrorWidget(
+        onRetry: () =>
+            ref.invalidate(lectureRecordByTimetableIdProvider(recordParams)),
+      );
+    }
+
+    final subject = subjectAsync.value;
+    if (subject == null) {
+      return const CcEmptyState(
+        icon: Symbols.event_busy,
+        title: 'Subject not found',
+        subtitle: 'This lecture\'s subject may have been removed.',
+      );
+    }
+
+    final existingRecord = existingRecordAsync.value;
+    if (existingRecord != null) {
+      return _buildLockedView(
+        theme,
+        cc,
+        timetableEntry,
+        subject,
+        existingRecord,
+      );
+    }
+    return _buildForm(context, theme, cc, userId, timetableEntry, subject);
+  }
+
+  // ── Scenario 2: locked, read-only ledger view ──────────────────────────
+
+  Widget _buildLockedView(
+    ThemeData theme,
+    CCTokens cc,
+    TimetableEntryEntity timetableEntry,
+    SubjectEntity subject,
+    LectureRecordEntity record,
+  ) {
+    final status = LectureStatus.decode(record.statusText);
+    final secondary = SecondaryStatus.fromWireKey(status.secondary);
+    final recordedLocal = record.recordedAt.toLocal();
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(
+        horizontal: LayoutTokens.screenPadding,
+        vertical: SpacingTokens.sm,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Main Scrollable Content
-          Positioned.fill(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.only(
-                left: LayoutTokens.screenPadding,
-                right: LayoutTokens.screenPadding,
-                top: SpacingTokens.sm,
-                bottom: 200, // Space for sticky bottom bar
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildHeroAnchor(theme, cc),
-                  const SizedBox(height: SpacingTokens.xxl),
-                  _buildLectureInformation(theme, cc),
-                  const SizedBox(height: SpacingTokens.xxl),
-                  _buildPrimaryStatusSection(theme, cc),
-                  _buildSecondaryStatusSection(theme, cc),
-                  const SizedBox(height: SpacingTokens.xxl),
-                  _buildOptionalNote(theme, cc),
-                  const SizedBox(height: SpacingTokens.xxl),
-                  _buildEvidenceSection(theme, cc),
-                  SizedBox(height: bottomPadding), // Keyboard avoidance
-                ],
-              ),
+          Center(
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(SpacingTokens.lg),
+                  decoration: BoxDecoration(
+                    color: cc.raise2,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: cc.line, width: 1),
+                  ),
+                  child: Icon(Symbols.lock, size: 32, color: cc.pri),
+                ),
+                const SizedBox(height: SpacingTokens.md),
+                Text(
+                  'Lecture Record',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: cc.mut,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
           ),
-
-          // Sticky Bottom Bar
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: _buildStickySaveBar(theme, cc),
+          const SizedBox(height: SpacingTokens.xxl),
+          _buildLectureInformation(theme, cc, timetableEntry, subject),
+          const SizedBox(height: SpacingTokens.xxl),
+          Container(
+            padding: const EdgeInsets.all(SpacingTokens.lg),
+            decoration: BoxDecoration(
+              color: cc.raise,
+              borderRadius: RadiusTokens.borderRadiusXxl,
+              border: Border.all(color: cc.line),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Symbols.lock, size: 16, color: cc.mut),
+                    const SizedBox(width: SpacingTokens.xs),
+                    Text(
+                      'This record is permanent and cannot be edited.',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: cc.mut,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: SpacingTokens.md),
+                _StatusPill(
+                  primary: status.primary,
+                  secondaryLabel: secondary?.label,
+                  otherText: status.secondary == 'other'
+                      ? status.otherText
+                      : null,
+                  cc: cc,
+                  theme: theme,
+                ),
+                if (record.note != null && record.note!.isNotEmpty) ...[
+                  const SizedBox(height: SpacingTokens.md),
+                  Text(
+                    'Note',
+                    style: theme.textTheme.labelSmall?.copyWith(color: cc.mut),
+                  ),
+                  const SizedBox(height: SpacingTokens.xxs),
+                  Text(
+                    record.note!,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: cc.fg),
+                  ),
+                ],
+                const SizedBox(height: SpacingTokens.md),
+                Divider(color: cc.line),
+                const SizedBox(height: SpacingTokens.md),
+                Row(
+                  children: [
+                    Icon(Symbols.history_toggle_off, size: 16, color: cc.mut),
+                    const SizedBox(width: SpacingTokens.xs),
+                    Text(
+                      'Recorded ${DateFormat('MMM d, yyyy • h:mm a').format(recordedLocal)}',
+                      style: theme.textTheme.bodySmall?.copyWith(color: cc.mut),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
+          const SizedBox(height: SpacingTokens.xxl),
+          Text(
+            'Evidence',
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: cc.fg,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: SpacingTokens.md),
+          EvidenceThumbnailStrip(recordId: record.id, readOnly: true),
+          const SizedBox(height: SpacingTokens.xxl),
         ],
       ),
+    );
+  }
+
+  // ── Scenario 1: create form ─────────────────────────────────────────
+
+  Widget _buildForm(
+    BuildContext context,
+    ThemeData theme,
+    CCTokens cc,
+    String userId,
+    TimetableEntryEntity timetableEntry,
+    SubjectEntity subject,
+  ) {
+    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
+
+    return Stack(
+      children: [
+        // Main Scrollable Content
+        Positioned.fill(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.only(
+              left: LayoutTokens.screenPadding,
+              right: LayoutTokens.screenPadding,
+              top: SpacingTokens.sm,
+              bottom: 200, // Space for sticky bottom bar
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildHeroAnchor(theme, cc),
+                const SizedBox(height: SpacingTokens.xxl),
+                _buildLectureInformation(theme, cc, timetableEntry, subject),
+                const SizedBox(height: SpacingTokens.xxl),
+                _buildPrimaryStatusSection(theme, cc),
+                _buildSecondaryStatusSection(theme, cc),
+                const SizedBox(height: SpacingTokens.xxl),
+                _buildOptionalNote(theme, cc),
+                const SizedBox(height: SpacingTokens.xxl),
+                _buildEvidenceSection(theme, cc),
+                SizedBox(height: bottomPadding), // Keyboard avoidance
+              ],
+            ),
+          ),
+        ),
+
+        // Sticky Bottom Bar
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: _buildStickySaveBar(
+            theme,
+            cc,
+            userId,
+            timetableEntry,
+            subject,
+          ),
+        ),
+      ],
     );
   }
 
@@ -181,7 +509,17 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
     );
   }
 
-  Widget _buildLectureInformation(ThemeData theme, CCTokens cc) {
+  Widget _buildLectureInformation(
+    ThemeData theme,
+    CCTokens cc,
+    TimetableEntryEntity timetableEntry,
+    SubjectEntity subject,
+  ) {
+    final lectureType = timetableEntry.lectureType.isNotEmpty
+        ? timetableEntry.lectureType[0].toUpperCase() +
+              timetableEntry.lectureType.substring(1)
+        : 'Theory';
+
     return Container(
       padding: const EdgeInsets.all(SpacingTokens.lg),
       decoration: BoxDecoration(
@@ -193,7 +531,7 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Advanced Mathematics II',
+            subject.name,
             style: theme.textTheme.headlineSmall?.copyWith(
               color: cc.fg,
               fontWeight: FontWeight.bold,
@@ -212,7 +550,7 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
                   borderRadius: RadiusTokens.borderRadiusSm,
                 ),
                 child: Text(
-                  'Theory',
+                  lectureType,
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: cc.pri,
                     fontWeight: FontWeight.bold,
@@ -223,7 +561,7 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
               Icon(Symbols.schedule, size: 16, color: cc.mut),
               const SizedBox(width: 4),
               Text(
-                '09:00 AM - 10:00 AM',
+                '${LectureScheduleItem.formatTimeSlot(timetableEntry.startTime)} - ${LectureScheduleItem.formatTimeSlot(timetableEntry.endTime)}',
                 style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
               ),
             ],
@@ -240,21 +578,24 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
                   Icon(Symbols.meeting_room, size: 18, color: cc.mut),
                   const SizedBox(width: SpacingTokens.sm),
                   Text(
-                    'Room 402',
+                    timetableEntry.room?.isNotEmpty == true
+                        ? timetableEntry.room!
+                        : 'No room set',
                     style: theme.textTheme.bodyMedium?.copyWith(color: cc.fg),
                   ),
                 ],
               ),
-              Row(
-                children: [
-                  Icon(Symbols.person, size: 18, color: cc.mut),
-                  const SizedBox(width: SpacingTokens.sm),
-                  Text(
-                    'Dr. A. Sharma',
-                    style: theme.textTheme.bodyMedium?.copyWith(color: cc.fg),
-                  ),
-                ],
-              ),
+              if (subject.faculty != null && subject.faculty!.isNotEmpty)
+                Row(
+                  children: [
+                    Icon(Symbols.person, size: 18, color: cc.mut),
+                    const SizedBox(width: SpacingTokens.sm),
+                    Text(
+                      subject.faculty!,
+                      style: theme.textTheme.bodyMedium?.copyWith(color: cc.fg),
+                    ),
+                  ],
+                ),
             ],
           ),
           const SizedBox(height: SpacingTokens.sm),
@@ -263,7 +604,7 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
               Icon(Symbols.calendar_today, size: 18, color: cc.mut),
               const SizedBox(width: SpacingTokens.sm),
               Text(
-                'Mon, Sep 15, 2025',
+                DateFormat('EEE, MMM d, yyyy').format(DateTime.now()),
                 style: theme.textTheme.bodyMedium?.copyWith(color: cc.fg),
               ),
             ],
@@ -504,7 +845,13 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
     );
   }
 
-  Widget _buildStickySaveBar(ThemeData theme, CCTokens cc) {
+  Widget _buildStickySaveBar(
+    ThemeData theme,
+    CCTokens cc,
+    String userId,
+    TimetableEntryEntity timetableEntry,
+    SubjectEntity subject,
+  ) {
     return Container(
       padding: EdgeInsets.only(
         left: LayoutTokens.screenPadding,
@@ -535,51 +882,13 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
           SizedBox(
             width: double.infinity,
             child: FilledButton(
-              onPressed: _primaryStatus == null
+              onPressed: _primaryStatus == null || _saving
                   ? null
-                  : () async {
-                      final repo = ref.read(attendanceRepositoryProvider);
-                      final now = DateTime.now().toUtc();
-
-                      final authState = ref.read(authStateProvider);
-                      final activeUserId =
-                          authState is AuthAuthenticated &&
-                              authState.user.uid.isNotEmpty
-                          ? authState.user.uid
-                          : 'default_user';
-
-                      await repo.create(
-                        AttendanceCompanion(
-                          id: drift.Value(_recordId),
-                          userId: drift.Value(activeUserId),
-                          subjectId: drift.Value(
-                            widget.subjectId ?? 'default_subject',
-                          ),
-                          date: drift.Value(
-                            now.toIso8601String().split('T')[0],
-                          ),
-                          primaryStatus: drift.Value(_primaryStatus!.name),
-                          secondaryStatus: drift.Value(_secondaryStatus?.name),
-                          lectureType: const drift.Value('theory'),
-                          notes: drift.Value(
-                            _noteController.text.isNotEmpty
-                                ? _noteController.text
-                                : null,
-                          ),
-                          createdAt: drift.Value(now.toIso8601String()),
-                          updatedAt: drift.Value(now.toIso8601String()),
-                        ),
-                      );
-
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Lecture Record saved.'),
-                          ),
-                        );
-                        context.pop();
-                      }
-                    },
+                  : () => _save(
+                      userId: userId,
+                      timetableEntry: timetableEntry,
+                      subject: subject,
+                    ),
               style: FilledButton.styleFrom(
                 backgroundColor: cc.pri,
                 foregroundColor: cc.priFg,
@@ -590,10 +899,22 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
                   borderRadius: RadiusTokens.borderRadiusLg,
                 ),
               ),
-              child: const Text(
-                'Save Lecture Record',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
+              child: _saving
+                  ? SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: cc.priFg,
+                      ),
+                    )
+                  : const Text(
+                      'Save Lecture Record',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
             ),
           ),
         ],
@@ -692,6 +1013,86 @@ class _PrimaryStatusCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _StatusPill extends StatelessWidget {
+  const _StatusPill({
+    required this.primary,
+    required this.secondaryLabel,
+    required this.otherText,
+    required this.cc,
+    required this.theme,
+  });
+
+  final String primary;
+  final String? secondaryLabel;
+  final String? otherText;
+  final CCTokens cc;
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color color;
+    final String label;
+    final IconData icon;
+    switch (primary) {
+      case 'present':
+        color = cc.pri;
+        label = 'Present';
+        icon = Symbols.check_circle;
+      case 'cancelled':
+        color = cc.warn;
+        label = 'Cancelled';
+        icon = Symbols.block;
+      default:
+        color = cc.risk;
+        label = 'Absent';
+        icon = Symbols.cancel;
+    }
+
+    final detail = otherText != null && otherText!.isNotEmpty
+        ? otherText
+        : secondaryLabel;
+
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: SpacingTokens.sm,
+            vertical: SpacingTokens.xxs,
+          ),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.12),
+            borderRadius: RadiusTokens.borderRadiusPill,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 14, color: color),
+              const SizedBox(width: SpacingTokens.xs),
+              Text(
+                label,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (detail != null) ...[
+          const SizedBox(width: SpacingTokens.sm),
+          Flexible(
+            child: Text(
+              detail,
+              style: theme.textTheme.bodyMedium?.copyWith(color: cc.mut),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

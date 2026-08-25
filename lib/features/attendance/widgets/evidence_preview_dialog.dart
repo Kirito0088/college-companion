@@ -22,16 +22,22 @@ class EvidencePreviewDialog extends ConsumerStatefulWidget {
     super.key,
     required this.evidence,
     this.recordId,
+    this.readOnly = false,
   });
 
   final LectureEvidenceEntity evidence;
   final String? recordId;
+
+  /// When true, hides the delete action — used for an already-recorded
+  /// (locked) lecture record's evidence.
+  final bool readOnly;
 
   /// Static helper to display the preview lightbox dialog.
   static Future<bool?> show(
     BuildContext context, {
     required LectureEvidenceEntity evidence,
     String? recordId,
+    bool readOnly = false,
   }) {
     return showDialog<bool>(
       context: context,
@@ -39,6 +45,7 @@ class EvidencePreviewDialog extends ConsumerStatefulWidget {
       builder: (context) => EvidencePreviewDialog(
         evidence: evidence,
         recordId: recordId,
+        readOnly: readOnly,
       ),
     );
   }
@@ -48,8 +55,7 @@ class EvidencePreviewDialog extends ConsumerStatefulWidget {
       _EvidencePreviewDialogState();
 }
 
-class _EvidencePreviewDialogState
-    extends ConsumerState<EvidencePreviewDialog> {
+class _EvidencePreviewDialogState extends ConsumerState<EvidencePreviewDialog> {
   Uint8List? _imageBytes;
   bool _isLoading = true;
   bool _isMissing = false;
@@ -138,9 +144,9 @@ class _EvidencePreviewDialogState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final formattedDate = DateFormat('MMM dd, yyyy • hh:mm a').format(
-      widget.evidence.captureTimestamp.toLocal(),
-    );
+    final formattedDate = DateFormat(
+      'MMM dd, yyyy • hh:mm a',
+    ).format(widget.evidence.captureTimestamp.toLocal());
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -171,14 +177,17 @@ class _EvidencePreviewDialogState
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(
-                      Symbols.delete,
-                      color: ColorTokens.error,
+                  if (widget.readOnly)
+                    const SizedBox(width: 48)
+                  else
+                    IconButton(
+                      icon: const Icon(
+                        Symbols.delete,
+                        color: ColorTokens.error,
+                      ),
+                      tooltip: 'Delete Evidence',
+                      onPressed: _handleDelete,
                     ),
-                    tooltip: 'Delete Evidence',
-                    onPressed: _handleDelete,
-                  ),
                 ],
               ),
             ),
@@ -191,40 +200,40 @@ class _EvidencePreviewDialogState
                         color: ColorTokens.primary,
                       )
                     : _isMissing || _imageBytes == null
-                        ? Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Symbols.broken_image,
+                            size: 64,
+                            color: ColorTokens.onSurfaceVariant,
+                          ),
+                          const SizedBox(height: SpacingTokens.md),
+                          Text(
+                            'Image file missing on device',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: ColorTokens.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      )
+                    : InteractiveViewer(
+                        minScale: 0.5,
+                        maxScale: 4.0,
+                        child: Image.memory(
+                          _imageBytes!,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Center(
+                              child: Icon(
                                 Symbols.broken_image,
                                 size: 64,
                                 color: ColorTokens.onSurfaceVariant,
                               ),
-                              const SizedBox(height: SpacingTokens.md),
-                              Text(
-                                'Image file missing on device',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: ColorTokens.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          )
-                        : InteractiveViewer(
-                            minScale: 0.5,
-                            maxScale: 4.0,
-                            child: Image.memory(
-                              _imageBytes!,
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) {
-                                return const Center(
-                                  child: Icon(
-                                    Symbols.broken_image,
-                                    size: 64,
-                                    color: ColorTokens.onSurfaceVariant,
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
+                            );
+                          },
+                        ),
+                      ),
               ),
             ),
 

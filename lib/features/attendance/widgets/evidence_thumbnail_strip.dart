@@ -22,9 +22,14 @@ class EvidenceThumbnailStrip extends ConsumerWidget {
   const EvidenceThumbnailStrip({
     super.key,
     required this.recordId,
+    this.readOnly = false,
   });
 
   final String recordId;
+
+  /// When true, evidence can be viewed but not captured or deleted — used
+  /// for an already-recorded (locked) lecture record.
+  final bool readOnly;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -33,7 +38,9 @@ class EvidenceThumbnailStrip extends ConsumerWidget {
     return evidenceAsync.when(
       data: (evidenceList) {
         if (evidenceList.isEmpty) {
-          return _buildEmptyState(context);
+          return readOnly
+              ? _buildReadOnlyEmptyState(context)
+              : _buildEmptyState(context);
         }
         return _buildStrip(context, evidenceList);
       },
@@ -58,10 +65,7 @@ class EvidenceThumbnailStrip extends ConsumerWidget {
             Expanded(
               child: Text(
                 'Failed to load evidence: $e',
-                style: const TextStyle(
-                  color: ColorTokens.error,
-                  fontSize: 12,
-                ),
+                style: const TextStyle(color: ColorTokens.error, fontSize: 12),
               ),
             ),
           ],
@@ -115,6 +119,28 @@ class EvidenceThumbnailStrip extends ConsumerWidget {
     );
   }
 
+  Widget _buildReadOnlyEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: SpacingTokens.lg,
+        vertical: SpacingTokens.base,
+      ),
+      decoration: BoxDecoration(
+        color: ColorTokens.surfaceContainerHigh,
+        borderRadius: RadiusTokens.borderRadiusLg,
+        border: Border.all(color: ColorTokens.outlineVariant),
+      ),
+      child: Text(
+        'No evidence was captured for this record.',
+        style: theme.textTheme.labelLarge?.copyWith(
+          color: ColorTokens.onSurfaceVariant,
+        ),
+      ),
+    );
+  }
+
   Widget _buildStrip(
     BuildContext context,
     List<LectureEvidenceEntity> evidenceList,
@@ -123,11 +149,11 @@ class EvidenceThumbnailStrip extends ConsumerWidget {
       height: 80,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: evidenceList.length + 1,
+        itemCount: readOnly ? evidenceList.length : evidenceList.length + 1,
         separatorBuilder: (context, index) =>
             const SizedBox(width: SpacingTokens.sm),
         itemBuilder: (context, index) {
-          if (index == evidenceList.length) {
+          if (!readOnly && index == evidenceList.length) {
             // Add more photo tile
             return _buildAddTile(context);
           }
@@ -136,6 +162,7 @@ class EvidenceThumbnailStrip extends ConsumerWidget {
           return EvidenceThumbnailCard(
             evidence: item,
             recordId: recordId,
+            readOnly: readOnly,
           );
         },
       ),
@@ -175,10 +202,12 @@ class EvidenceThumbnailCard extends ConsumerStatefulWidget {
     super.key,
     required this.evidence,
     required this.recordId,
+    this.readOnly = false,
   });
 
   final LectureEvidenceEntity evidence;
   final String recordId;
+  final bool readOnly;
 
   @override
   ConsumerState<EvidenceThumbnailCard> createState() =>
@@ -212,6 +241,7 @@ class _EvidenceThumbnailCardState extends ConsumerState<EvidenceThumbnailCard> {
           context,
           evidence: widget.evidence,
           recordId: widget.recordId,
+          readOnly: widget.readOnly,
         );
       },
       borderRadius: RadiusTokens.borderRadiusLg,

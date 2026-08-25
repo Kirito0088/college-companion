@@ -56,6 +56,18 @@ class LectureRecordDao {
         .getSingleOrNull();
   }
 
+  /// Watches the record for a specific timetable slot, if any — drives the
+  /// locked/read-only ledger view once a slot has been recorded.
+  Stream<LectureRecordEntity?> watchByTimetableId(
+    String userId,
+    String timetableId,
+  ) {
+    return (_database.select(_database.lectureRecords)..where(
+          (t) => t.userId.equals(userId) & t.timetableId.equals(timetableId),
+        ))
+        .watchSingleOrNull();
+  }
+
   /// Watches records for a subject, most recent first.
   Stream<List<LectureRecordEntity>> watchBySubject(
     String userId,

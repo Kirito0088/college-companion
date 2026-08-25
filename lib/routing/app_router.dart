@@ -60,7 +60,7 @@ abstract final class RoutePaths {
   static const String home = '/';
   static const String attendance = '/attendance';
   static const String safeBunk = '/safe-bunk';
-  static const String lectureRecord = '/lecture-record';
+  static const String lectureRecord = '/lecture-record/:timetableId';
   static const String calendar = '/calendar';
   static const String assignments = '/assignments';
   static const String profile = '/profile';
@@ -368,7 +368,9 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
         path: RoutePaths.lectureRecord,
         name: RouteNames.lectureRecord,
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const LectureRecordScreen(),
+        builder: (context, state) => LectureRecordScreen(
+          timetableId: state.pathParameters['timetableId']!,
+        ),
       ),
       GoRoute(
         path: RoutePaths.resources,

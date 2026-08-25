@@ -18,6 +18,7 @@ class LectureCard extends StatelessWidget {
     super.key,
     required this.lecture,
     this.onTap,
+    this.onRecord,
     this.onEdit,
     this.onDelete,
   });
@@ -27,6 +28,9 @@ class LectureCard extends StatelessWidget {
 
   /// Optional tap callback.
   final VoidCallback? onTap;
+
+  /// Optional callback to record attendance for this lecture slot.
+  final VoidCallback? onRecord;
 
   /// Optional edit callback.
   final VoidCallback? onEdit;
@@ -103,14 +107,26 @@ class LectureCard extends StatelessWidget {
                         ],
                       ],
                     ),
-                    if (onEdit != null || onDelete != null)
+                    if (onRecord != null || onEdit != null || onDelete != null)
                       PopupMenuButton<String>(
                         icon: Icon(Symbols.more_vert, size: 20, color: cc.mut),
                         onSelected: (value) {
+                          if (value == 'record') onRecord?.call();
                           if (value == 'edit') onEdit?.call();
                           if (value == 'delete') onDelete?.call();
                         },
                         itemBuilder: (context) => [
+                          if (onRecord != null)
+                            const PopupMenuItem(
+                              value: 'record',
+                              child: Row(
+                                children: [
+                                  Icon(Symbols.history_edu, size: 18),
+                                  SizedBox(width: SpacingTokens.sm),
+                                  Text('Record Lecture'),
+                                ],
+                              ),
+                            ),
                           if (onEdit != null)
                             const PopupMenuItem(
                               value: 'edit',

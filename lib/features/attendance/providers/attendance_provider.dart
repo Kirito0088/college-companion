@@ -161,6 +161,92 @@ final attendanceRecordsStreamProvider =
       return repo.watchAll(userId);
     });
 
+/// A single week of attendance, bucketed into one percentage per weekday.
+///
+/// Monday-first: `dailyPercentages[0]` is Monday, `[6]` is Sunday. A `null`
+/// entry means no lecture was held that day at all — semantically different
+/// from `0.0` (lectures held, none attended). Collapsing the two would plot a
+/// dip on a day that simply had no classes, which is the same class of
+/// synthesized data this model exists to eliminate.
+class AttendanceTrend {
+  const AttendanceTrend({required this.dailyPercentages});
+
+  /// Exactly 7 entries, Monday-first.
+  final List<double?> dailyPercentages;
+
+  /// A week with no countable lecture on any day.
+  static const AttendanceTrend empty = AttendanceTrend(
+    dailyPercentages: [null, null, null, null, null, null, null],
+  );
+
+  /// Whether any day in the week has a countable lecture.
+  bool get hasData => dailyPercentages.any((p) => p != null);
+
+  /// Buckets [records] into per-weekday percentages for the week beginning at
+  /// [weekStart] (which must be a Monday).
+  ///
+  /// Pure by design — the caller supplies the week rather than this reading
+  /// `DateTime.now()`, so the bucketing stays deterministic under test.
+  /// Cancelled lectures and soft-deleted rows are excluded entirely; only
+  /// `present`/`absent` rows count toward a day's denominator, matching how
+  /// [safeBunkStreamProvider] computes the overall percentage.
+  static AttendanceTrend fromRecords(
+    List<AttendanceEntity> records,
+    DateTime weekStart,
+  ) {
+    final attended = List<int>.filled(7, 0);
+    final total = List<int>.filled(7, 0);
+
+    final start = DateTime(weekStart.year, weekStart.month, weekStart.day);
+    final end = start.add(const Duration(days: 7));
+
+    for (final record in records) {
+      if (record.deletedAt != null) continue;
+
+      final date = DateTime.tryParse(record.date);
+      if (date == null) continue;
+
+      final day = DateTime(date.year, date.month, date.day);
+      if (day.isBefore(start) || !day.isBefore(end)) continue;
+
+      final index = day.difference(start).inDays;
+      if (record.primaryStatus == 'present') {
+        attended[index]++;
+        total[index]++;
+      } else if (record.primaryStatus == 'absent') {
+        total[index]++;
+      }
+    }
+
+    return AttendanceTrend(
+      dailyPercentages: List<double?>.generate(7, (i) {
+        if (total[i] == 0) return null;
+        return (attended[i] / total[i]) * 100.0;
+      }),
+    );
+  }
+}
+
+/// The Monday that begins the week containing [date].
+DateTime startOfWeek(DateTime date) {
+  final day = DateTime(date.year, date.month, date.day);
+  return day.subtract(Duration(days: day.weekday - DateTime.monday));
+}
+
+/// Watches this week's real attendance trend for a user.
+///
+/// Derived from [attendanceRecordsStreamProvider] — the same records the rest
+/// of `AttendanceScreen` already watches — so the trend card can never drift
+/// out of sync with the gauge and stats above it.
+final attendanceTrendProvider =
+    Provider.family<AsyncValue<AttendanceTrend>, String>((ref, userId) {
+      final recordsAsync = ref.watch(attendanceRecordsStreamProvider(userId));
+      return recordsAsync.whenData(
+        (records) =>
+            AttendanceTrend.fromRecords(records, startOfWeek(DateTime.now())),
+      );
+    });
+
 /// Computes attendance insights based on records and subjects.
 final attendanceInsightsProvider =
     Provider.family<AsyncValue<AttendanceInsights>, String>((ref, userId) {

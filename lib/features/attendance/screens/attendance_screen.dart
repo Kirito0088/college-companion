@@ -43,6 +43,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
     final insightsAsync = ref.watch(attendanceInsightsProvider(userId));
     final insights = insightsAsync.valueOrNull;
 
+    final trendAsync = ref.watch(attendanceTrendProvider(userId));
+    final trend = trendAsync.valueOrNull;
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
@@ -96,7 +99,12 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: _selectedIndex == 0
-                              ? _buildOverviewTab(context, safeBunk, insights)
+                              ? _buildOverviewTab(
+                                  context,
+                                  safeBunk,
+                                  insights,
+                                  trend,
+                                )
                               : _buildSubjectsTab(context, userId),
                         ),
                       ),
@@ -115,13 +123,14 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
     BuildContext context,
     SafeBunkResult? safeBunk,
     AttendanceInsights? insights,
+    AttendanceTrend? trend,
   ) {
     return [
       OverallGauge(safeBunk: safeBunk),
       const SizedBox(height: LayoutTokens.sectionGap),
       StatsRow(safeBunk: safeBunk),
       const SizedBox(height: LayoutTokens.sectionGap),
-      const AttendanceTrendCard(),
+      AttendanceTrendCard(trend: trend),
       const SizedBox(height: LayoutTokens.sectionGap),
       _buildHealthCard(context, safeBunk),
       const SizedBox(height: LayoutTokens.sectionGap),

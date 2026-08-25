@@ -4,6 +4,7 @@ import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 /// This week's attendance trend, plotted from real records.
@@ -14,12 +15,15 @@ import 'package:material_symbols_icons/symbols.dart';
 class AttendanceTrendCard extends StatelessWidget {
   const AttendanceTrendCard({required this.trend, super.key});
 
-  /// This week's per-weekday percentages, Monday-first. `null` while the
-  /// underlying records are still loading — distinct from an all-`null`
-  /// [AttendanceTrend], which means the week genuinely had no lectures.
-  /// Conflating the two would make the card claim "no data" for a week it
-  /// has not actually read yet.
-  final AttendanceTrend? trend;
+  /// This week's per-weekday percentages, Monday-first.
+  ///
+  /// Deliberately the whole [AsyncValue] rather than a nullable trend: the
+  /// card has four genuinely distinct things to say — still loading, failed
+  /// to read, read successfully but the week had no lectures, and here is
+  /// your curve. Device QA caught this card reporting a hard
+  /// `no such table: attendance` failure as "Loading…" forever, because a
+  /// nullable trend cannot tell a pending read apart from a failed one.
+  final AsyncValue<AttendanceTrend> trend;
 
   @override
   Widget build(BuildContext context) {
@@ -69,20 +73,31 @@ class AttendanceTrendCard extends StatelessWidget {
           SizedBox(
             height: 160,
             child: switch (trend) {
-              null => _buildPlaceholder(context, cc, 'Loading…', null),
-              final t when !t.hasData => _buildPlaceholder(
+              AsyncError() => _buildPlaceholder(
+                context,
+                cc,
+                'Couldn’t load your trend',
+                'Pull down to refresh and try again.',
+              ),
+              AsyncData(value: final t) when !t.hasData => _buildPlaceholder(
                 context,
                 cc,
                 'Not enough data yet',
                 'Mark attendance this week to see your trend.',
               ),
-              final t => _buildChart(context, cc, t),
+              AsyncData(value: final t) => _buildChart(context, cc, t),
+              _ => _buildPlaceholder(context, cc, 'Loading…', null),
             },
           ),
         ],
       ),
     );
   }
+
+  IconData get _placeholderIcon => switch (trend) {
+    AsyncError() => Symbols.error_outline_rounded,
+    _ => Symbols.timeline_rounded,
+  };
 
   Widget _buildPlaceholder(
     BuildContext context,
@@ -95,7 +110,7 @@ class AttendanceTrendCard extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Symbols.timeline_rounded, color: cc.mut, size: 32),
+          Icon(_placeholderIcon, color: cc.mut, size: 32),
           const SizedBox(height: SpacingTokens.sm),
           Text(
             title,

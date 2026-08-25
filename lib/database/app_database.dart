@@ -58,7 +58,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration {
@@ -106,8 +106,41 @@ class AppDatabase extends _$AppDatabase {
             await m.createIndex(idxNotificationsUser);
           }
         }
+        if (from < 6) {
+          // The v5 step above repaired only the three tables issue #28
+          // happened to name. A physical device (CPH2455) pulled after that
+          // migration ran showed the real damage: 9 of 15 tables were still
+          // missing, including `attendance` and `sync_queue`, because no
+          // onUpgrade step had ever created them. Since v5 had already
+          // stamped user_version, that step could never run again — a
+          // partial repair under forward-only migrations is permanent.
+          //
+          // So repair generically instead of naming tables: create anything
+          // the current schema declares that this database does not actually
+          // have. Driven by `allSchemaEntities` (tables and indexes alike),
+          // it stays correct as new tables are added rather than needing a
+          // hand-written step per table, which is what failed twice already.
+          await _createMissingSchemaEntities(m);
+        }
       },
     );
+  }
+
+  /// Creates every entity the current schema declares that is missing from
+  /// this database, leaving existing ones untouched.
+  ///
+  /// Checked against `sqlite_master` rather than relying on `IF NOT EXISTS`,
+  /// because `Migrator.createIndex` emits no such guard and throws on an
+  /// index that already exists.
+  Future<void> _createMissingSchemaEntities(Migrator m) async {
+    final existing = await customSelect(
+      "SELECT name FROM sqlite_master WHERE type IN ('table', 'index')",
+    ).get().then((rows) => rows.map((r) => r.read<String>('name')).toSet());
+
+    for (final entity in allSchemaEntities) {
+      if (existing.contains(entity.entityName)) continue;
+      await m.create(entity);
+    }
   }
 }
 

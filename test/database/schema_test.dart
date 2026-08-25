@@ -29,16 +29,20 @@ void main() {
       expect(row.data['ok'], 1);
     });
 
-    test('schema version is 5 baseline', () async {
-      expect(backend.db.schemaVersion, 5);
+    test('schema version is 6 baseline', () async {
+      expect(backend.db.schemaVersion, 6);
     });
 
-    test('Drift reports schema version 5 via user_version pragma', () async {
+    test('Drift stamps user_version to match schemaVersion', () async {
+      // Asserted against `schemaVersion` rather than a literal: the point is
+      // that the pragma tracks the declared version, and pinning a literal
+      // here just breaks on every migration without catching anything the
+      // baseline test above doesn't already cover.
       await backend.db.customSelect('SELECT 1').get();
       final row = await backend.db
           .customSelect('PRAGMA user_version')
           .getSingle();
-      expect(row.data.values.first, 5);
+      expect(row.data.values.first, backend.db.schemaVersion);
     });
   });
 

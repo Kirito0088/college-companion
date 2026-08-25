@@ -43,8 +43,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
     final insightsAsync = ref.watch(attendanceInsightsProvider(userId));
     final insights = insightsAsync.valueOrNull;
 
-    final trendAsync = ref.watch(attendanceTrendProvider(userId));
-    final trend = trendAsync.valueOrNull;
+    final trend = ref.watch(attendanceTrendProvider(userId));
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -123,7 +122,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
     BuildContext context,
     SafeBunkResult? safeBunk,
     AttendanceInsights? insights,
-    AttendanceTrend? trend,
+    AsyncValue<AttendanceTrend> trend,
   ) {
     return [
       OverallGauge(safeBunk: safeBunk),

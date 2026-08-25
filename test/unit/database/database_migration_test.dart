@@ -18,8 +18,8 @@ void main() {
   });
 
   group('Database Migration & Schema Tests', () {
-    test('Drift database instantiates with schema version 5', () {
-      expect(database.schemaVersion, 5);
+    test('Drift database instantiates with schema version 6', () {
+      expect(database.schemaVersion, 6);
     });
 
     test('All tables are registered in database schema', () {
@@ -526,6 +526,149 @@ void main() {
             )
             .get();
         expect(notifications, isEmpty);
+      },
+    );
+
+    test(
+      'a v5 db missing most of its tables is fully repaired to the current schema',
+      () async {
+        // Reproduces the EXACT schema pulled off a physical device (CPH2455)
+        // after the v5 repair had already run and stamped user_version = 5:
+        // only 6 of the 15 tables existed. The v5 step repaired the three
+        // tables issue #28 named, but nine others -- including `attendance`
+        // and `sync_queue` -- were never created by any onUpgrade step, and
+        // because the version was already stamped, v5 could never run again.
+        //
+        // Symptoms on device: `no such table: sync_queue` thrown out of
+        // SyncService on every launch, and the whole Attendance Overview
+        // stuck rendering placeholders because `no such table: attendance`
+        // failed every stream behind it.
+        final tempDir = await Directory.systemTemp.createTemp('cc_migration');
+        final dbFile = File('${tempDir.path}/partial_v5.db');
+        addTearDown(() => tempDir.delete(recursive: true));
+
+        final raw = sqlite3.sqlite3.open(dbFile.path);
+        raw.execute('''
+          CREATE TABLE users (
+            id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            profile_photo TEXT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            college_name TEXT NULL,
+            branch TEXT NULL,
+            semester TEXT NULL,
+            student_id TEXT NULL,
+            university TEXT NULL,
+            course TEXT NULL,
+            department TEXT NULL,
+            graduation_year TEXT NULL,
+            PRIMARY KEY (id)
+          );
+        ''');
+        raw.execute('''
+          CREATE TABLE semesters (
+            id TEXT NOT NULL,
+            user_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            working_days TEXT NOT NULL DEFAULT '{}',
+            is_current INTEGER NOT NULL DEFAULT 0,
+            is_archived INTEGER NOT NULL DEFAULT 0,
+            start_date TEXT NULL,
+            expected_completion_date TEXT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            deleted_at TEXT NULL,
+            PRIMARY KEY (id)
+          );
+        ''');
+        raw.execute('''
+          CREATE TABLE user_settings (
+            id TEXT NOT NULL,
+            user_id TEXT NOT NULL,
+            notifications_enabled INTEGER NOT NULL DEFAULT 1
+              CHECK (notifications_enabled IN (0, 1)),
+            lecture_reminders_enabled INTEGER NOT NULL DEFAULT 1
+              CHECK (lecture_reminders_enabled IN (0, 1)),
+            enabled_modules TEXT NOT NULL DEFAULT '{}',
+            theme TEXT NOT NULL DEFAULT 'dark',
+            preferences TEXT NOT NULL DEFAULT '{}',
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            PRIMARY KEY (id)
+          );
+        ''');
+        raw.execute('''
+          CREATE TABLE notifications (
+            id TEXT NOT NULL,
+            user_id TEXT NOT NULL,
+            title TEXT NOT NULL,
+            message TEXT NOT NULL,
+            type TEXT NOT NULL DEFAULT 'upcoming',
+            target_route TEXT NULL,
+            is_read INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL,
+            deleted_at TEXT NULL,
+            PRIMARY KEY (id)
+          );
+        ''');
+        raw.execute(
+          'CREATE INDEX idx_notifications_user ON notifications (user_id);',
+        );
+        raw.execute('''
+          CREATE TABLE lecture_records (id TEXT NOT NULL, PRIMARY KEY (id));
+        ''');
+        raw.execute('''
+          CREATE TABLE sync_metadata (id TEXT NOT NULL, PRIMARY KEY (id));
+        ''');
+        raw.execute('''
+          INSERT INTO users (id, name, email, created_at, updated_at)
+          VALUES
+            ('legacy_user', 'Legacy User', 'legacy@college.edu', '2026-01-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z');
+        ''');
+        raw.execute('PRAGMA user_version = 5;');
+        raw.close();
+
+        final migrated = AppDatabase.forTesting(NativeDatabase(dbFile));
+        addTearDown(migrated.close);
+
+        final present = await migrated
+            .customSelect(
+              "SELECT name FROM sqlite_master WHERE type IN ('table', 'index')",
+            )
+            .get()
+            .then((rows) => rows.map((r) => r.data['name'] as String).toSet());
+
+        // Every entity the current schema declares must now exist -- not just
+        // the handful any single past issue happened to name.
+        for (final entity in migrated.allSchemaEntities) {
+          expect(
+            present,
+            contains(entity.entityName),
+            reason: '${entity.entityName} was never created by onUpgrade',
+          );
+        }
+
+        // The two queries that actually failed on the device must now run.
+        await expectLater(
+          migrated
+              .customSelect(
+                'SELECT * FROM attendance WHERE user_id = ? AND deleted_at IS NULL',
+                variables: [const Variable<String>('legacy_user')],
+              )
+              .get(),
+          completion(isEmpty),
+        );
+        await expectLater(
+          migrated
+              .customSelect(
+                'SELECT * FROM sync_queue WHERE is_synced = ?',
+                variables: [const Variable<bool>(false)],
+              )
+              .get(),
+          completion(isEmpty),
+        );
       },
     );
 

@@ -19,6 +19,7 @@ import 'package:college_companion/features/attendance/widgets/attendance_trend_c
 import 'package:college_companion/theme/app_theme.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -114,7 +115,10 @@ void main() {
   });
 
   group('AttendanceTrendCard', () {
-    Future<void> pumpCard(WidgetTester tester, AttendanceTrend? trend) async {
+    Future<void> pumpCard(
+      WidgetTester tester,
+      AsyncValue<AttendanceTrend> trend,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.darkTheme,
@@ -135,7 +139,7 @@ void main() {
     testWidgets(
       'a week with no attendance renders an empty state, not a curve',
       (tester) async {
-        await pumpCard(tester, AttendanceTrend.empty);
+        await pumpCard(tester, const AsyncData(AttendanceTrend.empty));
 
         expect(find.text('Not enough data yet'), findsOneWidget);
         expect(trendPainterOf(tester), isNull);
@@ -147,7 +151,7 @@ void main() {
       (tester) async {
         // `null` means the records have not been read yet — claiming "not
         // enough data" here would assert something the card cannot know.
-        await pumpCard(tester, null);
+        await pumpCard(tester, const AsyncLoading());
 
         expect(find.text('Loading…'), findsOneWidget);
         expect(find.text('Not enough data yet'), findsNothing);
@@ -160,13 +164,35 @@ void main() {
     ) async {
       await pumpCard(
         tester,
-        AttendanceTrend.fromRecords([
-          _record(id: 'a1', date: '2026-08-24', primaryStatus: 'present'),
-        ], weekStart),
+        AsyncData(
+          AttendanceTrend.fromRecords([
+            _record(id: 'a1', date: '2026-08-24', primaryStatus: 'present'),
+          ], weekStart),
+        ),
       );
 
       expect(find.text('Not enough data yet'), findsNothing);
       expect(trendPainterOf(tester), isNotNull);
+    });
+
+    testWidgets('a failed read renders an error state, not a loading state', (
+      tester,
+    ) async {
+      // Device QA (CPH2455) hit `no such table: attendance` — a hard,
+      // permanent failure. Rendering that as "Loading…" told the user to
+      // wait for something that was never going to arrive.
+      await pumpCard(
+        tester,
+        AsyncError<AttendanceTrend>(
+          Exception('no such table: attendance'),
+          StackTrace.empty,
+        ),
+      );
+
+      expect(find.text('Couldn’t load your trend'), findsOneWidget);
+      expect(find.text('Loading…'), findsNothing);
+      expect(find.text('Not enough data yet'), findsNothing);
+      expect(trendPainterOf(tester), isNull);
     });
 
     testWidgets('the rendered curve changes when the underlying data changes', (
@@ -174,19 +200,23 @@ void main() {
     ) async {
       await pumpCard(
         tester,
-        AttendanceTrend.fromRecords([
-          _record(id: 'a1', date: '2026-08-24', primaryStatus: 'present'),
-        ], weekStart),
+        AsyncData(
+          AttendanceTrend.fromRecords([
+            _record(id: 'a1', date: '2026-08-24', primaryStatus: 'present'),
+          ], weekStart),
+        ),
       );
       final first = trendPainterOf(tester)! as TrendChartPainter;
 
       await pumpCard(
         tester,
-        AttendanceTrend.fromRecords([
-          _record(id: 'a1', date: '2026-08-24', primaryStatus: 'present'),
-          _record(id: 'a2', date: '2026-08-24', primaryStatus: 'absent'),
-          _record(id: 'a3', date: '2026-08-26', primaryStatus: 'absent'),
-        ], weekStart),
+        AsyncData(
+          AttendanceTrend.fromRecords([
+            _record(id: 'a1', date: '2026-08-24', primaryStatus: 'present'),
+            _record(id: 'a2', date: '2026-08-24', primaryStatus: 'absent'),
+            _record(id: 'a3', date: '2026-08-26', primaryStatus: 'absent'),
+          ], weekStart),
+        ),
       );
       final second = trendPainterOf(tester)! as TrendChartPainter;
 

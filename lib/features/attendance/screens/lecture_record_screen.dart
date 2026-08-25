@@ -359,13 +359,16 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(Symbols.lock, size: 16, color: cc.mut),
                     const SizedBox(width: SpacingTokens.xs),
-                    Text(
-                      'This record is permanent and cannot be edited.',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: cc.mut,
+                    Expanded(
+                      child: Text(
+                        'This record is permanent and cannot be edited.',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: cc.mut,
+                        ),
                       ),
                     ),
                   ],
@@ -814,12 +817,12 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
         const SizedBox(height: SpacingTokens.md),
 
         // Compact indicators
-        Row(
+        Wrap(
+          spacing: SpacingTokens.md,
+          runSpacing: SpacingTokens.xs,
           children: [
             _buildIndicator(theme, cc, Symbols.photo_camera, 'Camera only'),
-            const SizedBox(width: SpacingTokens.md),
             _buildIndicator(theme, cc, Symbols.sd_card, 'Stored locally'),
-            const SizedBox(width: SpacingTokens.md),
             _buildIndicator(theme, cc, Symbols.cloud_off, 'Never synced'),
           ],
         ),

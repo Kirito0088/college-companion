@@ -1,6 +1,7 @@
 /// Welcome Section Widget
 ///
-/// Displays a personalized greeting to the user with a notification bell.
+/// Displays a personalized greeting to the user with a notification bell that
+/// navigates to the notifications screen.
 /// Uses [authStateProvider] to access the user's display name.
 library;
 
@@ -8,10 +9,12 @@ import 'package:college_companion/features/authentication/models/auth_state.dart
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/features/dashboard/models/dashboard_snapshot.dart';
 import 'package:college_companion/features/dashboard/providers/dashboard_provider.dart';
+import 'package:college_companion/routing/app_router.dart';
 import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/typography_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 /// A welcome header displaying the synthesized greeting, user name, and a notification bell.
@@ -58,7 +61,8 @@ class WelcomeSection extends ConsumerWidget {
           ),
           child: IconButton(
             padding: EdgeInsets.zero,
-            onPressed: () {},
+            tooltip: 'Notifications',
+            onPressed: () => context.push(RoutePaths.notifications),
             icon: Icon(Symbols.notifications_rounded, color: cc.fg, size: 20),
           ),
         ),

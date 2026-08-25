@@ -7,10 +7,12 @@ import 'package:college_companion/features/dashboard/widgets/quick_actions_secti
 import 'package:college_companion/features/dashboard/widgets/today_overview_section.dart';
 import 'package:college_companion/features/dashboard/widgets/upcoming_assignments_section.dart';
 import 'package:college_companion/features/dashboard/widgets/welcome_section.dart';
+import 'package:college_companion/routing/app_router.dart';
 import 'package:college_companion/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class _FakeAuthStateNotifier extends AuthStateNotifier {
@@ -39,6 +41,58 @@ void main() {
       );
 
       expect(find.byType(WelcomeSection), findsOneWidget);
+    });
+
+    testWidgets('WelcomeSection bell exposes an accessible label', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authStateProvider.overrideWith(_FakeAuthStateNotifier.new),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.darkTheme,
+            home: const Scaffold(body: WelcomeSection()),
+          ),
+        ),
+      );
+
+      expect(find.byTooltip('Notifications'), findsOneWidget);
+    });
+
+    testWidgets('WelcomeSection bell navigates to the notifications route', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authStateProvider.overrideWith(_FakeAuthStateNotifier.new),
+          ],
+          child: MaterialApp.router(
+            theme: AppTheme.darkTheme,
+            routerConfig: GoRouter(
+              routes: [
+                GoRoute(
+                  path: '/',
+                  builder: (context, state) =>
+                      const Scaffold(body: WelcomeSection()),
+                ),
+                GoRoute(
+                  path: RoutePaths.notifications,
+                  builder: (context, state) =>
+                      const Scaffold(body: Text('Notifications Route')),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byTooltip('Notifications'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Notifications Route'), findsOneWidget);
     });
 
     testWidgets('NextLectureCard renders next action', (

@@ -12,12 +12,13 @@
 /// Details/Focus/Notifications have none (filed as a defect, not fixed
 /// here).
 ///
-/// The `SemesterDetailsScreen` case is deliberately `skip`ped: it renders
-/// `EmptySubjects` (its *empty*-state widget) as its error state too
-/// (`semester_details_screen.dart:373`), so a failed query is
-/// indistinguishable from "no data" to the user. This test documents that
-/// defect and will start passing once it's fixed — do not delete the skip
-/// to force it green.
+/// The `SemesterDetailsScreen` group covers issue #24: the screen used to
+/// render `EmptySubjects` (its *empty*-state widget) from the subjects
+/// `error:` branch, so a failed query read as "you haven't added any
+/// subjects yet" and offered no retry. Both of its async sources — the
+/// semester and the subjects query — are now asserted to produce an error
+/// state distinct from the empty one, with the genuinely-empty case pinned
+/// alongside so a future fix can't collapse the two back together.
 library;
 
 import 'dart:io';
@@ -37,6 +38,7 @@ import 'package:college_companion/features/resources/screens/resources_screen.da
 import 'package:college_companion/features/semester/providers/semester_provider.dart';
 import 'package:college_companion/features/semester/screens/semester_details_screen.dart';
 import 'package:college_companion/features/semester/screens/semesters_list_screen.dart';
+import 'package:college_companion/features/subjects/providers/subjects_provider.dart';
 import 'package:college_companion/providers/app_providers.dart';
 import 'package:college_companion/shared/widgets/empty_states/cc_empty_states.dart';
 import 'package:college_companion/shared/widgets/errors/cc_error_state.dart';
@@ -344,34 +346,82 @@ void main() {
   });
 
   group('SemesterDetailsScreen error/empty distinguishability', () {
-    testWidgets(
-      'a failed semester query must not render the same empty-state widget '
-      'as an actual empty result (currently both hit EmptySubjects — '
-      'semester_details_screen.dart:373)',
-      (tester) async {
-        await _pump(
-          tester,
-          const SemesterDetailsScreen(semesterId: 'sem_error'),
-          overrides: [
-            semesterByIdStreamProvider.overrideWith(
-              (ref, params) => Stream<SemesterEntity?>.error('boom'),
-            ),
-          ],
-        );
-
-        expect(
-          find.byType(NetworkErrorWidget),
-          findsOneWidget,
-          reason:
-              'An error should render an error widget, not the empty-data '
-              'widget — see docs/qa defect C.',
-        );
-      },
-      // Known defect: SemesterDetailsScreen renders EmptySubjects on error
-      // instead of an error widget (semester_details_screen.dart:373).
-      // Filed as https://github.com/Kirito0088/college-companion/issues/24 —
-      // unskip once fixed.
-      skip: true,
+    SemesterEntity semester() => const SemesterEntity(
+      id: 'sem_error',
+      userId: _userId,
+      name: 'Autumn 2026',
+      workingDays: '[1,2,3,4,5]',
+      isCurrent: true,
+      isArchived: false,
+      createdAt: _nowIso,
+      updatedAt: _nowIso,
     );
+
+    testWidgets('a failed semester query renders an error state, not the '
+        'empty-data widget', (tester) async {
+      await _pump(
+        tester,
+        const SemesterDetailsScreen(semesterId: 'sem_error'),
+        overrides: [
+          semesterByIdStreamProvider.overrideWith(
+            (ref, params) => Stream<SemesterEntity?>.error(
+              const DatabaseException('read failed'),
+            ),
+          ),
+          // The screen watches the subjects provider unconditionally, so it
+          // must be overridden even when the semester query is the one under
+          // test — otherwise it reaches the real Drift stream and the test
+          // hangs under fake async.
+          subjectsBySemesterStreamProvider.overrideWith(
+            (ref, params) => Stream<List<SubjectEntity>>.value(const []),
+          ),
+        ],
+      );
+
+      expect(find.byType(CcErrorState), findsOneWidget);
+      expect(find.byType(EmptySubjects), findsNothing);
+      expect(find.text('Try Again'), findsOneWidget);
+    });
+
+    testWidgets('a failed subjects query renders an error state, not the '
+        'empty-data widget', (tester) async {
+      await _pump(
+        tester,
+        const SemesterDetailsScreen(semesterId: 'sem_error'),
+        overrides: [
+          semesterByIdStreamProvider.overrideWith(
+            (ref, params) => Stream<SemesterEntity?>.value(semester()),
+          ),
+          subjectsBySemesterStreamProvider.overrideWith(
+            (ref, params) => Stream<List<SubjectEntity>>.error(
+              const DatabaseException('read failed'),
+            ),
+          ),
+        ],
+      );
+
+      expect(find.byType(CcErrorState), findsOneWidget);
+      expect(find.byType(EmptySubjects), findsNothing);
+      expect(find.text('Try Again'), findsOneWidget);
+    });
+
+    testWidgets('an genuinely-empty subjects list still shows the empty '
+        'copy, not an error state', (tester) async {
+      await _pump(
+        tester,
+        const SemesterDetailsScreen(semesterId: 'sem_error'),
+        overrides: [
+          semesterByIdStreamProvider.overrideWith(
+            (ref, params) => Stream<SemesterEntity?>.value(semester()),
+          ),
+          subjectsBySemesterStreamProvider.overrideWith(
+            (ref, params) => Stream<List<SubjectEntity>>.value(const []),
+          ),
+        ],
+      );
+
+      expect(find.byType(CcErrorState), findsNothing);
+      expect(find.text('No subjects yet'), findsOneWidget);
+    });
   });
 }

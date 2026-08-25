@@ -4,7 +4,6 @@ import 'package:college_companion/features/authentication/providers/auth_provide
 import 'package:college_companion/features/semester/providers/semester_provider.dart';
 import 'package:college_companion/features/subjects/providers/subjects_provider.dart';
 import 'package:college_companion/shared/widgets/dialogs/cc_dialogs.dart';
-import 'package:college_companion/shared/widgets/empty_states/cc_empty_states.dart';
 import 'package:college_companion/shared/widgets/errors/cc_error_state.dart';
 import 'package:college_companion/shared/widgets/loading/cc_skeletons.dart';
 import 'package:college_companion/theme/cc_tokens.dart';
@@ -371,7 +370,20 @@ class _SemesterDetailsScreenState extends ConsumerState<SemesterDetailsScreen> {
             );
           },
           loading: () => const SkeletonList(itemCount: 3),
-          error: (_, _) => const EmptySubjects(),
+          // A failed subjects query used to render EmptySubjects — the
+          // *empty-data* widget — so "we couldn't read your subjects" was
+          // worded as "you haven't added any subjects yet" and offered no
+          // retry (issue #24). CcErrorState describes the failure honestly
+          // and gives the student a way out.
+          error: (err, _) => CcErrorState(
+            error: err,
+            onRetry: () => ref.invalidate(
+              subjectsBySemesterStreamProvider((
+                userId: userId,
+                semesterId: widget.semesterId,
+              )),
+            ),
+          ),
         ),
       ],
     );

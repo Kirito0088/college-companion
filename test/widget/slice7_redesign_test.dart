@@ -6,7 +6,7 @@
 /// provider-driven data (via the same fake-stream-for-reads override
 /// pattern used by `attendance_redesign_test.dart` and
 /// `subject_details_redesign_test.dart`), plus its empty state where one is
-/// wired. `AssignmentsScreen` additionally gets its `NetworkErrorWidget`
+/// wired. `AssignmentsScreen` additionally gets its error-branch
 /// path exercised since it is the only Slice 7 screen with a real error
 /// branch (`assignments_screen.dart:164`) — Attendance/Timetable/Subject
 /// Details/Focus/Notifications have none (filed as a defect, not fixed
@@ -20,6 +20,9 @@
 /// to force it green.
 library;
 
+import 'dart:io';
+
+import 'package:college_companion/core/errors/exceptions.dart';
 import 'package:college_companion/database/app_database.dart';
 import 'package:college_companion/features/assignments/providers/assignments_provider.dart';
 import 'package:college_companion/features/assignments/screens/assignments_screen.dart';
@@ -36,6 +39,7 @@ import 'package:college_companion/features/semester/screens/semester_details_scr
 import 'package:college_companion/features/semester/screens/semesters_list_screen.dart';
 import 'package:college_companion/providers/app_providers.dart';
 import 'package:college_companion/shared/widgets/empty_states/cc_empty_states.dart';
+import 'package:college_companion/shared/widgets/errors/cc_error_state.dart';
 import 'package:college_companion/shared/widgets/errors/cc_errors.dart';
 import 'package:college_companion/theme/app_theme.dart';
 import 'package:college_companion/theme/cc_tokens.dart';
@@ -140,7 +144,29 @@ void main() {
       expect(find.byType(EmptyAssignments), findsOneWidget);
     });
 
-    testWidgets('shows NetworkErrorWidget when the stream errors', (
+    testWidgets('shows an error state when the stream errors', (tester) async {
+      await _pump(
+        tester,
+        const AssignmentsScreen(),
+        overrides: [
+          assignmentsStreamProvider.overrideWith(
+            (ref, userId) => Stream<List<AssignmentEntity>>.error(
+              const DatabaseException('no such table: assignments'),
+            ),
+          ),
+        ],
+      );
+
+      // Previously asserted `NetworkErrorWidget`, which is what issue #34
+      // was about: a local SQLite failure told the user to check their
+      // internet connection. The screen now hands the error to CcErrorState,
+      // which only says "network" on positive evidence of one.
+      expect(find.byType(CcErrorState), findsOneWidget);
+      expect(find.byType(NetworkErrorWidget), findsNothing);
+      expect(find.textContaining('internet'), findsNothing);
+    });
+
+    testWidgets('shows the network error for a genuine transport failure', (
       tester,
     ) async {
       await _pump(
@@ -148,7 +174,9 @@ void main() {
         const AssignmentsScreen(),
         overrides: [
           assignmentsStreamProvider.overrideWith(
-            (ref, userId) => Stream<List<AssignmentEntity>>.error('boom'),
+            (ref, userId) => Stream<List<AssignmentEntity>>.error(
+              const SocketException('failed host lookup'),
+            ),
           ),
         ],
       );

@@ -14,7 +14,7 @@ import 'package:college_companion/features/dashboard/widgets/today_overview_sect
 import 'package:college_companion/features/dashboard/widgets/upcoming_assignments_section.dart';
 import 'package:college_companion/features/dashboard/widgets/welcome_section.dart';
 import 'package:college_companion/routing/app_router.dart';
-import 'package:college_companion/shared/widgets/errors/cc_errors.dart';
+import 'package:college_companion/shared/widgets/errors/cc_error_state.dart';
 import 'package:college_companion/shared/widgets/loading/cc_skeletons.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -129,7 +129,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
           return _buildSuccessContent();
         },
         loading: () => _buildLoadingState(),
-        error: (err, stack) => NetworkErrorWidget(
+        error: (err, stack) => CcErrorState(
+          error: err,
           onRetry: () {
             ref.invalidate(dashboardSnapshotProvider(userId));
           },

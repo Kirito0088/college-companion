@@ -4,7 +4,7 @@ import 'package:college_companion/features/authentication/providers/auth_provide
 import 'package:college_companion/features/resources/providers/resources_provider.dart';
 import 'package:college_companion/routing/app_router.dart';
 import 'package:college_companion/shared/widgets/empty_states/cc_empty_states.dart';
-import 'package:college_companion/shared/widgets/errors/cc_errors.dart';
+import 'package:college_companion/shared/widgets/errors/cc_error_state.dart';
 import 'package:college_companion/shared/widgets/loading/cc_skeletons.dart';
 import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
@@ -259,7 +259,8 @@ class _ResourcesScreenState extends ConsumerState<ResourcesScreen> {
       ),
       error: (err, stack) => SliverFillRemaining(
         hasScrollBody: false,
-        child: NetworkErrorWidget(
+        child: CcErrorState(
+          error: err,
           onRetry: () {
             ref.invalidate(resourcesStreamProvider(userId));
           },

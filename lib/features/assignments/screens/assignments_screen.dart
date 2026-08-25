@@ -5,7 +5,7 @@ import 'package:college_companion/features/assignments/widgets/assignments_fab.d
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/shared/widgets/empty_states/cc_empty_states.dart';
-import 'package:college_companion/shared/widgets/errors/cc_errors.dart';
+import 'package:college_companion/shared/widgets/errors/cc_error_state.dart';
 import 'package:college_companion/shared/widgets/loading/cc_skeletons.dart';
 import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
@@ -161,7 +161,8 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
                       ),
                       child: SkeletonList(),
                     ),
-                    error: (err, stack) => NetworkErrorWidget(
+                    error: (err, stack) => CcErrorState(
+                      error: err,
                       onRetry: () {
                         ref.invalidate(assignmentsStreamProvider(userId));
                       },

@@ -6,7 +6,7 @@ import 'package:college_companion/features/calendar/widgets/agenda_card.dart';
 import 'package:college_companion/features/calendar/widgets/calendar_month_view.dart';
 import 'package:college_companion/routing/app_router.dart';
 import 'package:college_companion/shared/widgets/empty_states/cc_empty_states.dart';
-import 'package:college_companion/shared/widgets/errors/cc_errors.dart';
+import 'package:college_companion/shared/widgets/errors/cc_error_state.dart';
 import 'package:college_companion/shared/widgets/loading/cc_skeletons.dart';
 import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
@@ -113,7 +113,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   child: SkeletonList(),
                 ),
                 error: (err, stack) => Center(
-                  child: NetworkErrorWidget(
+                  child: CcErrorState(
+                    error: err,
                     onRetry: () {
                       ref.invalidate(calendarEventsStreamProvider(userId));
                     },

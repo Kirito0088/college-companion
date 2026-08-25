@@ -10,7 +10,7 @@ import 'package:college_companion/features/timetable/providers/timetable_provide
 import 'package:college_companion/shared/app_metadata.dart' as app_metadata;
 import 'package:college_companion/shared/models/lecture_status.dart';
 import 'package:college_companion/shared/widgets/cc_empty_state.dart';
-import 'package:college_companion/shared/widgets/errors/cc_errors.dart';
+import 'package:college_companion/shared/widgets/errors/cc_error_state.dart';
 import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
@@ -215,7 +215,8 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
       ),
       body: timetableAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => NetworkErrorWidget(
+        error: (error, _) => CcErrorState(
+          error: error,
           onRetry: () =>
               ref.invalidate(timetableEntryByIdProvider(widget.timetableId)),
         ),
@@ -268,12 +269,14 @@ class _LectureRecordScreenState extends ConsumerState<LectureRecordScreen> {
       return const Center(child: CircularProgressIndicator());
     }
     if (subjectAsync.hasError) {
-      return NetworkErrorWidget(
+      return CcErrorState(
+        error: subjectAsync.error,
         onRetry: () => ref.invalidate(subjectByIdStreamProvider(subjectParams)),
       );
     }
     if (existingRecordAsync.hasError) {
-      return NetworkErrorWidget(
+      return CcErrorState(
+        error: existingRecordAsync.error,
         onRetry: () =>
             ref.invalidate(lectureRecordByTimetableIdProvider(recordParams)),
       );

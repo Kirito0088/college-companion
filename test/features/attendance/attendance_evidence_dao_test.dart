@@ -47,77 +47,79 @@ void main() {
       expect(fetched.sha256, 'abcdef1234567890');
     });
 
-    test('watchEvidenceForRecord emits updates reactively when evidence is inserted and deleted', () async {
-      await seedGraph(backend.db);
-      const recordId = 'rec-stream-1';
-      final now = DateTime.now().toUtc();
+    test(
+      'watchEvidenceForRecord emits updates reactively when evidence is inserted and deleted',
+      () async {
+        await seedGraph(backend.db);
+        const recordId = 'rec-stream-1';
+        final now = DateTime.now().toUtc();
 
-      final stream = evidenceDao.watchEvidenceForRecord(recordId);
+        final stream = evidenceDao.watchEvidenceForRecord(recordId);
 
-      expect(
-        stream,
-        emitsInOrder([
-          isEmpty,
-          hasLength(1),
-          isEmpty,
-        ]),
-      );
+        expect(stream, emitsInOrder([isEmpty, hasLength(1), isEmpty]));
 
-      // Insert
-      final companion = AttendanceEvidenceCompanion(
-        id: const Value('ev-stream-1'),
-        lectureRecordId: const Value(recordId),
-        localPathRelative: const Value('evidence/stream.jpg'),
-        sha256: const Value('hash123'),
-        width: const Value(800),
-        height: const Value(600),
-        captureTimestamp: Value(now),
-        appVersion: const Value('1.0.0'),
-        timezone: const Value('UTC'),
-        state: const Value('original'),
-      );
-      await evidenceDao.insertEvidence(companion);
-
-      // Delete
-      await evidenceDao.deleteEvidence('ev-stream-1');
-    });
-
-    test('deleteEvidence removes record and registers with SyncQueue', () async {
-      await seedGraph(backend.db);
-      const recordId = 'rec-del-1';
-      final now = DateTime.now().toUtc();
-
-      await evidenceDao.insertEvidence(
-        AttendanceEvidenceCompanion(
-          id: const Value('ev-del-1'),
+        // Insert
+        final companion = AttendanceEvidenceCompanion(
+          id: const Value('ev-stream-1'),
           lectureRecordId: const Value(recordId),
-          localPathRelative: const Value('evidence/del.jpg'),
-          sha256: const Value('delhash'),
-          width: const Value(100),
-          height: const Value(100),
+          localPathRelative: const Value('evidence/stream.jpg'),
+          sha256: const Value('hash123'),
+          width: const Value(800),
+          height: const Value(600),
           captureTimestamp: Value(now),
           appVersion: const Value('1.0.0'),
           timezone: const Value('UTC'),
           state: const Value('original'),
-        ),
-      );
+        );
+        await evidenceDao.insertEvidence(companion);
 
-      final beforeDelete = await evidenceDao.getById('ev-del-1');
-      expect(beforeDelete, isNotNull);
+        // Delete
+        await evidenceDao.deleteEvidence('ev-stream-1');
+      },
+    );
 
-      // Delete
-      await evidenceDao.deleteEvidence('ev-del-1');
+    test(
+      'deleteEvidence removes record and registers with SyncQueue',
+      () async {
+        await seedGraph(backend.db);
+        const recordId = 'rec-del-1';
+        final now = DateTime.now().toUtc();
 
-      final afterDelete = await evidenceDao.getById('ev-del-1');
-      expect(afterDelete, isNull);
+        await evidenceDao.insertEvidence(
+          AttendanceEvidenceCompanion(
+            id: const Value('ev-del-1'),
+            lectureRecordId: const Value(recordId),
+            localPathRelative: const Value('evidence/del.jpg'),
+            sha256: const Value('delhash'),
+            width: const Value(100),
+            height: const Value(100),
+            captureTimestamp: Value(now),
+            appVersion: const Value('1.0.0'),
+            timezone: const Value('UTC'),
+            state: const Value('original'),
+          ),
+        );
 
-      // Verify sync queue has registered DELETE operation
-      final pendingQueue = await backend.queueDao.fetchPending();
-      final deleteItem = pendingQueue.firstWhere(
-        (item) => item.recordId == 'ev-del-1' && item.operation == 'DELETE',
-      );
-      expect(deleteItem, isNotNull);
-      expect(deleteItem.targetTable, isIn(['lecture_evidence', 'attendance_evidence']));
-    });
+        final beforeDelete = await evidenceDao.getById('ev-del-1');
+        expect(beforeDelete, isNotNull);
+
+        // Delete
+        await evidenceDao.deleteEvidence('ev-del-1');
+
+        final afterDelete = await evidenceDao.getById('ev-del-1');
+        expect(afterDelete, isNull);
+
+        // Verify sync queue has registered DELETE operation
+        final pendingQueue = await backend.queueDao.fetchPending();
+        final deleteItem = pendingQueue.firstWhere(
+          (item) => item.recordId == 'ev-del-1' && item.operation == 'DELETE',
+        );
+        expect(deleteItem, isNotNull);
+        expect(
+          deleteItem.targetTable,
+          isIn(['lecture_evidence', 'attendance_evidence']),
+        );
+      },
+    );
   });
 }

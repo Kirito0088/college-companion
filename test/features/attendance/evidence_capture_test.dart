@@ -21,12 +21,73 @@ import '../../support/test_db.dart';
 
 // Valid 1x1 transparent PNG bytes for Flutter Image widgets in tests
 final kTestPngBytes = Uint8List.fromList([
-  0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D,
-  0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
-  0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4, 0x89, 0x00, 0x00, 0x00,
-  0x0A, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
-  0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00, 0x00, 0x00, 0x00, 0x49,
-  0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82,
+  0x89,
+  0x50,
+  0x4E,
+  0x47,
+  0x0D,
+  0x0A,
+  0x1A,
+  0x0A,
+  0x00,
+  0x00,
+  0x00,
+  0x0D,
+  0x49,
+  0x48,
+  0x44,
+  0x52,
+  0x00,
+  0x00,
+  0x00,
+  0x01,
+  0x00,
+  0x00,
+  0x00,
+  0x01,
+  0x08,
+  0x06,
+  0x00,
+  0x00,
+  0x00,
+  0x1F,
+  0x15,
+  0xC4,
+  0x89,
+  0x00,
+  0x00,
+  0x00,
+  0x0A,
+  0x49,
+  0x44,
+  0x41,
+  0x54,
+  0x78,
+  0x9C,
+  0x63,
+  0x00,
+  0x01,
+  0x00,
+  0x00,
+  0x05,
+  0x00,
+  0x01,
+  0x0D,
+  0x0A,
+  0x2D,
+  0xB4,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x49,
+  0x45,
+  0x4E,
+  0x44,
+  0xAE,
+  0x42,
+  0x60,
+  0x82,
 ]);
 
 void main() {
@@ -76,12 +137,12 @@ void main() {
   }
 
   group('EvidenceCaptureSheet Widget Tests', () {
-    testWidgets('renders camera option, gallery option, and note field', (tester) async {
+    testWidgets('renders camera option, gallery option, and note field', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         buildTestableWidget(
-          child: const EvidenceCaptureSheet(
-            recordId: 'rec-test-1',
-          ),
+          child: const EvidenceCaptureSheet(recordId: 'rec-test-1'),
         ),
       );
       await tester.pump();
@@ -98,7 +159,9 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
     });
 
-    testWidgets('triggers onSourceSelected with note content on button press', (tester) async {
+    testWidgets('triggers onSourceSelected with note content on button press', (
+      tester,
+    ) async {
       ImageSource? selectedSource;
       String? enteredNote;
 
@@ -116,7 +179,10 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
 
-      await tester.enterText(find.byType(TextField), 'Classroom blackboard notes');
+      await tester.enterText(
+        find.byType(TextField),
+        'Classroom blackboard notes',
+      );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
 
@@ -131,7 +197,9 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
     });
 
-    testWidgets('triggers gallery selection on Choose from Gallery tap', (tester) async {
+    testWidgets('triggers gallery selection on Choose from Gallery tap', (
+      tester,
+    ) async {
       ImageSource? selectedSource;
 
       await tester.pumpWidget(
@@ -159,12 +227,12 @@ void main() {
   });
 
   group('EvidenceThumbnailStrip Widget Tests', () {
-    testWidgets('renders empty placeholder when no evidence exists', (tester) async {
+    testWidgets('renders empty placeholder when no evidence exists', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         buildTestableWidget(
-          child: const EvidenceThumbnailStrip(
-            recordId: 'rec-empty-1',
-          ),
+          child: const EvidenceThumbnailStrip(recordId: 'rec-empty-1'),
         ),
       );
       await tester.pump();
@@ -177,86 +245,92 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
     });
 
-    testWidgets('renders photo thumbnail and add more button when evidence is present', (tester) async {
-      final saved = await storageService.saveImage(
-        bytes: kTestPngBytes,
-        fileName: 'thumb_test.png',
-      );
+    testWidgets(
+      'renders photo thumbnail and add more button when evidence is present',
+      (tester) async {
+        final saved = await storageService.saveImage(
+          bytes: kTestPngBytes,
+          fileName: 'thumb_test.png',
+        );
 
-      await evidenceDao.insertEvidence(
-        AttendanceEvidenceCompanion(
-          id: const Value('ev-thumb-1'),
-          lectureRecordId: const Value('rec-with-thumb'),
-          localPathRelative: Value(saved.relativePath),
-          sha256: Value(saved.sha256Hash),
-          width: const Value(800),
-          height: const Value(600),
-          captureTimestamp: Value(DateTime.now().toUtc()),
-          appVersion: const Value('1.0.0'),
-          timezone: const Value('UTC'),
-          state: const Value('original'),
-        ),
-      );
-
-      await tester.pumpWidget(
-        buildTestableWidget(
-          child: const EvidenceThumbnailStrip(
-            recordId: 'rec-with-thumb',
+        await evidenceDao.insertEvidence(
+          AttendanceEvidenceCompanion(
+            id: const Value('ev-thumb-1'),
+            lectureRecordId: const Value('rec-with-thumb'),
+            localPathRelative: Value(saved.relativePath),
+            sha256: Value(saved.sha256Hash),
+            width: const Value(800),
+            height: const Value(600),
+            captureTimestamp: Value(DateTime.now().toUtc()),
+            appVersion: const Value('1.0.0'),
+            timezone: const Value('UTC'),
+            state: const Value('original'),
           ),
-        ),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
+        );
 
-      expect(find.byType(EvidenceThumbnailCard), findsOneWidget);
-      expect(find.byIcon(Symbols.add), findsOneWidget);
+        await tester.pumpWidget(
+          buildTestableWidget(
+            child: const EvidenceThumbnailStrip(recordId: 'rec-with-thumb'),
+          ),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
 
-      await tester.pumpWidget(const SizedBox());
-      await tester.pump(const Duration(milliseconds: 50));
-    });
+        expect(find.byType(EvidenceThumbnailCard), findsOneWidget);
+        expect(find.byIcon(Symbols.add), findsOneWidget);
+
+        await tester.pumpWidget(const SizedBox());
+        await tester.pump(const Duration(milliseconds: 50));
+      },
+    );
   });
 
   group('EvidencePreviewDialog Widget Tests', () {
-    testWidgets('renders interactive preview, close button, delete button, and metadata', (tester) async {
-      final saved = await storageService.saveImage(
-        bytes: kTestPngBytes,
-        fileName: 'preview_test.png',
-      );
+    testWidgets(
+      'renders interactive preview, close button, delete button, and metadata',
+      (tester) async {
+        final saved = await storageService.saveImage(
+          bytes: kTestPngBytes,
+          fileName: 'preview_test.png',
+        );
 
-      final entity = LectureEvidenceEntity(
-        id: 'ev-preview-1',
-        lectureRecordId: 'rec-preview-1',
-        localPathRelative: saved.relativePath,
-        sha256: saved.sha256Hash,
-        width: 1920,
-        height: 1080,
-        captureTimestamp: DateTime.utc(2026, 9, 15, 9, 30),
-        appVersion: '1.0.0',
-        timezone: 'UTC',
-        state: 'original',
-      );
+        final entity = LectureEvidenceEntity(
+          id: 'ev-preview-1',
+          lectureRecordId: 'rec-preview-1',
+          localPathRelative: saved.relativePath,
+          sha256: saved.sha256Hash,
+          width: 1920,
+          height: 1080,
+          captureTimestamp: DateTime.utc(2026, 9, 15, 9, 30),
+          appVersion: '1.0.0',
+          timezone: 'UTC',
+          state: 'original',
+        );
 
-      await tester.pumpWidget(
-        buildTestableWidget(
-          child: EvidencePreviewDialog(
-            evidence: entity,
-            recordId: 'rec-preview-1',
+        await tester.pumpWidget(
+          buildTestableWidget(
+            child: EvidencePreviewDialog(
+              evidence: entity,
+              recordId: 'rec-preview-1',
+            ),
           ),
-        ),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
 
-      expect(find.byIcon(Symbols.close), findsOneWidget);
-      expect(find.byIcon(Symbols.delete), findsOneWidget);
-      expect(find.text('Evidence Photo'), findsOneWidget);
-      expect(find.text('SHA-256 Verified'), findsOneWidget);
+        expect(find.byIcon(Symbols.close), findsOneWidget);
+        expect(find.byIcon(Symbols.delete), findsOneWidget);
+        expect(find.text('Evidence Photo'), findsOneWidget);
+        expect(find.text('SHA-256 Verified'), findsOneWidget);
 
-      await tester.pumpWidget(const SizedBox());
-      await tester.pump(const Duration(milliseconds: 50));
-    });
+        await tester.pumpWidget(const SizedBox());
+        await tester.pump(const Duration(milliseconds: 50));
+      },
+    );
 
-    testWidgets('delete action shows confirmation and deletes evidence', (tester) async {
+    testWidgets('delete action shows confirmation and deletes evidence', (
+      tester,
+    ) async {
       final saved = await storageService.saveImage(
         bytes: kTestPngBytes,
         fileName: 'to_delete_dialog.png',
@@ -314,50 +388,57 @@ void main() {
   });
 
   group('attendanceEvidenceProvider Integration Tests', () {
-    testWidgets('provides reactive stream and executes capture and delete actions', (tester) async {
-      const recordId = 'rec-provider-test';
+    testWidgets(
+      'provides reactive stream and executes capture and delete actions',
+      (tester) async {
+        const recordId = 'rec-provider-test';
 
-      late WidgetRef capturedRef;
-      await tester.pumpWidget(
-        buildTestableWidget(
-          child: Consumer(
-            builder: (context, ref, _) {
-              capturedRef = ref;
-              final asyncEvidence = ref.watch(attendanceEvidenceProvider(recordId));
-              return asyncEvidence.when(
-                data: (list) => Text('Count: ${list.length}'),
-                loading: () => const Text('Loading...'),
-                error: (e, _) => Text('Error: $e'),
-              );
-            },
+        late WidgetRef capturedRef;
+        await tester.pumpWidget(
+          buildTestableWidget(
+            child: Consumer(
+              builder: (context, ref, _) {
+                capturedRef = ref;
+                final asyncEvidence = ref.watch(
+                  attendanceEvidenceProvider(recordId),
+                );
+                return asyncEvidence.when(
+                  data: (list) => Text('Count: ${list.length}'),
+                  loading: () => const Text('Loading...'),
+                  error: (e, _) => Text('Error: $e'),
+                );
+              },
+            ),
           ),
-        ),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
 
-      expect(find.text('Count: 0'), findsOneWidget);
+        expect(find.text('Count: 0'), findsOneWidget);
 
-      // Add evidence via notifier
-      final notifier = capturedRef.read(attendanceEvidenceProvider(recordId).notifier);
-      final added = await notifier.addEvidenceFromBytes(
-        bytes: kTestPngBytes,
-        fileName: 'prov_test.png',
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
+        // Add evidence via notifier
+        final notifier = capturedRef.read(
+          attendanceEvidenceProvider(recordId).notifier,
+        );
+        final added = await notifier.addEvidenceFromBytes(
+          bytes: kTestPngBytes,
+          fileName: 'prov_test.png',
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
 
-      expect(find.text('Count: 1'), findsOneWidget);
+        expect(find.text('Count: 1'), findsOneWidget);
 
-      // Delete evidence via notifier
-      await notifier.deleteEvidence(added.id);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
+        // Delete evidence via notifier
+        await notifier.deleteEvidence(added.id);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
 
-      expect(find.text('Count: 0'), findsOneWidget);
+        expect(find.text('Count: 0'), findsOneWidget);
 
-      await tester.pumpWidget(const SizedBox());
-      await tester.pump(const Duration(milliseconds: 50));
-    });
+        await tester.pumpWidget(const SizedBox());
+        await tester.pump(const Duration(milliseconds: 50));
+      },
+    );
   });
 }

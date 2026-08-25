@@ -59,7 +59,8 @@ class _TestAuthStateNotifier extends AuthStateNotifier {
 const _userId = 'test_user_id';
 const _nowIso = '2026-01-01T00:00:00.000Z';
 
-AppDatabase _memoryDatabase() => AppDatabase.forTesting(NativeDatabase.memory());
+AppDatabase _memoryDatabase() =>
+    AppDatabase.forTesting(NativeDatabase.memory());
 
 Future<void> _pump(
   WidgetTester tester,
@@ -168,9 +169,7 @@ void main() {
     );
 
     for (final brightness in [Brightness.dark, Brightness.light]) {
-      testWidgets('renders real resource data in $brightness', (
-        tester,
-      ) async {
+      testWidgets('renders real resource data in $brightness', (tester) async {
         await _pump(
           tester,
           const ResourcesScreen(),
@@ -224,7 +223,8 @@ void main() {
           brightness: brightness,
           overrides: [
             notificationsStreamProvider.overrideWith(
-              (ref, userId) => Stream.value([notification('Class moved to 3pm')]),
+              (ref, userId) =>
+                  Stream.value([notification('Class moved to 3pm')]),
             ),
           ],
         );
@@ -233,23 +233,22 @@ void main() {
       });
     }
 
-    testWidgets(
-      'renders without exception when there are no notifications '
-      '(EmptyNotifications is not wired here — filed as a defect)',
-      (tester) async {
-        await _pump(
-          tester,
-          const NotificationsScreen(),
-          overrides: [
-            notificationsStreamProvider.overrideWith(
-              (ref, userId) => Stream.value([]),
-            ),
-          ],
-        );
+    testWidgets('renders without exception when there are no notifications '
+        '(EmptyNotifications is not wired here — filed as a defect)', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        const NotificationsScreen(),
+        overrides: [
+          notificationsStreamProvider.overrideWith(
+            (ref, userId) => Stream.value([]),
+          ),
+        ],
+      );
 
-        expect(tester.takeException(), isNull);
-      },
-    );
+      expect(tester.takeException(), isNull);
+    });
   });
 
   group('FocusScreen', () {
@@ -257,7 +256,12 @@ void main() {
       testWidgets('renders the timer without exception in $brightness', (
         tester,
       ) async {
-        await _pump(tester, const FocusScreen(), brightness: brightness, overrides: []);
+        await _pump(
+          tester,
+          const FocusScreen(),
+          brightness: brightness,
+          overrides: [],
+        );
 
         expect(tester.takeException(), isNull);
       });
@@ -277,9 +281,7 @@ void main() {
     );
 
     for (final brightness in [Brightness.dark, Brightness.light]) {
-      testWidgets('renders real semester data in $brightness', (
-        tester,
-      ) async {
+      testWidgets('renders real semester data in $brightness', (tester) async {
         await _pump(
           tester,
           const SemestersListScreen(),
@@ -295,21 +297,22 @@ void main() {
       });
     }
 
-    testWidgets('shows the empty state via EmptySubjects when there are no semesters', (
-      tester,
-    ) async {
-      await _pump(
-        tester,
-        const SemestersListScreen(),
-        overrides: [
-          semestersStreamProvider.overrideWith(
-            (ref, userId) => Stream.value([]),
-          ),
-        ],
-      );
+    testWidgets(
+      'shows the empty state via EmptySubjects when there are no semesters',
+      (tester) async {
+        await _pump(
+          tester,
+          const SemestersListScreen(),
+          overrides: [
+            semestersStreamProvider.overrideWith(
+              (ref, userId) => Stream.value([]),
+            ),
+          ],
+        );
 
-      expect(find.byType(EmptySubjects), findsOneWidget);
-    });
+        expect(find.byType(EmptySubjects), findsOneWidget);
+      },
+    );
   });
 
   group('SemesterDetailsScreen error/empty distinguishability', () {

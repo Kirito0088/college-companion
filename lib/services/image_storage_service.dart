@@ -57,9 +57,8 @@ class ImageStorageService {
   /// Creates an [ImageStorageService].
   ///
   /// [getAppDocDir] can be overridden in tests to provide an in-memory/temp directory.
-  ImageStorageService({
-    Future<Directory> Function()? getAppDocDir,
-  }) : _getAppDocDir = getAppDocDir ?? getApplicationDocumentsDirectory;
+  ImageStorageService({Future<Directory> Function()? getAppDocDir})
+    : _getAppDocDir = getAppDocDir ?? getApplicationDocumentsDirectory;
 
   final Future<Directory> Function() _getAppDocDir;
 
@@ -126,8 +125,8 @@ class ImageStorageService {
       evidenceDir.createSync(recursive: true);
     }
 
-    final name = fileName ??
-        'evidence_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final name =
+        fileName ?? 'evidence_${DateTime.now().millisecondsSinceEpoch}.jpg';
     final relativePath = '$evidenceSubdir/$name';
     final absPath = '${docDir.path}/$relativePath';
 

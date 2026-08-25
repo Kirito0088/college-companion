@@ -94,7 +94,8 @@ class _EvidenceCaptureSheetState extends ConsumerState<EvidenceCaptureSheet> {
         left: SpacingTokens.lg,
         right: SpacingTokens.lg,
         top: SpacingTokens.lg,
-        bottom: MediaQuery.of(context).padding.bottom +
+        bottom:
+            MediaQuery.of(context).padding.bottom +
             bottomInset +
             SpacingTokens.lg,
       ),

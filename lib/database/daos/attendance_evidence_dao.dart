@@ -30,9 +30,9 @@ class AttendanceEvidenceDao {
 
   /// Gets a single evidence entity by record ID.
   Future<LectureEvidenceEntity?> getByRecordId(String recordId) {
-    return (_database.select(_database.lectureEvidence)
-          ..where((t) => t.lectureRecordId.equals(recordId)))
-        .getSingleOrNull();
+    return (_database.select(
+      _database.lectureEvidence,
+    )..where((t) => t.lectureRecordId.equals(recordId))).getSingleOrNull();
   }
 
   /// Gets an evidence entity by its primary key UUID.
@@ -65,9 +65,9 @@ class AttendanceEvidenceDao {
 
   /// Deletes an evidence row by [evidenceId] and registers a DELETE mutation with the sync queue.
   Future<void> deleteEvidence(String evidenceId) async {
-    await (_database.delete(_database.lectureEvidence)
-          ..where((t) => t.id.equals(evidenceId)))
-        .go();
+    await (_database.delete(
+      _database.lectureEvidence,
+    )..where((t) => t.id.equals(evidenceId))).go();
 
     if (_syncQueueDao != null) {
       await _syncQueueDao.enqueue(

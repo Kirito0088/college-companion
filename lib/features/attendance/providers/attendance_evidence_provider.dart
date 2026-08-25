@@ -32,9 +32,9 @@ final imageStorageServiceProvider = Provider<ImageStorageService>((ref) {
 /// Watches evidence entities for a specific lecture record as a stream.
 final attendanceEvidenceStreamProvider =
     StreamProvider.family<List<LectureEvidenceEntity>, String>((ref, recordId) {
-  final dao = ref.watch(attendanceEvidenceDaoProvider);
-  return dao.watchEvidenceForRecord(recordId);
-});
+      final dao = ref.watch(attendanceEvidenceDaoProvider);
+      return dao.watchEvidenceForRecord(recordId);
+    });
 
 /// StateNotifier providing reactive evidence streams and capture/delete actions.
 class AttendanceEvidenceNotifier
@@ -56,14 +56,16 @@ class AttendanceEvidenceNotifier
   StreamSubscription<List<LectureEvidenceEntity>>? _subscription;
 
   void _init() {
-    _subscription = dao.watchEvidenceForRecord(recordId).listen(
-      (data) {
-        state = AsyncData(data);
-      },
-      onError: (Object err, StackTrace stack) {
-        state = AsyncError(err, stack);
-      },
-    );
+    _subscription = dao
+        .watchEvidenceForRecord(recordId)
+        .listen(
+          (data) {
+            state = AsyncData(data);
+          },
+          onError: (Object err, StackTrace stack) {
+            state = AsyncError(err, stack);
+          },
+        );
   }
 
   @override
@@ -177,15 +179,17 @@ class AttendanceEvidenceNotifier
 }
 
 /// Provides the reactive evidence stream and capture/delete actions for a specific record.
-final attendanceEvidenceProvider = StateNotifierProvider.autoDispose.family<
-    AttendanceEvidenceNotifier,
-    AsyncValue<List<LectureEvidenceEntity>>,
-    String>((ref, recordId) {
-  final dao = ref.watch(attendanceEvidenceDaoProvider);
-  final storageService = ref.watch(imageStorageServiceProvider);
-  return AttendanceEvidenceNotifier(
-    recordId: recordId,
-    dao: dao,
-    storageService: storageService,
-  );
-});
+final attendanceEvidenceProvider = StateNotifierProvider.autoDispose
+    .family<
+      AttendanceEvidenceNotifier,
+      AsyncValue<List<LectureEvidenceEntity>>,
+      String
+    >((ref, recordId) {
+      final dao = ref.watch(attendanceEvidenceDaoProvider);
+      final storageService = ref.watch(imageStorageServiceProvider);
+      return AttendanceEvidenceNotifier(
+        recordId: recordId,
+        dao: dao,
+        storageService: storageService,
+      );
+    });

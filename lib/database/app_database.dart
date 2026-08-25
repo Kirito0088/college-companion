@@ -58,7 +58,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration {
@@ -83,6 +83,28 @@ class AppDatabase extends _$AppDatabase {
           await m.addColumn(users, users.course);
           await m.addColumn(users, users.department);
           await m.addColumn(users, users.graduationYear);
+        }
+        if (from < 5) {
+          // lectureRecords, syncMetadata, and notifications were added to
+          // the schema at v2, but that upgrade step never created them —
+          // only onCreate (fresh installs) did. `createTable` emits
+          // `CREATE TABLE IF NOT EXISTS`, so it's safe to call unconditionally
+          // for both the broken-upgrade case and installs that already have
+          // these tables via onCreate.
+          await m.createTable(lectureRecords);
+          await m.createTable(syncMetadata);
+          await m.createTable(notifications);
+
+          // Unlike createTable, createIndex has no "IF NOT EXISTS" — calling
+          // it on a device that already has idxNotificationsUser (any fresh
+          // install) would throw, so it needs an explicit existence check.
+          final indexExists = await customSelect(
+            "SELECT name FROM sqlite_master WHERE type = 'index' AND name = ?",
+            variables: const [Variable<String>('idx_notifications_user')],
+          ).getSingleOrNull();
+          if (indexExists == null) {
+            await m.createIndex(idxNotificationsUser);
+          }
         }
       },
     );

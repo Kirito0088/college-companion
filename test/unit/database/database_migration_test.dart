@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:college_companion/database/app_database.dart';
+import 'package:drift/drift.dart' show Variable;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite3;
@@ -17,8 +18,8 @@ void main() {
   });
 
   group('Database Migration & Schema Tests', () {
-    test('Drift database instantiates with schema version 4', () {
-      expect(database.schemaVersion, 4);
+    test('Drift database instantiates with schema version 5', () {
+      expect(database.schemaVersion, 5);
     });
 
     test('All tables are registered in database schema', () {
@@ -432,5 +433,165 @@ void main() {
         expect(row.data['semester'], isNull);
       },
     );
+
+    test(
+      'upgrading from a v1 db predating lecture_records/sync_metadata/notifications '
+      'creates all three tables',
+      () async {
+        // Reproduces a real on-device schema (schema_version 1, created
+        // before lecture_records, sync_metadata, and notifications existed
+        // in the Dart table definitions) and asserts the v1 -> v5 migration
+        // creates all three rather than leaving them missing, which is the
+        // failure mode from issue #28 (SqliteException: no such table:
+        // notifications).
+        final tempDir = await Directory.systemTemp.createTemp('cc_migration');
+        final dbFile = File('${tempDir.path}/legacy_v1.db');
+        addTearDown(() => tempDir.delete(recursive: true));
+
+        final raw = sqlite3.sqlite3.open(dbFile.path);
+        raw.execute('''
+          CREATE TABLE users (
+            id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            profile_photo TEXT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            PRIMARY KEY (id)
+          );
+        ''');
+        raw.execute('''
+          CREATE TABLE semesters (
+            id TEXT NOT NULL,
+            user_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            working_days TEXT NOT NULL DEFAULT '{}',
+            is_current INTEGER NOT NULL DEFAULT 0,
+            is_archived INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            deleted_at TEXT NULL,
+            PRIMARY KEY (id)
+          );
+        ''');
+        raw.execute('''
+          CREATE TABLE user_settings (
+            id TEXT NOT NULL,
+            user_id TEXT NOT NULL,
+            notifications_enabled INTEGER NOT NULL DEFAULT 1
+              CHECK (notifications_enabled IN (0, 1)),
+            enabled_modules TEXT NOT NULL DEFAULT '{}',
+            theme TEXT NOT NULL DEFAULT 'dark',
+            preferences TEXT NOT NULL DEFAULT '{}',
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            PRIMARY KEY (id)
+          );
+        ''');
+        raw.execute('''
+          INSERT INTO users (id, name, email, created_at, updated_at)
+          VALUES
+            ('legacy_user', 'Legacy User', 'legacy@college.edu', '2026-01-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z');
+        ''');
+        raw.execute('PRAGMA user_version = 1;');
+        raw.close();
+
+        final migrated = AppDatabase.forTesting(NativeDatabase(dbFile));
+        addTearDown(migrated.close);
+
+        final tableNames = await migrated
+            .customSelect("SELECT name FROM sqlite_master WHERE type = 'table'")
+            .get()
+            .then((rows) => rows.map((r) => r.data['name'] as String).toSet());
+
+        expect(tableNames, contains('lecture_records'));
+        expect(tableNames, contains('sync_metadata'));
+        expect(tableNames, contains('notifications'));
+
+        // notifications also declares idx_notifications_user, which fresh
+        // installs get via onCreate's createAll() — the repair migration
+        // must create it too, not just the bare table.
+        final indexNames = await migrated
+            .customSelect("SELECT name FROM sqlite_master WHERE type = 'index'")
+            .get()
+            .then((rows) => rows.map((r) => r.data['name'] as String).toSet());
+        expect(indexNames, contains('idx_notifications_user'));
+
+        // The table must actually be queryable, not just present — this is
+        // the exact query NotificationsScreen runs.
+        final notifications = await migrated
+            .customSelect(
+              'SELECT * FROM notifications WHERE user_id = ? AND deleted_at IS NULL',
+              variables: [const Variable<String>('legacy_user')],
+            )
+            .get();
+        expect(notifications, isEmpty);
+      },
+    );
+
+    test('upgrading from a v4 db that already has notifications and its index '
+        'does not throw', () async {
+      // A device that did a fresh install between v2 and v4 already has
+      // notifications (and idx_notifications_user) via onCreate's
+      // createAll(). The v4 -> v5 repair step must not try to recreate
+      // either: createTable is IF NOT EXISTS-safe, but createIndex has no
+      // such guard and throws "index already exists" if called blindly.
+      final tempDir = await Directory.systemTemp.createTemp('cc_migration');
+      final dbFile = File('${tempDir.path}/existing_v4.db');
+      addTearDown(() => tempDir.delete(recursive: true));
+
+      final raw = sqlite3.sqlite3.open(dbFile.path);
+      raw.execute('''
+          CREATE TABLE users (
+            id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            profile_photo TEXT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            college_name TEXT NULL,
+            branch TEXT NULL,
+            semester TEXT NULL,
+            student_id TEXT NULL,
+            university TEXT NULL,
+            course TEXT NULL,
+            department TEXT NULL,
+            graduation_year TEXT NULL,
+            PRIMARY KEY (id)
+          );
+        ''');
+      raw.execute('''
+          CREATE TABLE notifications (
+            id TEXT NOT NULL,
+            user_id TEXT NOT NULL,
+            title TEXT NOT NULL,
+            message TEXT NOT NULL,
+            type TEXT NOT NULL DEFAULT 'upcoming',
+            target_route TEXT NULL,
+            is_read INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL,
+            deleted_at TEXT NULL,
+            PRIMARY KEY (id)
+          );
+        ''');
+      raw.execute(
+        'CREATE INDEX idx_notifications_user ON notifications (user_id);',
+      );
+      raw.execute('''
+          INSERT INTO users (id, name, email, created_at, updated_at)
+          VALUES
+            ('legacy_user', 'Legacy User', 'legacy@college.edu', '2026-01-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z');
+        ''');
+      raw.execute('PRAGMA user_version = 4;');
+      raw.close();
+
+      final migrated = AppDatabase.forTesting(NativeDatabase(dbFile));
+      addTearDown(migrated.close);
+
+      await expectLater(
+        migrated.customSelect('SELECT 1').getSingle(),
+        completes,
+      );
+    });
   });
 }

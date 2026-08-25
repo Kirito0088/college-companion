@@ -2,6 +2,7 @@ import 'package:college_companion/database/app_database.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/features/notifications/providers/notification_provider.dart';
+import 'package:college_companion/shared/widgets/errors/cc_errors.dart';
 import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
@@ -148,11 +149,8 @@ class NotificationsScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Text(
-            'Error loading notifications: $error',
-            style: TextStyle(color: cc.risk),
-          ),
+        error: (error, stack) => NetworkErrorWidget(
+          onRetry: () => ref.invalidate(notificationsStreamProvider(userId)),
         ),
       ),
     );

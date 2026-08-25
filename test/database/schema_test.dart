@@ -29,16 +29,16 @@ void main() {
       expect(row.data['ok'], 1);
     });
 
-    test('schema version is 4 baseline', () async {
-      expect(backend.db.schemaVersion, 4);
+    test('schema version is 5 baseline', () async {
+      expect(backend.db.schemaVersion, 5);
     });
 
-    test('Drift reports schema version 4 via user_version pragma', () async {
+    test('Drift reports schema version 5 via user_version pragma', () async {
       await backend.db.customSelect('SELECT 1').get();
       final row = await backend.db
           .customSelect('PRAGMA user_version')
           .getSingle();
-      expect(row.data.values.first, 4);
+      expect(row.data.values.first, 5);
     });
   });
 
@@ -59,6 +59,7 @@ void main() {
         'sync_queue',
         'sync_metadata',
         'resources',
+        'notifications',
       ];
       for (final t in expected) {
         expect(tables, contains(t), reason: 'missing table $t');

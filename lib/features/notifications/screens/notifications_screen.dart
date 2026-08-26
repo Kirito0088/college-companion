@@ -2,6 +2,7 @@ import 'package:college_companion/database/app_database.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/features/notifications/providers/notification_provider.dart';
+import 'package:college_companion/shared/widgets/empty_states/cc_empty_states.dart';
 import 'package:college_companion/shared/widgets/errors/cc_error_state.dart';
 import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
@@ -63,12 +64,7 @@ class NotificationsScreen extends ConsumerWidget {
       body: notificationsAsync.when(
         data: (notifications) {
           if (notifications.isEmpty) {
-            return Center(
-              child: Text(
-                'No notifications right now.',
-                style: TextStyle(color: cc.mut),
-              ),
-            );
+            return const Center(child: EmptyNotifications());
           }
 
           final today = <NotificationEntity>[];

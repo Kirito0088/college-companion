@@ -263,8 +263,7 @@ void main() {
       });
     }
 
-    testWidgets('renders without exception when there are no notifications '
-        '(EmptyNotifications is not wired here — filed as a defect)', (
+    testWidgets('shows EmptyNotifications when there are no notifications', (
       tester,
     ) async {
       await _pump(
@@ -277,6 +276,7 @@ void main() {
         ],
       );
 
+      expect(find.byType(EmptyNotifications), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   });

@@ -1,7 +1,6 @@
 import 'package:college_companion/features/onboarding/providers/onboarding_provider.dart';
 import 'package:college_companion/routing/app_router.dart';
 import 'package:college_companion/theme/cc_tokens.dart';
-import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:college_companion/theme/typography_tokens.dart';
@@ -267,6 +266,7 @@ class _WelcomeHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cc = context.cc;
+    final colors = Theme.of(context).colorScheme;
 
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
@@ -296,30 +296,34 @@ class _WelcomeHero extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            const Positioned(
+            Positioned(
               top: 40,
               left: 40,
               child: _FloatingIconCard(
                 icon: Symbols.calendar_month,
-                color: ColorTokens.tertiary,
+                color: colors.tertiary,
                 delay: 200,
               ),
             ),
-            const Positioned(
+            Positioned(
               bottom: 60,
               left: 30,
               child: _FloatingIconCard(
                 icon: Symbols.fact_check,
-                color: ColorTokens.success,
+                // ADR-011 treats "healthy" and the primary accent as the
+                // same colour, so this follows the accent selection.
+                color: cc.pri,
                 delay: 400,
               ),
             ),
-            const Positioned(
+            Positioned(
               top: 70,
               right: 30,
               child: _FloatingIconCard(
                 icon: Symbols.description,
-                color: ColorTokens.info,
+                // No reactive "info" slot exists; `secondary` is the MD3
+                // slot for a cool hue that is not the accent.
+                color: colors.secondary,
                 delay: 600,
               ),
             ),
@@ -426,7 +430,7 @@ class _AttendanceHero extends StatelessWidget {
                 value: 0.85 * value,
                 strokeWidth: 12,
                 backgroundColor: cc.raise2,
-                color: ColorTokens.success,
+                color: cc.pri,
                 strokeCap: StrokeCap.round,
               ),
             ),
@@ -443,7 +447,7 @@ class _AttendanceHero extends StatelessWidget {
                 Text(
                   'Safe',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: ColorTokens.success,
+                    color: cc.pri,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -491,11 +495,11 @@ class _PlanningHero extends StatelessWidget {
           title: 'Math Assignment',
           subtitle: 'Due Tomorrow',
         ),
-        const _MockCard(
+        _MockCard(
           delay: 200,
           yOffset: 40,
           rotate: 0.05,
-          color: ColorTokens.tertiary,
+          color: Theme.of(context).colorScheme.tertiary,
           icon: Symbols.event,
           title: 'Database Lecture',
           subtitle: '10:00 AM - Room 402',
@@ -651,7 +655,7 @@ class _StudyHubHero extends StatelessWidget {
               ),
             );
           },
-          child: const _FolderIcon(color: ColorTokens.info),
+          child: _FolderIcon(color: Theme.of(context).colorScheme.secondary),
         ),
         TweenAnimationBuilder<double>(
           tween: Tween(begin: 0.0, end: 1.0),
@@ -666,7 +670,7 @@ class _StudyHubHero extends StatelessWidget {
               ),
             );
           },
-          child: const _FolderIcon(color: ColorTokens.warning),
+          child: _FolderIcon(color: cc.warn),
         ),
 
         // Main File Card
@@ -801,6 +805,8 @@ class _ReadyHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cc = context.cc;
+
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
       duration: const Duration(milliseconds: 1000),
@@ -812,15 +818,11 @@ class _ReadyHero extends StatelessWidget {
         width: 160,
         height: 160,
         decoration: BoxDecoration(
-          color: ColorTokens.success.withValues(alpha: 0.15),
+          color: cc.pri.withValues(alpha: 0.15),
           shape: BoxShape.circle,
         ),
-        child: const Center(
-          child: Icon(
-            Symbols.check_circle,
-            size: 80,
-            color: ColorTokens.success,
-          ),
+        child: Center(
+          child: Icon(Symbols.check_circle, size: 80, color: cc.pri),
         ),
       ),
     );

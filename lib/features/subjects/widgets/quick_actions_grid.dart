@@ -1,4 +1,4 @@
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +18,7 @@ class QuickActionsGrid extends StatelessWidget {
         Text(
           'Quick Actions',
           style: theme.textTheme.titleMedium?.copyWith(
-            color: ColorTokens.onSurface,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: SpacingTokens.md), // mb-4
@@ -27,7 +27,8 @@ class QuickActionsGrid extends StatelessWidget {
             Expanded(
               child: _QuickActionCard(
                 icon: Symbols.menu_book,
-                iconColor: ColorTokens.secondary, // approx secondary-fixed
+                iconColor:
+                    theme.colorScheme.secondary, // approx secondary-fixed
                 label: 'View Lectures',
                 onTap: () {},
               ),
@@ -36,7 +37,7 @@ class QuickActionsGrid extends StatelessWidget {
             Expanded(
               child: _QuickActionCard(
                 icon: Symbols.sticky_note_2,
-                iconColor: ColorTokens.warning,
+                iconColor: context.cc.warn,
                 label: 'View Notes',
                 onTap: () {},
               ),
@@ -49,7 +50,7 @@ class QuickActionsGrid extends StatelessWidget {
             Expanded(
               child: _QuickActionCard(
                 icon: Symbols.description,
-                iconColor: ColorTokens.tertiary,
+                iconColor: theme.colorScheme.tertiary,
                 label: 'Internal Marks',
                 onTap: () => context.push('/semester'),
               ),
@@ -58,7 +59,7 @@ class QuickActionsGrid extends StatelessWidget {
             Expanded(
               child: _QuickActionCard(
                 icon: Symbols.folder,
-                iconColor: ColorTokens.secondary,
+                iconColor: theme.colorScheme.secondary,
                 label: 'Resources',
                 onTap: () => context.push('/resources'),
               ),
@@ -71,7 +72,7 @@ class QuickActionsGrid extends StatelessWidget {
             Expanded(
               child: _QuickActionCard(
                 icon: Symbols.calendar_month,
-                iconColor: ColorTokens.primary,
+                iconColor: theme.colorScheme.primary,
                 label: 'Calendar (Test)',
                 onTap: () => context.push('/calendar'),
               ),
@@ -108,9 +109,9 @@ class _QuickActionCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(SpacingTokens.md), // p-4
         decoration: BoxDecoration(
-          color: ColorTokens.surfaceContainer,
+          color: theme.colorScheme.surfaceContainer,
           borderRadius: RadiusTokens.borderRadiusMd, // rounded-xl => 12px
-          border: Border.all(color: ColorTokens.surfaceVariant),
+          border: Border.all(color: theme.colorScheme.outlineVariant),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,8 +119,8 @@ class _QuickActionCard extends StatelessWidget {
             Container(
               width: 40, // w-10
               height: 40, // h-10
-              decoration: const BoxDecoration(
-                color: ColorTokens.surfaceContainer,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainer,
                 borderRadius: RadiusTokens.borderRadiusSm, // rounded-lg => 8px
               ),
               alignment: Alignment.center,
@@ -129,7 +130,7 @@ class _QuickActionCard extends StatelessWidget {
             Text(
               label,
               style: theme.textTheme.labelLarge?.copyWith(
-                color: ColorTokens.onSurface,
+                color: theme.colorScheme.onSurface,
               ),
             ),
           ],

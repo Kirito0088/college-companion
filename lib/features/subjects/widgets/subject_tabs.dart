@@ -1,4 +1,3 @@
-import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
 
@@ -8,9 +7,15 @@ class SubjectTabs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: ColorTokens.surfaceVariant, width: 1),
+          bottom: BorderSide(
+            // The opaque hairline, not a raised-surface fill — in the light
+            // theme the first elevation step is white and would vanish
+            // against the surface beneath it.
+            color: Theme.of(context).colorScheme.outlineVariant,
+            width: 1,
+          ),
         ),
       ),
       child: SingleChildScrollView(
@@ -46,7 +51,7 @@ class SubjectTabs extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: isActive ? ColorTokens.primary : Colors.transparent,
+            color: isActive ? theme.colorScheme.primary : Colors.transparent,
             width: 2,
           ),
         ),
@@ -54,7 +59,9 @@ class SubjectTabs extends StatelessWidget {
       child: Text(
         title,
         style: theme.textTheme.titleMedium?.copyWith(
-          color: isActive ? ColorTokens.primary : ColorTokens.onSurfaceVariant,
+          color: isActive
+              ? theme.colorScheme.primary
+              : theme.colorScheme.onSurfaceVariant,
         ),
       ),
     );

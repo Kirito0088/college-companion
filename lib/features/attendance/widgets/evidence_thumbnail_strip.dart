@@ -10,7 +10,6 @@ import 'package:college_companion/database/app_database.dart';
 import 'package:college_companion/features/attendance/providers/attendance_evidence_provider.dart';
 import 'package:college_companion/features/attendance/widgets/evidence_capture_sheet.dart';
 import 'package:college_companion/features/attendance/widgets/evidence_preview_dialog.dart';
-import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +32,7 @@ class EvidenceThumbnailStrip extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).colorScheme;
     final evidenceAsync = ref.watch(attendanceEvidenceProvider(recordId));
 
     return evidenceAsync.when(
@@ -44,28 +44,26 @@ class EvidenceThumbnailStrip extends ConsumerWidget {
         }
         return _buildStrip(context, evidenceList);
       },
-      loading: () => const SizedBox(
+      loading: () => SizedBox(
         height: 80,
-        child: Center(
-          child: CircularProgressIndicator(color: ColorTokens.primary),
-        ),
+        child: Center(child: CircularProgressIndicator(color: colors.primary)),
       ),
       error: (e, _) => Container(
         height: 80,
         padding: const EdgeInsets.all(SpacingTokens.md),
         decoration: BoxDecoration(
-          color: ColorTokens.surfaceContainerHigh,
+          color: colors.surfaceContainerHigh,
           borderRadius: RadiusTokens.borderRadiusLg,
-          border: Border.all(color: ColorTokens.outlineVariant),
+          border: Border.all(color: colors.outlineVariant),
         ),
         child: Row(
           children: [
-            const Icon(Symbols.error, color: ColorTokens.error, size: 20),
+            Icon(Symbols.error, color: colors.error, size: 20),
             const SizedBox(width: SpacingTokens.sm),
             Expanded(
               child: Text(
                 'Failed to load evidence: $e',
-                style: const TextStyle(color: ColorTokens.error, fontSize: 12),
+                style: TextStyle(color: colors.error, fontSize: 12),
               ),
             ),
           ],
@@ -76,6 +74,7 @@ class EvidenceThumbnailStrip extends ConsumerWidget {
 
   Widget _buildEmptyState(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = theme.colorScheme;
 
     return InkWell(
       onTap: () => EvidenceCaptureSheet.show(context, recordId: recordId),
@@ -86,30 +85,30 @@ class EvidenceThumbnailStrip extends ConsumerWidget {
           vertical: SpacingTokens.base,
         ),
         decoration: BoxDecoration(
-          color: ColorTokens.surfaceContainerHigh,
+          color: colors.surfaceContainerHigh,
           borderRadius: RadiusTokens.borderRadiusLg,
-          border: Border.all(color: ColorTokens.outlineVariant),
+          border: Border.all(color: colors.outlineVariant),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
               padding: const EdgeInsets.all(SpacingTokens.sm),
-              decoration: const BoxDecoration(
-                color: ColorTokens.surfaceContainerHighest,
+              decoration: BoxDecoration(
+                color: colors.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Symbols.add_a_photo,
                 size: 20,
-                color: ColorTokens.onSurfaceVariant,
+                color: colors.onSurfaceVariant,
               ),
             ),
             const SizedBox(width: SpacingTokens.md),
             Text(
               'Add Evidence',
               style: theme.textTheme.labelLarge?.copyWith(
-                color: ColorTokens.onSurface,
+                color: colors.onSurface,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -121,6 +120,7 @@ class EvidenceThumbnailStrip extends ConsumerWidget {
 
   Widget _buildReadOnlyEmptyState(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = theme.colorScheme;
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -128,14 +128,14 @@ class EvidenceThumbnailStrip extends ConsumerWidget {
         vertical: SpacingTokens.base,
       ),
       decoration: BoxDecoration(
-        color: ColorTokens.surfaceContainerHigh,
+        color: colors.surfaceContainerHigh,
         borderRadius: RadiusTokens.borderRadiusLg,
-        border: Border.all(color: ColorTokens.outlineVariant),
+        border: Border.all(color: colors.outlineVariant),
       ),
       child: Text(
         'No evidence was captured for this record.',
         style: theme.textTheme.labelLarge?.copyWith(
-          color: ColorTokens.onSurfaceVariant,
+          color: colors.onSurfaceVariant,
         ),
       ),
     );
@@ -170,6 +170,7 @@ class EvidenceThumbnailStrip extends ConsumerWidget {
   }
 
   Widget _buildAddTile(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return InkWell(
       onTap: () => EvidenceCaptureSheet.show(context, recordId: recordId),
       borderRadius: RadiusTokens.borderRadiusLg,
@@ -177,19 +178,15 @@ class EvidenceThumbnailStrip extends ConsumerWidget {
         width: 80,
         height: 80,
         decoration: BoxDecoration(
-          color: ColorTokens.surfaceContainerHigh,
+          color: colors.surfaceContainerHigh,
           borderRadius: RadiusTokens.borderRadiusLg,
           border: Border.all(
-            color: ColorTokens.outlineVariant,
+            color: colors.outlineVariant,
             style: BorderStyle.solid,
           ),
         ),
-        child: const Center(
-          child: Icon(
-            Symbols.add,
-            color: ColorTokens.onSurfaceVariant,
-            size: 24,
-          ),
+        child: Center(
+          child: Icon(Symbols.add, color: colors.onSurfaceVariant, size: 24),
         ),
       ),
     );
@@ -235,6 +232,7 @@ class _EvidenceThumbnailCardState extends ConsumerState<EvidenceThumbnailCard> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return InkWell(
       onTap: () {
         EvidencePreviewDialog.show(
@@ -249,9 +247,9 @@ class _EvidenceThumbnailCardState extends ConsumerState<EvidenceThumbnailCard> {
         width: 80,
         height: 80,
         decoration: BoxDecoration(
-          color: ColorTokens.surfaceContainerHighest,
+          color: colors.surfaceContainerHighest,
           borderRadius: RadiusTokens.borderRadiusLg,
-          border: Border.all(color: ColorTokens.outlineVariant, width: 1.5),
+          border: Border.all(color: colors.outlineVariant, width: 1.5),
         ),
         clipBehavior: Clip.antiAlias,
         child: _imageBytes != null
@@ -261,20 +259,20 @@ class _EvidenceThumbnailCardState extends ConsumerState<EvidenceThumbnailCard> {
                 height: 80,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
-                  return const Center(
+                  return Center(
                     child: Icon(
                       Symbols.broken_image,
                       size: 24,
-                      color: ColorTokens.onSurfaceVariant,
+                      color: colors.onSurfaceVariant,
                     ),
                   );
                 },
               )
-            : const Center(
+            : Center(
                 child: Icon(
                   Symbols.image,
                   size: 24,
-                  color: ColorTokens.onSurfaceVariant,
+                  color: colors.onSurfaceVariant,
                 ),
               ),
       ),

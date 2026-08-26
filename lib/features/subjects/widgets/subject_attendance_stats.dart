@@ -1,5 +1,5 @@
 import 'package:college_companion/shared/widgets/cc_card.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
 
@@ -17,7 +17,7 @@ class SubjectAttendanceStats extends StatelessWidget {
           Text(
             'Attendance',
             style: theme.textTheme.titleMedium?.copyWith(
-              color: ColorTokens.onSurface,
+              color: theme.colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: SpacingTokens.lg),
@@ -29,13 +29,13 @@ class SubjectAttendanceStats extends StatelessWidget {
               Text(
                 '85%',
                 style: theme.textTheme.displayLarge?.copyWith(
-                  color: ColorTokens.onSurface,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
               Text(
                 'Target: 75%',
                 style: theme.textTheme.labelLarge?.copyWith(
-                  color: ColorTokens.onSurfaceVariant,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -46,7 +46,7 @@ class SubjectAttendanceStats extends StatelessWidget {
             height: 8, // h-2
             width: double.infinity,
             decoration: BoxDecoration(
-              color: ColorTokens.surfaceContainerHighest,
+              color: theme.colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(4), // rounded-full
             ),
             child: FractionallySizedBox(
@@ -54,7 +54,9 @@ class SubjectAttendanceStats extends StatelessWidget {
               widthFactor: 0.85,
               child: Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFF10B981), // attendance-chart-fill
+                  // Healthy attendance reads as the accent (ADR-011: success == pri),
+                  // so the fill tracks the user's accent choice.
+                  color: context.cc.pri,
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -64,19 +66,14 @@ class SubjectAttendanceStats extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
+              _buildStatItem(context, 'Present', '34', context.cc.pri),
+              _buildStatItem(context, 'Absent', '6', context.cc.risk),
               _buildStatItem(
                 context,
-                'Present',
-                '34',
-                SemanticColorTokens.present,
+                'Total',
+                '40',
+                theme.colorScheme.onSurface,
               ),
-              _buildStatItem(
-                context,
-                'Absent',
-                '6',
-                SemanticColorTokens.absent,
-              ),
-              _buildStatItem(context, 'Total', '40', ColorTokens.onSurface),
             ],
           ),
         ],
@@ -96,7 +93,7 @@ class SubjectAttendanceStats extends StatelessWidget {
         Text(
           label,
           style: theme.textTheme.labelLarge?.copyWith(
-            color: ColorTokens.onSurfaceVariant,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: SpacingTokens.xs),

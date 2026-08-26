@@ -5,7 +5,7 @@
 library;
 
 import 'package:college_companion/features/attendance/providers/attendance_evidence_provider.dart';
-import 'package:college_companion/theme/color_tokens.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -56,6 +56,7 @@ class _EvidenceCaptureSheetState extends ConsumerState<EvidenceCaptureSheet> {
   }
 
   Future<void> _handleSelection(ImageSource source) async {
+    final colors = Theme.of(context).colorScheme;
     final note = _noteController.text.trim().isEmpty
         ? null
         : _noteController.text.trim();
@@ -76,7 +77,7 @@ class _EvidenceCaptureSheetState extends ConsumerState<EvidenceCaptureSheet> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to save evidence: $e'),
-            backgroundColor: ColorTokens.error,
+            backgroundColor: colors.error,
           ),
         );
       }
@@ -86,6 +87,7 @@ class _EvidenceCaptureSheetState extends ConsumerState<EvidenceCaptureSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Container(
@@ -100,16 +102,10 @@ class _EvidenceCaptureSheetState extends ConsumerState<EvidenceCaptureSheet> {
             SpacingTokens.lg,
       ),
       decoration: BoxDecoration(
-        color: ColorTokens.surfaceContainerHigh,
+        color: colors.surfaceContainerHigh,
         borderRadius: RadiusTokens.borderRadiusXl,
-        border: Border.all(color: ColorTokens.outlineVariant),
-        boxShadow: [
-          BoxShadow(
-            color: ColorTokens.background.withValues(alpha: 0.5),
-            blurRadius: 24,
-            offset: const Offset(0, -4),
-          ),
-        ],
+        border: Border.all(color: colors.outlineVariant),
+        boxShadow: context.cc.shadow,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -121,7 +117,7 @@ class _EvidenceCaptureSheetState extends ConsumerState<EvidenceCaptureSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: ColorTokens.onSurfaceVariant.withValues(alpha: 0.4),
+                color: colors.onSurfaceVariant.withValues(alpha: 0.4),
                 borderRadius: RadiusTokens.borderRadiusPill,
               ),
             ),
@@ -134,12 +130,12 @@ class _EvidenceCaptureSheetState extends ConsumerState<EvidenceCaptureSheet> {
               Container(
                 padding: const EdgeInsets.all(SpacingTokens.sm),
                 decoration: BoxDecoration(
-                  color: ColorTokens.primary.withValues(alpha: 0.15),
+                  color: colors.primary.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Symbols.photo_camera,
-                  color: ColorTokens.primary,
+                  color: colors.primary,
                   size: 24,
                 ),
               ),
@@ -151,7 +147,7 @@ class _EvidenceCaptureSheetState extends ConsumerState<EvidenceCaptureSheet> {
                     Text(
                       'Attach Evidence',
                       style: theme.textTheme.titleMedium?.copyWith(
-                        color: ColorTokens.onSurface,
+                        color: colors.onSurface,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -159,7 +155,7 @@ class _EvidenceCaptureSheetState extends ConsumerState<EvidenceCaptureSheet> {
                     Text(
                       'Stored locally on this device only (never synced).',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: ColorTokens.onSurfaceVariant,
+                        color: colors.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -173,19 +169,19 @@ class _EvidenceCaptureSheetState extends ConsumerState<EvidenceCaptureSheet> {
           TextField(
             controller: _noteController,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: ColorTokens.onSurface,
+              color: colors.onSurface,
             ),
             decoration: InputDecoration(
               hintText: 'Note or description (optional)...',
               hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                color: ColorTokens.onSurfaceVariant,
+                color: colors.onSurfaceVariant,
               ),
-              prefixIcon: const Icon(
+              prefixIcon: Icon(
                 Symbols.edit_note,
-                color: ColorTokens.onSurfaceVariant,
+                color: colors.onSurfaceVariant,
               ),
               filled: true,
-              fillColor: ColorTokens.surfaceContainerHighest,
+              fillColor: colors.surfaceContainerHighest,
               border: const OutlineInputBorder(
                 borderRadius: RadiusTokens.borderRadiusMd,
                 borderSide: BorderSide.none,
@@ -204,8 +200,8 @@ class _EvidenceCaptureSheetState extends ConsumerState<EvidenceCaptureSheet> {
             icon: const Icon(Symbols.photo_camera, size: 20),
             label: const Text('Take Photo'),
             style: FilledButton.styleFrom(
-              backgroundColor: ColorTokens.primary,
-              foregroundColor: ColorTokens.onPrimary,
+              backgroundColor: colors.primary,
+              foregroundColor: colors.onPrimary,
               minimumSize: const Size(double.infinity, 48),
               padding: const EdgeInsets.symmetric(vertical: SpacingTokens.md),
               shape: const RoundedRectangleBorder(
@@ -221,8 +217,8 @@ class _EvidenceCaptureSheetState extends ConsumerState<EvidenceCaptureSheet> {
             icon: const Icon(Symbols.photo_library, size: 20),
             label: const Text('Choose from Gallery'),
             style: OutlinedButton.styleFrom(
-              foregroundColor: ColorTokens.onSurface,
-              side: const BorderSide(color: ColorTokens.outlineVariant),
+              foregroundColor: colors.onSurface,
+              side: BorderSide(color: colors.outlineVariant),
               minimumSize: const Size(double.infinity, 48),
               padding: const EdgeInsets.symmetric(vertical: SpacingTokens.md),
               shape: const RoundedRectangleBorder(

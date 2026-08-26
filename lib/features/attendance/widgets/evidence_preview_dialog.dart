@@ -8,7 +8,6 @@ import 'dart:typed_data';
 
 import 'package:college_companion/database/app_database.dart';
 import 'package:college_companion/features/attendance/providers/attendance_evidence_provider.dart';
-import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -80,41 +79,42 @@ class _EvidencePreviewDialogState extends ConsumerState<EvidencePreviewDialog> {
   }
 
   Future<void> _handleDelete() async {
+    final colors = Theme.of(context).colorScheme;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          backgroundColor: ColorTokens.surfaceContainerHigh,
+          backgroundColor: colors.surfaceContainerHigh,
           shape: const RoundedRectangleBorder(
             borderRadius: RadiusTokens.borderRadiusXl,
           ),
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Symbols.delete, color: ColorTokens.error),
-              SizedBox(width: SpacingTokens.sm),
+              Icon(Symbols.delete, color: colors.error),
+              const SizedBox(width: SpacingTokens.sm),
               Text(
                 'Delete Evidence?',
-                style: TextStyle(color: ColorTokens.onSurface),
+                style: TextStyle(color: colors.onSurface),
               ),
             ],
           ),
-          content: const Text(
+          content: Text(
             'This classroom photo will be permanently deleted from local device storage.',
-            style: TextStyle(color: ColorTokens.onSurfaceVariant),
+            style: TextStyle(color: colors.onSurfaceVariant),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
               style: TextButton.styleFrom(
-                foregroundColor: ColorTokens.onSurfaceVariant,
+                foregroundColor: colors.onSurfaceVariant,
               ),
               child: const Text('Cancel'),
             ),
             FilledButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
               style: FilledButton.styleFrom(
-                backgroundColor: ColorTokens.error,
-                foregroundColor: ColorTokens.onError,
+                backgroundColor: colors.error,
+                foregroundColor: colors.onError,
               ),
               child: const Text('Delete'),
             ),
@@ -144,6 +144,7 @@ class _EvidencePreviewDialogState extends ConsumerState<EvidencePreviewDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     final formattedDate = DateFormat(
       'MMM dd, yyyy • hh:mm a',
     ).format(widget.evidence.captureTimestamp.toLocal());
@@ -163,17 +164,14 @@ class _EvidencePreviewDialogState extends ConsumerState<EvidencePreviewDialog> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    icon: const Icon(
-                      Symbols.close,
-                      color: ColorTokens.onSurface,
-                    ),
+                    icon: Icon(Symbols.close, color: colors.onSurface),
                     tooltip: 'Close',
                     onPressed: () => Navigator.of(context).pop(false),
                   ),
                   Text(
                     'Evidence Photo',
                     style: theme.textTheme.titleMedium?.copyWith(
-                      color: ColorTokens.onSurface,
+                      color: colors.onSurface,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -181,10 +179,7 @@ class _EvidencePreviewDialogState extends ConsumerState<EvidencePreviewDialog> {
                     const SizedBox(width: 48)
                   else
                     IconButton(
-                      icon: const Icon(
-                        Symbols.delete,
-                        color: ColorTokens.error,
-                      ),
+                      icon: Icon(Symbols.delete, color: colors.error),
                       tooltip: 'Delete Evidence',
                       onPressed: _handleDelete,
                     ),
@@ -196,23 +191,21 @@ class _EvidencePreviewDialogState extends ConsumerState<EvidencePreviewDialog> {
             Expanded(
               child: Center(
                 child: _isLoading
-                    ? const CircularProgressIndicator(
-                        color: ColorTokens.primary,
-                      )
+                    ? CircularProgressIndicator(color: colors.primary)
                     : _isMissing || _imageBytes == null
                     ? Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
+                          Icon(
                             Symbols.broken_image,
                             size: 64,
-                            color: ColorTokens.onSurfaceVariant,
+                            color: colors.onSurfaceVariant,
                           ),
                           const SizedBox(height: SpacingTokens.md),
                           Text(
                             'Image file missing on device',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: ColorTokens.onSurfaceVariant,
+                              color: colors.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -224,11 +217,11 @@ class _EvidencePreviewDialogState extends ConsumerState<EvidencePreviewDialog> {
                           _imageBytes!,
                           fit: BoxFit.contain,
                           errorBuilder: (context, error, stackTrace) {
-                            return const Center(
+                            return Center(
                               child: Icon(
                                 Symbols.broken_image,
                                 size: 64,
-                                color: ColorTokens.onSurfaceVariant,
+                                color: colors.onSurfaceVariant,
                               ),
                             );
                           },
@@ -242,9 +235,9 @@ class _EvidencePreviewDialogState extends ConsumerState<EvidencePreviewDialog> {
               margin: const EdgeInsets.all(SpacingTokens.lg),
               padding: const EdgeInsets.all(SpacingTokens.md),
               decoration: BoxDecoration(
-                color: ColorTokens.surfaceContainerHigh.withValues(alpha: 0.9),
+                color: colors.surfaceContainerHigh.withValues(alpha: 0.9),
                 borderRadius: RadiusTokens.borderRadiusLg,
-                border: Border.all(color: ColorTokens.outlineVariant),
+                border: Border.all(color: colors.outlineVariant),
               ),
               child: Row(
                 children: [
@@ -254,22 +247,18 @@ class _EvidencePreviewDialogState extends ConsumerState<EvidencePreviewDialog> {
                       vertical: SpacingTokens.xxs,
                     ),
                     decoration: BoxDecoration(
-                      color: ColorTokens.success.withValues(alpha: 0.15),
+                      color: colors.primary.withValues(alpha: 0.15),
                       borderRadius: RadiusTokens.borderRadiusSm,
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
-                          Symbols.verified,
-                          color: ColorTokens.success,
-                          size: 14,
-                        ),
+                        Icon(Symbols.verified, color: colors.primary, size: 14),
                         const SizedBox(width: SpacingTokens.xxs),
                         Text(
                           'SHA-256 Verified',
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: ColorTokens.success,
+                            color: colors.primary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -281,7 +270,7 @@ class _EvidencePreviewDialogState extends ConsumerState<EvidencePreviewDialog> {
                     child: Text(
                       formattedDate,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: ColorTokens.onSurfaceVariant,
+                        color: colors.onSurfaceVariant,
                       ),
                       textAlign: TextAlign.end,
                     ),

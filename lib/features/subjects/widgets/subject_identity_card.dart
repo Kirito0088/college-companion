@@ -1,5 +1,4 @@
 import 'package:college_companion/shared/widgets/cc_card.dart';
-import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -19,14 +18,14 @@ class SubjectIdentityCard extends StatelessWidget {
             width: 56, // w-14
             height: 56, // h-14
             decoration: BoxDecoration(
-              color: ColorTokens.surfaceContainerHigh,
+              color: theme.colorScheme.surfaceContainerHigh,
               borderRadius: RadiusTokens.borderRadiusSm, // rounded-lg
-              border: Border.all(color: ColorTokens.outlineVariant),
+              border: Border.all(color: theme.colorScheme.outlineVariant),
             ),
             alignment: Alignment.center,
-            child: const Icon(
+            child: Icon(
               Symbols.psychology,
-              color: ColorTokens.primary,
+              color: theme.colorScheme.primary,
               size: 30, // text-3xl
               fill: 1, // icon-fill
             ),
@@ -39,7 +38,7 @@ class SubjectIdentityCard extends StatelessWidget {
                 Text(
                   'Artificial Intelligence',
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: ColorTokens.onSurface,
+                    color: theme.colorScheme.onSurface,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -47,7 +46,7 @@ class SubjectIdentityCard extends StatelessWidget {
                 Text(
                   'Prof. Sharma',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: ColorTokens.onSurfaceVariant,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: SpacingTokens.xs),
@@ -56,15 +55,15 @@ class SubjectIdentityCard extends StatelessWidget {
                     Text(
                       'Theory',
                       style: theme.textTheme.labelLarge?.copyWith(
-                        color: ColorTokens.onSurfaceVariant,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(width: SpacingTokens.sm),
                     Container(
                       width: 4,
                       height: 4,
-                      decoration: const BoxDecoration(
-                        color: ColorTokens.outlineVariant,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.outlineVariant,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -72,7 +71,7 @@ class SubjectIdentityCard extends StatelessWidget {
                     Text(
                       '4 Credits',
                       style: theme.textTheme.labelLarge?.copyWith(
-                        color: ColorTokens.onSurfaceVariant,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],

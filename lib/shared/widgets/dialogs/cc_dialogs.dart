@@ -1,4 +1,11 @@
-import 'package:college_companion/theme/color_tokens.dart';
+/// Shared confirmation/feedback dialogs.
+///
+/// ADR-011 (issue #26): colors come from `Theme.of(context).colorScheme`
+/// so every dialog follows the user's theme + accent selection. The legacy
+/// static color constants in `lib/theme/` are dark/jade-only and must not
+/// be referenced from here.
+library;
+
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
 
@@ -9,6 +16,7 @@ class CCDialogs {
     return showDialog<bool>(
       context: context,
       builder: (context) {
+        final colors = Theme.of(context).colorScheme;
         return AlertDialog(
           title: const Text('Log out'),
           content: const Text(
@@ -21,8 +29,8 @@ class CCDialogs {
             ),
             FilledButton(
               style: FilledButton.styleFrom(
-                backgroundColor: ColorTokens.error,
-                foregroundColor: ColorTokens.onError,
+                backgroundColor: colors.error,
+                foregroundColor: colors.onError,
               ),
               onPressed: () => Navigator.of(context).pop(true),
               child: const Text('Log Out'),
@@ -39,6 +47,7 @@ class CCDialogs {
     required String message,
   }) {
     final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     return showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
@@ -47,7 +56,7 @@ class CCDialogs {
         return Container(
           margin: const EdgeInsets.all(SpacingTokens.md),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
+            color: colors.surface,
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
@@ -65,7 +74,10 @@ class CCDialogs {
                 width: 48,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: ColorTokens.surfaceVariant,
+                  // The opaque hairline, not a raised-surface fill — in the
+                  // light theme `surface` and the first elevation step are
+                  // both white, so a surface-toned handle would vanish.
+                  color: colors.outlineVariant,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -73,12 +85,12 @@ class CCDialogs {
               Container(
                 padding: const EdgeInsets.all(SpacingTokens.lg),
                 decoration: BoxDecoration(
-                  color: ColorTokens.error.withValues(alpha: 0.1),
+                  color: colors.error.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.delete_outline,
-                  color: ColorTokens.error,
+                  color: colors.error,
                   size: 32,
                 ),
               ),
@@ -92,7 +104,7 @@ class CCDialogs {
                   textAlign: TextAlign.center,
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: ColorTokens.onSurface,
+                    color: colors.onSurface,
                   ),
                 ),
               ),
@@ -105,7 +117,7 @@ class CCDialogs {
                   message,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: ColorTokens.onSurfaceVariant,
+                    color: colors.onSurfaceVariant,
                     height: 1.5,
                   ),
                 ),
@@ -128,10 +140,10 @@ class CCDialogs {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Cancel',
                           style: TextStyle(
-                            color: ColorTokens.onSurfaceVariant,
+                            color: colors.onSurfaceVariant,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -142,8 +154,8 @@ class CCDialogs {
                       child: FilledButton(
                         onPressed: () => Navigator.of(context).pop(true),
                         style: FilledButton.styleFrom(
-                          backgroundColor: ColorTokens.error,
-                          foregroundColor: ColorTokens.onError,
+                          backgroundColor: colors.error,
+                          foregroundColor: colors.onError,
                           padding: const EdgeInsets.symmetric(
                             vertical: SpacingTokens.md,
                           ),
@@ -176,6 +188,7 @@ class CCDialogs {
     return showDialog<bool>(
       context: context,
       builder: (context) {
+        final colors = Theme.of(context).colorScheme;
         return AlertDialog(
           title: const Text('Discard changes?'),
           content: const Text(
@@ -188,8 +201,8 @@ class CCDialogs {
             ),
             FilledButton(
               style: FilledButton.styleFrom(
-                backgroundColor: ColorTokens.error,
-                foregroundColor: ColorTokens.onError,
+                backgroundColor: colors.error,
+                foregroundColor: colors.onError,
               ),
               onPressed: () => Navigator.of(context).pop(true),
               child: const Text('Discard'),
@@ -208,10 +221,11 @@ class CCDialogs {
     return showDialog<void>(
       context: context,
       builder: (context) {
+        final colors = Theme.of(context).colorScheme;
         return AlertDialog(
           title: Row(
             children: [
-              const Icon(Icons.check_circle, color: ColorTokens.primary),
+              Icon(Icons.check_circle, color: colors.primary),
               const SizedBox(width: SpacingTokens.sm),
               Expanded(child: Text(title)),
             ],
@@ -236,10 +250,11 @@ class CCDialogs {
     return showDialog<void>(
       context: context,
       builder: (context) {
+        final colors = Theme.of(context).colorScheme;
         return AlertDialog(
           title: Row(
             children: [
-              const Icon(Icons.error, color: ColorTokens.error),
+              Icon(Icons.error, color: colors.error),
               const SizedBox(width: SpacingTokens.sm),
               Expanded(child: Text(title)),
             ],

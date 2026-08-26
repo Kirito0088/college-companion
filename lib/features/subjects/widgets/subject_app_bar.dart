@@ -1,4 +1,3 @@
-import 'package:college_companion/theme/color_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -22,9 +21,9 @@ class SubjectAppBar extends StatelessWidget {
           IconButton(
             onPressed: () => context.pop(),
             icon: const Icon(Symbols.arrow_back),
-            color: ColorTokens.onSurface,
+            color: theme.colorScheme.onSurface,
             style: IconButton.styleFrom(
-              hoverColor: ColorTokens.surfaceContainerHigh,
+              hoverColor: theme.colorScheme.surfaceContainerHigh,
             ),
           ),
           const SizedBox(width: SpacingTokens.sm),
@@ -32,7 +31,7 @@ class SubjectAppBar extends StatelessWidget {
             child: Text(
               'Subject Overview',
               style: theme.textTheme.headlineSmall?.copyWith(
-                color: ColorTokens.onSurface,
+                color: theme.colorScheme.onSurface,
               ),
             ),
           ),

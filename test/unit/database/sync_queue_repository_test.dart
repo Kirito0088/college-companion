@@ -86,4 +86,55 @@ void main() {
       expect(pending.first.error, 'Server 500 error');
     },
   );
+
+  group('status counts (#16)', () {
+    Future<int> enqueue(String id) => repository.enqueue(
+      targetTable: 'semesters',
+      recordId: id,
+      operation: 'UPDATE',
+    );
+
+    Future<void> exhaust(int queueId) async {
+      for (var i = 0; i < SyncQueueRepository.maxRetries; i++) {
+        await repository.recordFailure(queueId, 'RLS', i);
+      }
+    }
+
+    test('splits waiting changes from ones that gave up', () async {
+      await enqueue('a');
+      await enqueue('b');
+      await exhaust(await enqueue('c'));
+      final synced = await enqueue('d');
+      await repository.markSynced(synced);
+
+      final counts = await repository.watchCounts().first;
+
+      expect(counts.pending, 2);
+      expect(counts.failed, 1);
+    });
+
+    test('updates as the queue changes', () async {
+      final seen = <int>[];
+      final sub = repository.watchCounts().listen((c) => seen.add(c.pending));
+      addTearDown(sub.cancel);
+
+      await pumpEventQueue();
+      final id = await enqueue('a');
+      await pumpEventQueue();
+      await repository.markSynced(id);
+      await pumpEventQueue();
+
+      expect(seen, [0, 1, 0]);
+    });
+
+    test('retryFailed makes given-up changes pending again', () async {
+      await exhaust(await enqueue('c'));
+
+      await repository.retryFailed();
+
+      final counts = await repository.watchCounts().first;
+      expect(counts.failed, 0);
+      expect(counts.pending, 1);
+    });
+  });
 }

@@ -4,8 +4,10 @@ import 'package:college_companion/features/profile/providers/profile_provider.da
 import 'package:college_companion/features/profile/widgets/profile_app_bar.dart';
 import 'package:college_companion/features/profile/widgets/profile_header_card.dart';
 import 'package:college_companion/features/profile/widgets/profile_menu_list.dart';
+import 'package:college_companion/providers/sync_status_provider.dart';
 import 'package:college_companion/routing/app_router.dart';
 import 'package:college_companion/shared/widgets/dialogs/cc_dialogs.dart';
+import 'package:college_companion/shared/widgets/sync_status_text.dart';
 import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
@@ -52,7 +54,9 @@ class ProfileScreen extends ConsumerWidget {
                       course: profile.branch,
                     ),
                     const SizedBox(height: LayoutTokens.sectionGap),
-                    const ProfileMenuList(),
+                    ProfileMenuList(
+                      syncSummary: syncSummary(ref.watch(syncStatusProvider)),
+                    ),
                     const SizedBox(height: LayoutTokens.sectionGap),
                     const _PreviewOnboardingButton(),
                     const SizedBox(height: SpacingTokens.md),

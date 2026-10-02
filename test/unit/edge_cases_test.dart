@@ -36,6 +36,7 @@ void main() {
       'Handles sudden network drop gracefully during sync operation',
       () async {
         final syncService = SyncService(
+          isAuthenticated: () => true,
           syncQueueRepository: syncQueueRepository,
           database: database,
           supabaseClient: supabaseClient,
@@ -67,6 +68,7 @@ void main() {
       'Prevents re-entrant sync execution while sync is already in progress',
       () async {
         final syncService = SyncService(
+          isAuthenticated: () => true,
           syncQueueRepository: syncQueueRepository,
           database: database,
           supabaseClient: supabaseClient,
@@ -154,6 +156,7 @@ void main() {
         );
 
         final syncService = SyncService(
+          isAuthenticated: () => true,
           syncQueueRepository: syncQueueRepository,
           database: database,
           supabaseClient: supabaseClient,

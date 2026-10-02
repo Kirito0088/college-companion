@@ -3,12 +3,13 @@ import 'dart:math';
 
 import 'package:college_companion/core/repositories/sync_queue_repository.dart';
 import 'package:college_companion/database/app_database.dart';
+import 'package:college_companion/database/daos/sync_metadata_dao.dart';
 import 'package:college_companion/features/assignments/repositories/assignments_repository.dart';
 import 'package:college_companion/features/semester/repositories/semesters_repository.dart';
 import 'package:college_companion/services/connectivity_service.dart';
 import 'package:college_companion/services/sync_service.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:drift/drift.dart' hide isNotNull;
+import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
@@ -133,6 +134,7 @@ void main() {
       );
 
       final syncService = SyncService(
+        isAuthenticated: () => true,
         syncQueueRepository: syncQueueRepository,
         database: database,
         supabaseClient: supabaseClient,
@@ -158,6 +160,7 @@ void main() {
       }
 
       final syncService = SyncService(
+        isAuthenticated: () => true,
         syncQueueRepository: syncQueueRepository,
         database: database,
         supabaseClient: supabaseClient,
@@ -204,6 +207,7 @@ void main() {
         supabaseClient.shouldThrow = true;
 
         final syncService = SyncService(
+          isAuthenticated: () => true,
           syncQueueRepository: syncQueueRepository,
           database: database,
           supabaseClient: supabaseClient,
@@ -254,6 +258,7 @@ void main() {
         connectivityService.isConnected = false;
 
         final syncService = SyncService(
+          isAuthenticated: () => true,
           syncQueueRepository: syncQueueRepository,
           database: database,
           supabaseClient: supabaseClient,
@@ -323,6 +328,7 @@ void main() {
         expect(pending[1].targetTable, 'assignments');
 
         final syncService = SyncService(
+          isAuthenticated: () => true,
           syncQueueRepository: syncQueueRepository,
           database: database,
           supabaseClient: supabaseClient,
@@ -349,6 +355,7 @@ void main() {
       );
 
       final syncService = SyncService(
+        isAuthenticated: () => true,
         syncQueueRepository: syncQueueRepository,
         database: database,
         supabaseClient: supabaseClient,
@@ -391,6 +398,7 @@ void main() {
         );
 
         final syncService = SyncService(
+          isAuthenticated: () => true,
           syncQueueRepository: syncQueueRepository,
           database: database,
           supabaseClient: supabaseClient,
@@ -412,5 +420,82 @@ void main() {
         syncService.dispose();
       },
     );
+  });
+
+  group('SyncService status (#16)', () {
+    SyncService service({required bool authenticated}) => SyncService(
+      syncQueueRepository: syncQueueRepository,
+      database: database,
+      supabaseClient: supabaseClient,
+      connectivityService: connectivityService,
+      isAuthenticated: () => authenticated,
+    );
+
+    test(
+      'skips without an authenticated session, spending no retries',
+      () async {
+        await syncQueueRepository.enqueue(
+          targetTable: 'semesters',
+          recordId: 'sem_1',
+          operation: 'INSERT',
+        );
+        final sync = service(authenticated: false);
+        addTearDown(sync.dispose);
+
+        await sync.syncPendingMutations();
+
+        final pending = await syncQueueRepository.getPendingItems();
+        expect(pending.single.retryCount, 0);
+        expect(supabaseClient.upsertedPayloads, isEmpty);
+      },
+    );
+
+    test('publishes in-flight state around a batch', () async {
+      await syncQueueRepository.enqueue(
+        targetTable: 'semesters',
+        recordId: 'sem_1',
+        operation: 'DELETE',
+      );
+      final sync = service(authenticated: true);
+      addTearDown(sync.dispose);
+      final states = <bool>[];
+      final sub = sync.syncing.listen(states.add);
+      addTearDown(sub.cancel);
+
+      await sync.syncPendingMutations();
+      await pumpEventQueue();
+
+      expect(states, [true, false]);
+    });
+
+    test('records when the queue last fully synced', () async {
+      await syncQueueRepository.enqueue(
+        targetTable: 'semesters',
+        recordId: 'sem_1',
+        operation: 'DELETE',
+      );
+      final sync = service(authenticated: true);
+      addTearDown(sync.dispose);
+
+      await sync.syncPendingMutations();
+
+      final stamp = await SyncMetadataDao(database).get(lastSyncAtKey);
+      expect(DateTime.tryParse(stamp ?? ''), isNotNull);
+    });
+
+    test('does not claim a sync that had failures', () async {
+      supabaseClient.shouldThrow = true;
+      await syncQueueRepository.enqueue(
+        targetTable: 'semesters',
+        recordId: 'sem_1',
+        operation: 'DELETE',
+      );
+      final sync = service(authenticated: true);
+      addTearDown(sync.dispose);
+
+      await sync.syncPendingMutations();
+
+      expect(await SyncMetadataDao(database).get(lastSyncAtKey), isNull);
+    });
   });
 }

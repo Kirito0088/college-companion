@@ -145,6 +145,7 @@ void main() {
     connectivityService = TestConnectivityService();
     supabaseClient = TestSupabaseClient();
     syncService = SyncService(
+      isAuthenticated: () => true,
       syncQueueRepository: syncQueueRepository,
       database: database,
       supabaseClient: supabaseClient,

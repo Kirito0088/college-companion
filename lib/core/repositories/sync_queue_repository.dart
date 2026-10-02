@@ -13,6 +13,47 @@ class SyncQueueRepository {
 
   final AppDatabase _database;
 
+  /// Upload attempts after which an item gives up and waits for a manual
+  /// retry ([retryFailed]) instead of retrying on every batch.
+  static const int maxRetries = 5;
+
+  /// Live counts of unsynced changes: those still being retried
+  /// (`pending`) and those that gave up after [maxRetries] (`failed`).
+  ///
+  /// Drives the sync status surfaces (#16), so "all changes saved" is only
+  /// ever shown when nothing is waiting.
+  Stream<({int pending, int failed})> watchCounts() {
+    final unsynced = _database.syncQueueItems.isSynced.equals(false);
+    final pending = _database.syncQueueItems.id.count(
+      filter:
+          unsynced &
+          _database.syncQueueItems.retryCount.isSmallerThanValue(maxRetries),
+    );
+    final failed = _database.syncQueueItems.id.count(
+      filter:
+          unsynced &
+          _database.syncQueueItems.retryCount.isBiggerOrEqualValue(maxRetries),
+    );
+    return (_database.selectOnly(_database.syncQueueItems)
+          ..addColumns([pending, failed]))
+        .map(
+          (row) =>
+              (pending: row.read(pending) ?? 0, failed: row.read(failed) ?? 0),
+        )
+        .watchSingle();
+  }
+
+  /// Makes changes that gave up eligible for upload again; called by a
+  /// manual "Sync Now" (sync-engine.md, Manual Sync).
+  Future<void> retryFailed() {
+    return (_database.update(_database.syncQueueItems)..where(
+          (t) =>
+              t.isSynced.equals(false) &
+              t.retryCount.isBiggerOrEqualValue(maxRetries),
+        ))
+        .write(const SyncQueueItemsCompanion(retryCount: Value(0)));
+  }
+
   /// Enqueues a sync operation for a business record.
   Future<int> enqueue({
     required String targetTable,

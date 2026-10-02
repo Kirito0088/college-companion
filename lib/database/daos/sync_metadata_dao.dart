@@ -22,6 +22,14 @@ class SyncMetadataDao {
     return row?.value;
   }
 
+  /// Watches the value for a bookkeeping [key]; emits null while unset.
+  Stream<String?> watch(String key) {
+    return (_database.select(_database.syncMetadata)
+          ..where((t) => t.key.equals(key)))
+        .watchSingleOrNull()
+        .map((row) => row?.value);
+  }
+
   /// Sets (inserts or replaces) a key/value pair.
   Future<void> set(String key, String value) {
     return _database

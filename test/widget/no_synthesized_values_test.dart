@@ -99,6 +99,16 @@ void main() {
       expect(find.textContaining('Last synced'), findsNothing);
       expect(find.textContaining('9:30 AM'), findsNothing);
     });
+
+    testWidgets('shows the real sync summary it is given (#16)', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _host(const ProfileMenuList(syncSummary: '2 changes waiting to sync')),
+      );
+
+      expect(find.text('2 changes waiting to sync'), findsOneWidget);
+    });
   });
 
   group('AttendanceScreen Overview with no recorded lectures', () {

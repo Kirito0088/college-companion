@@ -9,11 +9,16 @@ import 'dart:math';
 
 import 'package:college_companion/core/repositories/sync_queue_repository.dart';
 import 'package:college_companion/database/app_database.dart';
+import 'package:college_companion/database/daos/sync_metadata_dao.dart';
 import 'package:college_companion/services/connectivity_service.dart';
 import 'package:college_companion/services/supabase_service.dart';
 import 'package:college_companion/utilities/logger.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+/// `sync_metadata` key holding when the queue last drained without a
+/// failure (ISO 8601, UTC). Read by the sync status surfaces (#16).
+const String lastSyncAtKey = 'last_sync_at';
 
 /// Orchestrates synchronization between local Drift storage and Supabase cloud.
 class SyncService {
@@ -21,6 +26,7 @@ class SyncService {
   SyncService({
     required this.syncQueueRepository,
     required this.database,
+    required this.isAuthenticated,
     SupabaseClient? supabaseClient,
     ConnectivityService? connectivityService,
   }) : _syncSupabaseClient = supabaseClient,
@@ -29,13 +35,17 @@ class SyncService {
   }
 
   static const String _tag = 'SyncService';
-  static const int _maxRetries = 5;
 
   /// Sync queue repository instance.
   final SyncQueueRepository syncQueueRepository;
   final AppDatabase database;
+
+  /// Whether a signed-in session exists to authenticate uploads.
+  final bool Function() isAuthenticated;
   final SupabaseClient? _syncSupabaseClient;
   final ConnectivityService _connectivityService;
+  late final SyncMetadataDao _metadata = SyncMetadataDao(database);
+  final StreamController<bool> _syncing = StreamController<bool>.broadcast();
 
   SupabaseClient get _supabaseClient =>
       _syncSupabaseClient ?? SupabaseService.client;
@@ -45,6 +55,10 @@ class SyncService {
 
   /// Returns `true` if synchronization is currently in progress.
   bool get isSyncing => _isSyncing;
+
+  /// Emits `true` when a batch starts uploading and `false` when it ends.
+  /// Batches with nothing to upload emit nothing.
+  Stream<bool> get syncing => _syncing.stream;
 
   void _initConnectivityListener() {
     _connectivitySubscription = _connectivityService.onStatusChange.listen((
@@ -60,6 +74,7 @@ class SyncService {
   /// Cancels subscriptions when disposing.
   void dispose() {
     _connectivitySubscription?.cancel();
+    _syncing.close();
   }
 
   /// Flushes pending queue items to Supabase if connected.
@@ -71,14 +86,25 @@ class SyncService {
       AppLogger.info('Device offline, skipping sync batch', tag: _tag);
       return;
     }
+    // Every upload must be authenticated (sync-engine.md, Security). Without
+    // a session RLS rejects each item, and counting those rejections as
+    // failures would exhaust their retries before the student signs in.
+    if (!isAuthenticated()) {
+      AppLogger.info('No authenticated session, skipping sync', tag: _tag);
+      return;
+    }
 
     _isSyncing = true;
+    var announced = false;
     try {
       final pendingItems = await syncQueueRepository.getPendingItems();
       if (pendingItems.isEmpty) {
         _isSyncing = false;
         return;
       }
+      _syncing.add(true);
+      announced = true;
+      var clean = true;
 
       AppLogger.info(
         'Syncing ${pendingItems.length} pending mutations to Supabase',
@@ -86,7 +112,8 @@ class SyncService {
       );
 
       for (final item in pendingItems) {
-        if (item.retryCount >= _maxRetries) {
+        if (item.retryCount >= SyncQueueRepository.maxRetries) {
+          clean = false;
           AppLogger.info(
             'Sync item ${item.id} exceeded max retries (${item.retryCount}), skipping',
             tag: _tag,
@@ -99,6 +126,7 @@ class SyncService {
           await _processItem(item);
           await syncQueueRepository.markSynced(item.id);
         } catch (e, stack) {
+          clean = false;
           AppLogger.error(
             'Failed sync item ${item.id} (attempt ${item.retryCount + 1})',
             error: e,
@@ -117,8 +145,16 @@ class SyncService {
 
       // Clean up old synced records
       await syncQueueRepository.purgeSyncedItems();
+
+      if (clean) {
+        await _metadata.set(
+          lastSyncAtKey,
+          DateTime.now().toUtc().toIso8601String(),
+        );
+      }
     } finally {
       _isSyncing = false;
+      if (announced && !_syncing.isClosed) _syncing.add(false);
     }
   }
 

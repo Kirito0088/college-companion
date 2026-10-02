@@ -66,6 +66,7 @@ final syncServiceProvider = Provider<SyncService>((ref) {
   final service = SyncService(
     syncQueueRepository: syncQueueRepository,
     database: database,
+    isAuthenticated: () => supabaseClient.auth.currentSession != null,
     supabaseClient: supabaseClient,
     connectivityService: connectivityService,
   );

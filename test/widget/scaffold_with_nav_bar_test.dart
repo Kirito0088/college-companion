@@ -52,16 +52,37 @@ void main() {
 
       expect(find.text('Attendance Page'), findsOneWidget);
     });
+
+    // #16: the sync chip sits just above the navigation bar, over the
+    // page, so it never collides with a screen's app bar.
+    testWidgets('shows a status banner just above the navigation bar', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp.router(
+          theme: AppTheme.theme(Brightness.dark, Accent.jade),
+          routerConfig: _buildRouter(statusBanner: const Text('Banner')),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final banner = tester.getRect(find.text('Banner'));
+      final nav = tester.getRect(find.text('Home').last);
+      expect(banner.bottom, lessThan(nav.top));
+      expect(nav.top - banner.bottom, lessThan(80));
+    });
   });
 }
 
-GoRouter _buildRouter() {
+GoRouter _buildRouter({Widget? statusBanner}) {
   return GoRouter(
     initialLocation: '/home',
     routes: [
       StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) =>
-            ScaffoldWithNavBar(navigationShell: navigationShell),
+        builder: (context, state, navigationShell) => ScaffoldWithNavBar(
+          navigationShell: navigationShell,
+          statusBanner: statusBanner,
+        ),
         branches: [
           StatefulShellBranch(
             routes: [

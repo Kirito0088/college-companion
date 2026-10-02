@@ -41,17 +41,38 @@ const _destinations = [
 /// A scaffold that wraps [StatefulNavigationShell] with bottom navigation.
 class ScaffoldWithNavBar extends StatelessWidget {
   /// Creates a [ScaffoldWithNavBar] with the given [navigationShell].
-  const ScaffoldWithNavBar({required this.navigationShell, super.key});
+  const ScaffoldWithNavBar({
+    required this.navigationShell,
+    this.statusBanner,
+    super.key,
+  });
 
   /// The navigation shell provided by [StatefulShellRoute].
   final StatefulNavigationShell navigationShell;
+
+  /// Shown centred just above the navigation bar, over the current page,
+  /// e.g. the sync status chip (#16). Above the bar rather than at the top
+  /// so it never collides with a screen's own app bar.
+  final Widget? statusBanner;
 
   @override
   Widget build(BuildContext context) {
     final cc = context.cc;
 
     return Scaffold(
-      body: navigationShell,
+      body: statusBanner == null
+          ? navigationShell
+          : Stack(
+              children: [
+                navigationShell,
+                Positioned(
+                  left: LayoutTokens.screenPadding,
+                  right: LayoutTokens.screenPadding,
+                  bottom: SpacingTokens.sm,
+                  child: Center(child: statusBanner),
+                ),
+              ],
+            ),
       bottomNavigationBar: DecoratedBox(
         decoration: BoxDecoration(color: cc.raise),
         child: SafeArea(

@@ -45,6 +45,7 @@ import 'package:college_companion/features/settings/screens/terms_conditions_scr
 import 'package:college_companion/features/subjects/screens/subject_details_screen.dart';
 import 'package:college_companion/features/timetable/screens/timetable_screen.dart';
 import 'package:college_companion/routing/scaffold_with_nav_bar.dart';
+import 'package:college_companion/shared/widgets/sync_status_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -218,7 +219,10 @@ GoRouter createRouter(WidgetRef ref, {required Listenable refreshListenable}) {
       // ── Main shell with bottom navigation ──────────────────────────────
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
-          return ScaffoldWithNavBar(navigationShell: navigationShell);
+          return ScaffoldWithNavBar(
+            navigationShell: navigationShell,
+            statusBanner: const SyncStatusChip(),
+          );
         },
         branches: [
           // Home

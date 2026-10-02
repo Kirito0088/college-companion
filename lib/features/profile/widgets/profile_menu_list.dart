@@ -7,7 +7,11 @@ import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class ProfileMenuList extends StatelessWidget {
-  const ProfileMenuList({super.key});
+  const ProfileMenuList({super.key, this.syncSummary});
+
+  /// One-line sync state for the Data & Sync row (#16), or null to show
+  /// none. Never a made-up time: see `syncSummary` in sync_status_text.dart.
+  final String? syncSummary;
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +53,7 @@ class ProfileMenuList extends StatelessWidget {
           CCListRow(
             icon: Symbols.sync,
             label: 'Data & Sync',
+            subtitle: syncSummary,
             showBorder: true,
             onTap: () => context.push(RoutePaths.dataSync),
           ),

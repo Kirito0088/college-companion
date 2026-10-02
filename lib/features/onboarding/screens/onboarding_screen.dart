@@ -12,6 +12,10 @@ import 'package:material_symbols_icons/symbols.dart';
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
+  /// Identifies the bottom Skip / pager / Next bar.
+  @visibleForTesting
+  static const controlsKey = Key('onboarding_controls');
+
   @override
   ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
@@ -54,108 +58,97 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
     return Scaffold(
       backgroundColor: cc.bg,
-      body: Stack(
+      // The controls sit *below* the pages rather than floating over them:
+      // as an overlay they hid the end of each page's copy on short screens
+      // (#39), and a page cannot draw under a bar it does not overlap.
+      body: Column(
         children: [
-          PageView(
-            controller: _pageController,
-            onPageChanged: (index) {
-              setState(() {
-                _currentPage = index;
-              });
-            },
-            physics: const BouncingScrollPhysics(),
-            children: [
-              const _WelcomePage(),
-              const _AttendancePage(),
-              const _PlanningPage(),
-              const _StudyHubPage(),
-              _ReadyPage(onFinish: _finishOnboarding),
-            ],
+          Expanded(
+            child: PageView(
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentPage = index;
+                });
+              },
+              physics: const BouncingScrollPhysics(),
+              children: [
+                const _WelcomePage(),
+                const _AttendancePage(),
+                const _PlanningPage(),
+                const _StudyHubPage(),
+                _ReadyPage(onFinish: _finishOnboarding),
+              ],
+            ),
           ),
 
           // Bottom Controls
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              padding: EdgeInsets.only(
-                left: LayoutTokens.screenPadding,
-                right: LayoutTokens.screenPadding,
-                top: SpacingTokens.xl,
-                bottom:
-                    MediaQuery.of(context).padding.bottom + SpacingTokens.xl,
-              ),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    cc.bg.withValues(alpha: 0),
-                    cc.bg.withValues(alpha: 0.8),
-                    cc.bg,
-                  ],
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Skip or Empty space
-                  AnimatedOpacity(
-                    duration: const Duration(milliseconds: 300),
-                    opacity: _currentPage < _totalPages - 1 ? 1.0 : 0.0,
-                    child: TextButton(
-                      onPressed: _currentPage < _totalPages - 1
-                          ? _finishOnboarding
-                          : null,
-                      style: TextButton.styleFrom(
-                        foregroundColor: cc.mut,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: SpacingTokens.md,
-                          vertical: SpacingTokens.sm,
-                        ),
+          Container(
+            key: OnboardingScreen.controlsKey,
+            padding: EdgeInsets.only(
+              left: LayoutTokens.screenPadding,
+              right: LayoutTokens.screenPadding,
+              top: SpacingTokens.lg,
+              bottom: MediaQuery.of(context).padding.bottom + SpacingTokens.xl,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Skip or Empty space
+                AnimatedOpacity(
+                  duration: const Duration(milliseconds: 300),
+                  opacity: _currentPage < _totalPages - 1 ? 1.0 : 0.0,
+                  child: TextButton(
+                    onPressed: _currentPage < _totalPages - 1
+                        ? _finishOnboarding
+                        : null,
+                    style: TextButton.styleFrom(
+                      foregroundColor: cc.mut,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: SpacingTokens.md,
+                        vertical: SpacingTokens.sm,
                       ),
-                      child: const Text('Skip'),
                     ),
+                    child: const Text('Skip'),
                   ),
+                ),
 
-                  // Page Indicators
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: List.generate(_totalPages, (index) {
-                      final isActive = index == _currentPage;
-                      return AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeOutCubic,
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        height: 8,
-                        width: isActive ? 24 : 8,
-                        decoration: BoxDecoration(
-                          color: isActive ? cc.pri : cc.raise2,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      );
-                    }),
-                  ),
+                // Page Indicators
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(_totalPages, (index) {
+                    final isActive = index == _currentPage;
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeOutCubic,
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      height: 8,
+                      width: isActive ? 24 : 8,
+                      decoration: BoxDecoration(
+                        color: isActive ? cc.pri : cc.raise2,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    );
+                  }),
+                ),
 
-                  // Next Button
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: _currentPage < _totalPages - 1
-                        ? IconButton(
-                            key: const ValueKey('next'),
-                            onPressed: _nextPage,
-                            style: IconButton.styleFrom(
-                              backgroundColor: cc.pri,
-                              foregroundColor: cc.priFg,
-                              padding: const EdgeInsets.all(SpacingTokens.md),
-                            ),
-                            icon: const Icon(Symbols.arrow_forward),
-                          )
-                        : const SizedBox.shrink(),
-                  ),
-                ],
-              ),
+                // Next Button
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: _currentPage < _totalPages - 1
+                      ? IconButton(
+                          key: const ValueKey('next'),
+                          onPressed: _nextPage,
+                          style: IconButton.styleFrom(
+                            backgroundColor: cc.pri,
+                            foregroundColor: cc.priFg,
+                            padding: const EdgeInsets.all(SpacingTokens.md),
+                          ),
+                          icon: const Icon(Symbols.arrow_forward),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ],
             ),
           ),
         ],
@@ -196,44 +189,48 @@ class _OnboardingPageLayout extends StatelessWidget {
           Expanded(flex: 3, child: Center(child: heroVisual)),
           Expanded(
             flex: 2,
-            child: TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0.0, end: 1.0),
-              duration: const Duration(milliseconds: 800),
-              curve: Curves.easeOutQuint,
-              builder: (context, value, child) {
-                return Opacity(
-                  opacity: value.clamp(0.0, 1.0),
-                  child: Transform.translate(
-                    offset: Offset(0, 20 * (1 - value)),
-                    child: child,
-                  ),
-                );
-              },
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TypographyTokens.serifTextTheme.headlineLarge
-                        ?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: cc.fg,
-                          height: 1.2,
-                        ),
-                  ),
-                  const SizedBox(height: SpacingTokens.lg),
-                  Text(
-                    subtitle,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: cc.mut,
-                      height: 1.5,
+            // Scrolls rather than overflowing when the copy outgrows its
+            // share of a short screen or a large text scale (#39).
+            child: SingleChildScrollView(
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.easeOutQuint,
+                builder: (context, value, child) {
+                  return Opacity(
+                    opacity: value.clamp(0.0, 1.0),
+                    child: Transform.translate(
+                      offset: Offset(0, 20 * (1 - value)),
+                      child: child,
                     ),
-                  ),
-                  if (bottomContent != null) ...[
-                    const SizedBox(height: SpacingTokens.xxl),
-                    bottomContent!,
+                  );
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TypographyTokens.serifTextTheme.headlineLarge
+                          ?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: cc.fg,
+                            height: 1.2,
+                          ),
+                    ),
+                    const SizedBox(height: SpacingTokens.lg),
+                    Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: cc.mut,
+                        height: 1.5,
+                      ),
+                    ),
+                    if (bottomContent != null) ...[
+                      const SizedBox(height: SpacingTokens.xxl),
+                      bottomContent!,
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),

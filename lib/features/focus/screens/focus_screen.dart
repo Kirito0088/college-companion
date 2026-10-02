@@ -1,5 +1,6 @@
 import 'package:college_companion/features/focus/models/focus_timer_state.dart';
 import 'package:college_companion/features/focus/providers/focus_timer_provider.dart';
+import 'package:college_companion/shared/widgets/errors/cc_error_state.dart';
 import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
@@ -110,7 +111,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
             const SizedBox(height: LayoutTokens.sectionGap),
             _buildDndCard(context, timerState, timerNotifier),
             const SizedBox(height: LayoutTokens.sectionGap),
-            _buildSessionHistory(context, timerState),
+            _buildSessionHistory(context, timerState, timerNotifier),
             const SizedBox(height: LayoutTokens.sectionGap),
             _buildMotivationalCard(context),
             const SizedBox(height: SpacingTokens.xxl),
@@ -433,7 +434,11 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     );
     final hours = totalMins ~/ 60;
     final mins = totalMins % 60;
-    final focusTimeString = hours > 0 ? '${hours}h ${mins}m' : '${mins}m';
+    // Unknown, not zero: a failed history load must not read as no focus.
+    final historyFailed = state.historyError != null;
+    final focusTimeString = historyFailed
+        ? '--'
+        : (hours > 0 ? '${hours}h ${mins}m' : '${mins}m');
 
     return _buildSectionContainer(
       context: context,
@@ -452,7 +457,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
             child: _buildStatItem(
               context,
               'Sessions',
-              '${state.completedSessionsToday}',
+              historyFailed ? '--' : '${state.completedSessionsToday}',
             ),
           ),
           Container(
@@ -624,10 +629,25 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     );
   }
 
-  Widget _buildSessionHistory(BuildContext context, FocusTimerState state) {
+  Widget _buildSessionHistory(
+    BuildContext context,
+    FocusTimerState state,
+    FocusTimerNotifier notifier,
+  ) {
     final theme = Theme.of(context);
     final cc = context.cc;
     final history = state.history;
+
+    if (state.historyError != null) {
+      return _buildSectionContainer(
+        context: context,
+        title: 'Recent Sessions',
+        child: CcErrorState(
+          error: state.historyError,
+          onRetry: notifier.loadHistory,
+        ),
+      );
+    }
 
     if (history.isEmpty) {
       return _buildSectionContainer(

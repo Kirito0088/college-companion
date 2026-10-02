@@ -43,6 +43,7 @@ class FocusTimerState {
     this.currentSubject = 'General Focus',
     this.dndEnabled = true,
     this.history = const [],
+    this.historyError,
     this.completionAlertMessage,
   });
   final FocusTimerStatus status;
@@ -55,6 +56,11 @@ class FocusTimerState {
   final String currentSubject;
   final bool dndEnabled;
   final List<FocusSession> history;
+
+  /// Why the session history failed to load, or null if it loaded (or has
+  /// not been attempted yet). Kept separate from [history] so a failed read
+  /// is never mistaken for a student with no sessions.
+  final Object? historyError;
   final String? completionAlertMessage;
 
   String get formattedTime {
@@ -86,6 +92,8 @@ class FocusTimerState {
     String? currentSubject,
     bool? dndEnabled,
     List<FocusSession>? history,
+    Object? historyError,
+    bool clearHistoryError = false,
     String? completionAlertMessage,
     bool clearAlert = false,
   }) {
@@ -101,6 +109,9 @@ class FocusTimerState {
       currentSubject: currentSubject ?? this.currentSubject,
       dndEnabled: dndEnabled ?? this.dndEnabled,
       history: history ?? this.history,
+      historyError: clearHistoryError
+          ? null
+          : (historyError ?? this.historyError),
       completionAlertMessage: clearAlert
           ? null
           : (completionAlertMessage ?? this.completionAlertMessage),

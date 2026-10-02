@@ -12,6 +12,7 @@ import 'package:college_companion/features/timetable/widgets/add_edit_timetable_
 import 'package:college_companion/features/timetable/widgets/day_selector_segmented_button.dart';
 import 'package:college_companion/features/timetable/widgets/lecture_card.dart';
 import 'package:college_companion/shared/widgets/cc_empty_state.dart';
+import 'package:college_companion/shared/widgets/errors/cc_error_state.dart';
 import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
 import 'package:flutter/material.dart';
@@ -115,20 +116,10 @@ class TimetableScreen extends ConsumerWidget {
                 child: lecturesAsync.when(
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
-                  error: (error, _) => Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Symbols.error_outline, size: 40, color: cc.risk),
-                        const SizedBox(height: SpacingTokens.sm),
-                        Text(
-                          'Failed to load timetable',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: cc.fg,
-                          ),
-                        ),
-                      ],
-                    ),
+                  error: (error, _) => CcErrorState(
+                    error: error,
+                    onRetry: () =>
+                        ref.invalidate(timetableForDayProvider(selectedDay)),
                   ),
                   data: (lectures) {
                     if (lectures.isEmpty) {

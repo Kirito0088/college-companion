@@ -9,6 +9,7 @@ import 'package:college_companion/features/authentication/models/auth_state.dart
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/features/subjects/providers/subjects_provider.dart';
 import 'package:college_companion/shared/widgets/empty_states/cc_empty_states.dart';
+import 'package:college_companion/shared/widgets/errors/cc_error_state.dart';
 import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
@@ -100,6 +101,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                           children: _selectedIndex == 0
                               ? _buildOverviewTab(
                                   context,
+                                  userId,
+                                  safeBunkAsync.error ?? insightsAsync.error,
                                   safeBunk,
                                   insights,
                                   trend,
@@ -120,10 +123,29 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
 
   List<Widget> _buildOverviewTab(
     BuildContext context,
+    String userId,
+    Object? error,
     SafeBunkResult? safeBunk,
     AttendanceInsights? insights,
     AsyncValue<AttendanceTrend> trend,
   ) {
+    // The overview reads valueOrNull throughout, so without this a failed
+    // query rendered every card as "Loading..." / "--" indefinitely (#25).
+    if (error != null) {
+      return [
+        CcErrorState(
+          error: error,
+          // Invalidate the sources, not the derived insights provider: that
+          // would recompute from the same still-failed streams.
+          onRetry: () {
+            ref.invalidate(safeBunkStreamProvider(userId));
+            ref.invalidate(subjectsStreamProvider(userId));
+            ref.invalidate(attendanceRecordsStreamProvider(userId));
+          },
+        ),
+      ];
+    }
+
     return [
       OverallGauge(safeBunk: safeBunk),
       const SizedBox(height: LayoutTokens.sectionGap),
@@ -144,7 +166,6 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
   List<Widget> _buildSubjectsTab(BuildContext context, String userId) {
     final subjectsAsync = ref.watch(subjectsStreamProvider(userId));
     final recordsAsync = ref.watch(attendanceRecordsStreamProvider(userId));
-    final cc = context.cc;
 
     return [
       _buildSearchPlaceholder(context),
@@ -162,6 +183,16 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
             return _subjectSearchQuery.isEmpty
                 ? const EmptySubjects()
                 : const EmptySearch();
+          }
+
+          // Without records every subject would read 0%, which looks like
+          // real data. Say the read failed instead.
+          if (recordsAsync.hasError) {
+            return CcErrorState(
+              error: recordsAsync.error,
+              onRetry: () =>
+                  ref.invalidate(attendanceRecordsStreamProvider(userId)),
+            );
           }
 
           final records = recordsAsync.valueOrNull ?? const [];
@@ -194,13 +225,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
           return Column(children: cards);
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(
-          child: Text(
-            'Error loading subjects: $err',
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: cc.risk),
-          ),
+        error: (err, _) => CcErrorState(
+          error: err,
+          onRetry: () => ref.invalidate(subjectsStreamProvider(userId)),
         ),
       ),
     ];

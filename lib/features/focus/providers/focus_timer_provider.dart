@@ -10,30 +10,42 @@ final focusRepositoryProvider = Provider<FocusRepository>((ref) {
 
 class FocusTimerNotifier extends StateNotifier<FocusTimerState> {
   FocusTimerNotifier(this._repository) : super(const FocusTimerState()) {
-    _init();
+    loadHistory();
   }
 
   final FocusRepository _repository;
   Timer? _timer;
   FocusTimerStatus _prePauseStatus = FocusTimerStatus.running;
 
-  Future<void> _init() async {
-    final history = await _repository.loadSessions();
-    final dndEnabled = await _repository.loadDndSetting();
+  /// Loads persisted session history and the DND preference.
+  ///
+  /// Called on construction and again by the screen's retry action. A
+  /// failure is recorded in [FocusTimerState.historyError] rather than left
+  /// as an unhandled async error, so the screen can say so (#25).
+  Future<void> loadHistory() async {
+    try {
+      final history = await _repository.loadSessions();
+      final dndEnabled = await _repository.loadDndSetting();
+      if (!mounted) return;
 
-    // Calculate completed sessions today from history
-    final now = DateTime.now();
-    final todaySessions = history.where((s) {
-      return s.completedAt.year == now.year &&
-          s.completedAt.month == now.month &&
-          s.completedAt.day == now.day;
-    }).length;
+      // Calculate completed sessions today from history
+      final now = DateTime.now();
+      final todaySessions = history.where((s) {
+        return s.completedAt.year == now.year &&
+            s.completedAt.month == now.month &&
+            s.completedAt.day == now.day;
+      }).length;
 
-    state = state.copyWith(
-      history: history,
-      dndEnabled: dndEnabled,
-      completedSessionsToday: todaySessions,
-    );
+      state = state.copyWith(
+        history: history,
+        dndEnabled: dndEnabled,
+        completedSessionsToday: todaySessions,
+        clearHistoryError: true,
+      );
+    } catch (error) {
+      if (!mounted) return;
+      state = state.copyWith(historyError: error);
+    }
   }
 
   void start() {

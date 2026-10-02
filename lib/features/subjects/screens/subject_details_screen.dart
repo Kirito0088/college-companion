@@ -7,6 +7,7 @@ import 'package:college_companion/features/subjects/widgets/subject_attendance_f
 import 'package:college_companion/features/subjects/widgets/subject_attendance_timeline.dart';
 import 'package:college_companion/features/subjects/widgets/subject_details_header.dart';
 import 'package:college_companion/features/subjects/widgets/subject_metric_overview.dart';
+import 'package:college_companion/shared/widgets/errors/cc_error_state.dart';
 import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/icon_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
@@ -91,15 +92,14 @@ class SubjectDetailsScreen extends ConsumerWidget {
       ),
       body: stateAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(SpacingTokens.xl),
-            child: Text(
-              'Error loading subject: $error',
-              style: theme.textTheme.bodyMedium?.copyWith(color: cc.risk),
-              textAlign: TextAlign.center,
-            ),
-          ),
+        error: (error, _) => CcErrorState(
+          error: error,
+          // subjectDetailProvider is derived; invalidating it alone would
+          // recompute the same error from the still-failed source streams.
+          onRetry: () {
+            ref.invalidate(subjectByIdStreamProvider(params));
+            ref.invalidate(attendanceBySubjectStreamProvider(params));
+          },
         ),
         data: (state) {
           return SingleChildScrollView(

@@ -6,16 +6,23 @@
 /// - GoRouter navigation
 /// - Plus Jakarta Sans / Newsreader / IBM Plex Mono typography
 /// - Riverpod-aware routing for authentication redirects
+/// - Local academic reminders kept in step with the student's data (#10)
 library;
+
+import 'dart:async';
 
 import 'package:college_companion/core/constants/app_constants.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
+import 'package:college_companion/features/notifications/providers/notification_provider.dart';
+import 'package:college_companion/features/notifications/providers/reminder_provider.dart';
+import 'package:college_companion/features/notifications/services/local_notification_service.dart';
 import 'package:college_companion/features/onboarding/providers/onboarding_provider.dart';
 import 'package:college_companion/providers/app_providers.dart';
 import 'package:college_companion/routing/app_router.dart';
 import 'package:college_companion/theme/app_theme.dart';
 import 'package:college_companion/theme/providers/app_theme_provider.dart';
+import 'package:college_companion/utilities/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -37,7 +44,8 @@ class CollegeCompanionApp extends ConsumerStatefulWidget {
       _CollegeCompanionAppState();
 }
 
-class _CollegeCompanionAppState extends ConsumerState<CollegeCompanionApp> {
+class _CollegeCompanionAppState extends ConsumerState<CollegeCompanionApp>
+    with WidgetsBindingObserver {
   /// Notifies GoRouter to re-evaluate redirects when auth or onboarding
   /// state changes. Onboarding must be included: [OnboardingNotifier]
   /// loads its persisted flag from SharedPreferences asynchronously, so
@@ -49,6 +57,8 @@ class _CollegeCompanionAppState extends ConsumerState<CollegeCompanionApp> {
 
   late final ProviderSubscription<AuthState> _authStateSubscription;
   late final ProviderSubscription<bool> _onboardingSubscription;
+  late final ProviderSubscription<ReminderPlanState> _reminderSubscription;
+  StreamSubscription<ReminderTap>? _reminderTaps;
   late final GoRouter _router;
 
   @override
@@ -64,10 +74,101 @@ class _CollegeCompanionAppState extends ConsumerState<CollegeCompanionApp> {
       (_, _) => _authRefreshNotifier.value++,
     );
     _router = createRouter(ref, refreshListenable: _authRefreshNotifier);
+
+    // Reminders (#10): the plan is derived from live data; applying it to
+    // the OS is this widget's job, so it happens exactly once per change.
+    _reminderSubscription = ref.listenManual<ReminderPlanState>(
+      reminderPlanProvider,
+      _applyReminderPlan,
+      fireImmediately: true,
+    );
+    WidgetsBinding.instance.addObserver(this);
+    final notifications = ref.read(localNotificationServiceProvider);
+    _reminderTaps = notifications.taps.listen(_openReminder);
+    unawaited(
+      notifications.launchTap().then((tap) {
+        if (tap != null) _openReminder(tap);
+      }),
+    );
   }
+
+  /// Re-plan on return to the foreground: the plan is relative to "now",
+  /// so this rolls the seven-day window forward.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.invalidate(reminderPlanProvider);
+    }
+  }
+
+  void _applyReminderPlan(ReminderPlanState? previous, ReminderPlanState next) {
+    final scheduler = ref.read(reminderSchedulerProvider);
+    final Future<void> work;
+    switch (next) {
+      case RemindersReady(:final userId, :final plan, :final now):
+        work = scheduler.reconcile(userId: userId, plan: plan, now: now);
+      // Only a transition out of a live schedule (sign-out) clears it. A
+      // cold start also begins Off while onboarding state loads, and must
+      // not wipe reminders that are about to be re-planned anyway.
+      case RemindersOff() when previous is RemindersReady:
+        work = scheduler.clear();
+      case RemindersOff() || RemindersWaiting():
+        return;
+    }
+    unawaited(
+      work.catchError((Object error, StackTrace stackTrace) {
+        AppLogger.error(
+          'Reminder scheduling failed',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }),
+    );
+  }
+
+  /// Opens the screen a tapped reminder points to and marks it read.
+  void _openReminder(ReminderTap tap) {
+    final auth = ref.read(authStateProvider);
+    if (auth is AuthAuthenticated) {
+      unawaited(
+        ref
+            .read(notificationRepositoryProvider)
+            .markRead(auth.user.uid, tap.id)
+            .catchError((Object error, StackTrace stackTrace) {
+              AppLogger.error(
+                'Could not mark reminder read',
+                error: error,
+                stackTrace: stackTrace,
+              );
+            }),
+      );
+    }
+    // After the current frame, so a cold start's initial redirect settles
+    // before navigating on top of it. A bottom-nav tab is gone to, which
+    // selects it; pushing it would stack it on whichever tab is current.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_shellTabs.contains(tap.route)) {
+        _router.go(tap.route);
+      } else {
+        _router.push(tap.route);
+      }
+    });
+  }
+
+  /// Top-level routes of the bottom-navigation shell.
+  static const Set<String> _shellTabs = {
+    RoutePaths.home,
+    RoutePaths.attendance,
+    RoutePaths.calendar,
+    RoutePaths.assignments,
+    RoutePaths.profile,
+  };
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _reminderSubscription.close();
+    unawaited(_reminderTaps?.cancel());
     _authStateSubscription.close();
     _onboardingSubscription.close();
     _router.dispose();

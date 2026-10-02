@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Status-bar icon for local reminders (#10). Material Symbols "school",
+     monochrome as Android requires for notification small icons. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960"
+    android:tint="#FFFFFF">
+    <group android:translateY="960">
+        <path
+            android:fillColor="@android:color/white"
+            android:pathData="M480,-120 L200,-272v-240L40,-600l440,-240 440,240v320h-80v-276l-80,44v240L480,-120Zm0,-332 L754,-600 480,-748 206,-600l274,148Zm0,241 L680,-319v-151L480,-360 280,-470v151l200,108Z" />
+    </group>
+</vector>

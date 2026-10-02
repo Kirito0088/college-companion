@@ -3,10 +3,19 @@
 /// Handles CRUD and query operations for notifications.
 library;
 
+import 'dart:async';
+
 import 'package:college_companion/core/errors/exceptions.dart';
 import 'package:college_companion/core/repositories/sync_queue_repository.dart';
 import 'package:college_companion/database/app_database.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart' show listEquals;
+
+/// Prefix of the ids of rows written by the reminder scheduler (#10).
+///
+/// Mirrors `PlannedReminder.keyPrefix`; kept here so the repository does not
+/// depend on the planner.
+const String reminderIdPrefix = 'reminder:';
 
 /// Repository for notification operations.
 class NotificationRepository {
@@ -16,18 +25,121 @@ class NotificationRepository {
   final AppDatabase _database;
   final SyncQueueRepository? _syncQueueRepository;
 
-  /// Watches all non-deleted notifications for the given user, ordered by creation date descending.
-  Stream<List<NotificationEntity>> watchAll(String userId) {
+  /// Watches the user's delivered, non-deleted notifications, newest first.
+  ///
+  /// Scheduled reminders are stored ahead of time with `createdAt` set to
+  /// their fire time (#10), so "delivered" means `createdAt <= now`. Time
+  /// passing is not a table change and does not re-run a Drift watch, so the
+  /// visible set is re-evaluated every [refresh] as well as on every write.
+  /// [clock] exists for tests.
+  Stream<List<NotificationEntity>> watchAll(
+    String userId, {
+    DateTime Function() clock = DateTime.now,
+    Duration refresh = const Duration(minutes: 1),
+  }) {
+    final Stream<List<NotificationEntity>> rows;
     try {
-      return (_database.select(_database.notifications)
-            ..where((t) => t.userId.equals(userId) & t.deletedAt.isNull())
-            ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
-          .watch();
+      rows =
+          (_database.select(_database.notifications)
+                ..where((t) => t.userId.equals(userId) & t.deletedAt.isNull())
+                ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
+              .watch();
     } catch (e) {
       throw DatabaseException(
         'Failed to watch notifications for user: $userId',
         e,
       );
+    }
+
+    List<NotificationEntity>? latest;
+    List<String>? lastEmittedIds;
+    StreamSubscription<List<NotificationEntity>>? subscription;
+    Timer? ticker;
+    late final StreamController<List<NotificationEntity>> controller;
+
+    void emitDelivered({bool force = false}) {
+      final all = latest;
+      if (all == null) return;
+      final nowIso = clock().toUtc().toIso8601String();
+      final delivered = all
+          .where((n) => n.createdAt.compareTo(nowIso) <= 0)
+          .toList();
+      final ids = delivered.map((n) => n.id).toList();
+      // A tick only matters when a reminder crossed into view.
+      if (!force && listEquals(ids, lastEmittedIds)) return;
+      lastEmittedIds = ids;
+      controller.add(delivered);
+    }
+
+    controller = StreamController<List<NotificationEntity>>(
+      onListen: () {
+        subscription = rows.listen(
+          (all) {
+            latest = all;
+            emitDelivered(force: true);
+          },
+          onError: controller.addError,
+          onDone: () {
+            ticker?.cancel();
+            controller.close();
+          },
+        );
+        ticker = Timer.periodic(refresh, (_) => emitDelivered());
+      },
+      onCancel: () async {
+        ticker?.cancel();
+        await subscription?.cancel();
+        await controller.close();
+      },
+    );
+    return controller.stream;
+  }
+
+  /// Future-dated reminder rows for [userId]: those scheduled with the OS
+  /// that have not fired yet as of [now].
+  Future<List<NotificationEntity>> getScheduledReminders(
+    String userId,
+    DateTime now,
+  ) async {
+    try {
+      final nowIso = now.toUtc().toIso8601String();
+      return await (_database.select(_database.notifications)..where(
+            (t) =>
+                t.userId.equals(userId) &
+                t.id.like('$reminderIdPrefix%') &
+                t.createdAt.isBiggerThanValue(nowIso) &
+                t.deletedAt.isNull(),
+          ))
+          .get();
+    } catch (e) {
+      throw DatabaseException('Failed to read scheduled reminders', e);
+    }
+  }
+
+  /// Stores (or updates) a scheduled reminder's row.
+  ///
+  /// Not queued for cloud sync: reminder rows are derived on each device
+  /// from data that does sync (timetable, assignments, settings), and the
+  /// cloud schema has no notifications table.
+  Future<void> saveScheduledReminder(NotificationsCompanion row) async {
+    try {
+      await _database.into(_database.notifications).insertOnConflictUpdate(row);
+    } catch (e) {
+      throw DatabaseException('Failed to save scheduled reminder', e);
+    }
+  }
+
+  /// Removes a reminder row that was scheduled but will no longer fire.
+  ///
+  /// A hard delete: the row was never delivered or synced, so there is no
+  /// history to keep and nothing for the cloud to learn.
+  Future<void> removeScheduledReminder(String userId, String id) async {
+    try {
+      await (_database.delete(
+        _database.notifications,
+      )..where((t) => t.userId.equals(userId) & t.id.equals(id))).go();
+    } catch (e) {
+      throw DatabaseException('Failed to remove scheduled reminder: $id', e);
     }
   }
 
@@ -47,22 +159,26 @@ class NotificationRepository {
     }
   }
 
-  /// Marks all unread notifications as read for a given user.
-  Future<void> markAllRead(String userId) async {
+  /// Marks every delivered, unread notification as read for a given user.
+  ///
+  /// Reminders still waiting to fire are left alone: the student has not
+  /// seen them yet. [now] exists for tests.
+  Future<void> markAllRead(String userId, {DateTime? now}) async {
     try {
-      final unreadNotifications =
-          await (_database.select(_database.notifications)..where(
-                (t) =>
-                    t.userId.equals(userId) &
-                    t.isRead.equals(false) &
-                    t.deletedAt.isNull(),
-              ))
-              .get();
+      final nowIso = (now ?? DateTime.now()).toUtc().toIso8601String();
+      Expression<bool> unreadDelivered($NotificationsTable t) =>
+          t.userId.equals(userId) &
+          t.isRead.equals(false) &
+          t.deletedAt.isNull() &
+          t.createdAt.isSmallerOrEqualValue(nowIso);
+
+      final unreadNotifications = await (_database.select(
+        _database.notifications,
+      )..where(unreadDelivered)).get();
 
       if (unreadNotifications.isEmpty) return;
 
-      await (_database.update(_database.notifications)
-            ..where((t) => t.userId.equals(userId) & t.isRead.equals(false)))
+      await (_database.update(_database.notifications)..where(unreadDelivered))
           .write(const NotificationsCompanion(isRead: Value(true)));
 
       if (_syncQueueRepository != null) {

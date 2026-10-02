@@ -227,6 +227,19 @@ class _NotificationItem extends ConsumerWidget {
         icon = Symbols.event;
         iconColor = cc.pri;
         break;
+      // Local reminders (#10): calm accent, never the risk colour.
+      case 'lecture_reminder':
+        icon = Symbols.schedule;
+        iconColor = cc.pri;
+        break;
+      case 'assignment_reminder':
+        icon = Symbols.assignment;
+        iconColor = cc.pri;
+        break;
+      case 'daily_briefing':
+        icon = Symbols.wb_sunny;
+        iconColor = cc.pri;
+        break;
       default:
         icon = Symbols.notifications;
         iconColor = theme.colorScheme.secondary;

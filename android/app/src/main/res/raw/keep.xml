@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Resources referenced only by name from Dart, which release resource
+     shrinking cannot see. The notification icon is passed to
+     flutter_local_notifications as the string "ic_stat_notification". -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/ic_stat_notification" />

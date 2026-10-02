@@ -1,5 +1,6 @@
 import 'package:college_companion/features/onboarding/screens/onboarding_screen.dart';
 import 'package:college_companion/theme/app_theme.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -11,7 +12,10 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(theme: AppTheme.darkTheme, home: const OnboardingScreen()),
+        MaterialApp(
+          theme: AppTheme.theme(Brightness.dark, Accent.jade),
+          home: const OnboardingScreen(),
+        ),
       );
 
       await tester.pumpAndSettle();
@@ -22,7 +26,10 @@ void main() {
 
     testWidgets('Next button advances page view', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(theme: AppTheme.darkTheme, home: const OnboardingScreen()),
+        MaterialApp(
+          theme: AppTheme.theme(Brightness.dark, Accent.jade),
+          home: const OnboardingScreen(),
+        ),
       );
 
       await tester.pumpAndSettle();

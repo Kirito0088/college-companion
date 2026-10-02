@@ -11,6 +11,7 @@ import 'package:college_companion/features/subjects/screens/subject_details_scre
 import 'package:college_companion/features/subjects/widgets/subject_details_header.dart';
 import 'package:college_companion/providers/app_providers.dart';
 import 'package:college_companion/theme/app_theme.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -168,7 +169,7 @@ void main() {
         attendanceRepositoryProvider.overrideWithValue(attendanceRepo),
       ],
       child: MaterialApp(
-        theme: AppTheme.darkTheme,
+        theme: AppTheme.theme(Brightness.dark, Accent.jade),
         home: const SubjectDetailsScreen(subjectId: testSubjectId),
       ),
     );

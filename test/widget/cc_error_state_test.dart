@@ -17,6 +17,7 @@ import 'package:college_companion/core/errors/exceptions.dart';
 import 'package:college_companion/shared/widgets/errors/cc_error_state.dart';
 import 'package:college_companion/shared/widgets/errors/cc_errors.dart';
 import 'package:college_companion/theme/app_theme.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -129,7 +130,7 @@ void main() {
     }) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.darkTheme,
+          theme: AppTheme.theme(Brightness.dark, Accent.jade),
           home: Scaffold(
             body: CcErrorState(error: error, onRetry: onRetry),
           ),

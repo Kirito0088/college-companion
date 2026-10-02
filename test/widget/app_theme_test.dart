@@ -160,31 +160,6 @@ void main() {
         );
       },
     );
-
-    testWidgets('darkTheme/lightTheme aliases resolve to the jade accent', (
-      tester,
-    ) async {
-      final darkTheme = AppTheme.darkTheme;
-      final lightTheme = AppTheme.lightTheme;
-      await tester.pumpWidget(
-        MaterialApp(theme: darkTheme, home: const SizedBox()),
-      );
-      await tester.pumpWidget(
-        MaterialApp(theme: lightTheme, home: const SizedBox()),
-      );
-      expect(
-        darkTheme.colorScheme.primary,
-        equals(
-          AppTheme.theme(Brightness.dark, Accent.jade).colorScheme.primary,
-        ),
-      );
-      expect(
-        lightTheme.colorScheme.primary,
-        equals(
-          AppTheme.theme(Brightness.light, Accent.jade).colorScheme.primary,
-        ),
-      );
-    });
   });
 
   // ── CCCard micro-border widget tests ─────────────────────────────────────

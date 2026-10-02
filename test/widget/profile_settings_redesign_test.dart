@@ -12,6 +12,7 @@ import 'package:college_companion/providers/app_providers.dart';
 import 'package:college_companion/shared/widgets/cc_list_row.dart';
 import 'package:college_companion/shared/widgets/cc_section.dart';
 import 'package:college_companion/theme/app_theme.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:drift/drift.dart' show Value, Variable;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -45,7 +46,7 @@ void main() {
       var tapped = false;
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.darkTheme,
+          theme: AppTheme.theme(Brightness.dark, Accent.jade),
           home: Scaffold(
             body: CCListRow(
               icon: Symbols.sync,
@@ -73,7 +74,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.darkTheme,
+          theme: AppTheme.theme(Brightness.dark, Accent.jade),
           home: Scaffold(
             body: CCListRow(
               icon: Symbols.notifications,
@@ -94,7 +95,7 @@ void main() {
     testWidgets('renders its title and children', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.darkTheme,
+          theme: AppTheme.theme(Brightness.dark, Accent.jade),
           home: const Scaffold(
             body: CCSection(
               title: 'Account',
@@ -115,7 +116,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.darkTheme,
+          theme: AppTheme.theme(Brightness.dark, Accent.jade),
           home: const Scaffold(
             body: ProfileHeaderCard(
               name: 'Jayesh',
@@ -137,7 +138,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp.router(
-            theme: AppTheme.darkTheme,
+            theme: AppTheme.theme(Brightness.dark, Accent.jade),
             routerConfig: GoRouter(
               routes: [
                 GoRoute(
@@ -207,7 +208,7 @@ void main() {
             ),
           ],
           child: MaterialApp(
-            theme: AppTheme.darkTheme,
+            theme: AppTheme.theme(Brightness.dark, Accent.jade),
             home: const SettingsScreen(),
           ),
         ),
@@ -286,7 +287,7 @@ void main() {
             ),
           ],
           child: MaterialApp(
-            theme: AppTheme.darkTheme,
+            theme: AppTheme.theme(Brightness.dark, Accent.jade),
             home: const SettingsScreen(),
           ),
         ),

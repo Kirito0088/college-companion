@@ -35,6 +35,7 @@ import 'package:college_companion/features/timetable/widgets/lecture_card.dart';
 import 'package:college_companion/routing/scaffold_with_nav_bar.dart';
 import 'package:college_companion/shared/widgets/section_header.dart';
 import 'package:college_companion/theme/app_theme.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -165,7 +166,7 @@ void main() {
           await _pumpAtSize(
             tester,
             MaterialApp.router(
-              theme: AppTheme.darkTheme,
+              theme: AppTheme.theme(Brightness.dark, Accent.jade),
               routerConfig: _navBarRouter(),
             ),
             width: w,
@@ -195,7 +196,7 @@ void main() {
       await _pumpAtSize(
         tester,
         MaterialApp(
-          theme: AppTheme.darkTheme,
+          theme: AppTheme.theme(Brightness.dark, Accent.jade),
           home: Scaffold(
             body: SectionHeader(
               title:
@@ -237,7 +238,7 @@ void main() {
       await _pumpAtSize(
         tester,
         MaterialApp(
-          theme: AppTheme.darkTheme,
+          theme: AppTheme.theme(Brightness.dark, Accent.jade),
           home: Scaffold(
             body: LectureCard(
               lecture: lecture(
@@ -290,7 +291,7 @@ void main() {
             ),
           ],
           child: MaterialApp(
-            theme: AppTheme.darkTheme,
+            theme: AppTheme.theme(Brightness.dark, Accent.jade),
             home: const Scaffold(body: NextLectureCard()),
           ),
         ),
@@ -326,7 +327,7 @@ void main() {
           ),
         ],
         child: MaterialApp(
-          theme: AppTheme.darkTheme,
+          theme: AppTheme.theme(Brightness.dark, Accent.jade),
           home: const CalendarScreen(),
         ),
       ),
@@ -350,7 +351,7 @@ void main() {
           ),
         ],
         child: MaterialApp(
-          theme: AppTheme.darkTheme,
+          theme: AppTheme.theme(Brightness.dark, Accent.jade),
           home: const AssignmentsScreen(),
         ),
       ),
@@ -372,7 +373,7 @@ void main() {
           ),
         ],
         child: MaterialApp(
-          theme: AppTheme.darkTheme,
+          theme: AppTheme.theme(Brightness.dark, Accent.jade),
           home: const ResourcesScreen(),
         ),
       ),
@@ -396,7 +397,7 @@ void main() {
           ),
         ],
         child: MaterialApp(
-          theme: AppTheme.darkTheme,
+          theme: AppTheme.theme(Brightness.dark, Accent.jade),
           home: const SettingsScreen(),
         ),
       ),
@@ -408,7 +409,7 @@ void main() {
           ),
         ],
         child: MaterialApp(
-          theme: AppTheme.darkTheme,
+          theme: AppTheme.theme(Brightness.dark, Accent.jade),
           home: const DashboardScreen(),
         ),
       ),
@@ -429,7 +430,7 @@ void main() {
           ),
         ],
         child: MaterialApp(
-          theme: AppTheme.darkTheme,
+          theme: AppTheme.theme(Brightness.dark, Accent.jade),
           home: MediaQuery(
             data: MediaQueryData(
               size: Size(width, 3000),

@@ -9,6 +9,7 @@ import 'package:college_companion/features/dashboard/widgets/upcoming_assignment
 import 'package:college_companion/features/dashboard/widgets/welcome_section.dart';
 import 'package:college_companion/routing/app_router.dart';
 import 'package:college_companion/theme/app_theme.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -34,7 +35,7 @@ void main() {
             authStateProvider.overrideWith(_FakeAuthStateNotifier.new),
           ],
           child: MaterialApp(
-            theme: AppTheme.darkTheme,
+            theme: AppTheme.theme(Brightness.dark, Accent.jade),
             home: const Scaffold(body: WelcomeSection()),
           ),
         ),
@@ -52,7 +53,7 @@ void main() {
             authStateProvider.overrideWith(_FakeAuthStateNotifier.new),
           ],
           child: MaterialApp(
-            theme: AppTheme.darkTheme,
+            theme: AppTheme.theme(Brightness.dark, Accent.jade),
             home: const Scaffold(body: WelcomeSection()),
           ),
         ),
@@ -70,7 +71,7 @@ void main() {
             authStateProvider.overrideWith(_FakeAuthStateNotifier.new),
           ],
           child: MaterialApp.router(
-            theme: AppTheme.darkTheme,
+            theme: AppTheme.theme(Brightness.dark, Accent.jade),
             routerConfig: GoRouter(
               routes: [
                 GoRoute(
@@ -104,7 +105,7 @@ void main() {
             authStateProvider.overrideWith(_FakeAuthStateNotifier.new),
           ],
           child: MaterialApp(
-            theme: AppTheme.darkTheme,
+            theme: AppTheme.theme(Brightness.dark, Accent.jade),
             home: const Scaffold(body: NextLectureCard()),
           ),
         ),
@@ -122,7 +123,7 @@ void main() {
             authStateProvider.overrideWith(_FakeAuthStateNotifier.new),
           ],
           child: MaterialApp(
-            theme: AppTheme.darkTheme,
+            theme: AppTheme.theme(Brightness.dark, Accent.jade),
             home: const Scaffold(body: TodayOverviewSection()),
           ),
         ),
@@ -141,7 +142,7 @@ void main() {
             authStateProvider.overrideWith(_FakeAuthStateNotifier.new),
           ],
           child: MaterialApp(
-            theme: AppTheme.darkTheme,
+            theme: AppTheme.theme(Brightness.dark, Accent.jade),
             home: const Scaffold(body: AcademicSnapshotSection()),
           ),
         ),
@@ -160,7 +161,7 @@ void main() {
             authStateProvider.overrideWith(_FakeAuthStateNotifier.new),
           ],
           child: MaterialApp(
-            theme: AppTheme.darkTheme,
+            theme: AppTheme.theme(Brightness.dark, Accent.jade),
             home: const Scaffold(body: UpcomingAssignmentsSection()),
           ),
         ),
@@ -175,7 +176,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.darkTheme,
+          theme: AppTheme.theme(Brightness.dark, Accent.jade),
           home: const Scaffold(body: QuickActionsSection()),
         ),
       );
@@ -193,7 +194,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.darkTheme,
+          theme: AppTheme.theme(Brightness.dark, Accent.jade),
           home: const Scaffold(
             body: AttendanceRing(percentage: 82.4, isSafe: true),
           ),

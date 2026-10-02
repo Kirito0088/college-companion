@@ -13,6 +13,7 @@ import 'package:college_companion/features/authentication/providers/auth_provide
 import 'package:college_companion/features/subjects/providers/subjects_provider.dart';
 import 'package:college_companion/shared/widgets/empty_states/cc_empty_states.dart';
 import 'package:college_companion/theme/app_theme.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -64,7 +65,7 @@ Future<void> _pumpSubjectsTab(
         ),
       ],
       child: MaterialApp(
-        theme: AppTheme.darkTheme,
+        theme: AppTheme.theme(Brightness.dark, Accent.jade),
         home: const AttendanceScreen(),
       ),
     ),

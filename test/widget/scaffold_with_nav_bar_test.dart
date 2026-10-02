@@ -1,5 +1,6 @@
 import 'package:college_companion/routing/scaffold_with_nav_bar.dart';
 import 'package:college_companion/theme/app_theme.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -17,7 +18,10 @@ void main() {
       final router = _buildRouter();
 
       await tester.pumpWidget(
-        MaterialApp.router(theme: AppTheme.darkTheme, routerConfig: router),
+        MaterialApp.router(
+          theme: AppTheme.theme(Brightness.dark, Accent.jade),
+          routerConfig: router,
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -34,7 +38,10 @@ void main() {
       final router = _buildRouter();
 
       await tester.pumpWidget(
-        MaterialApp.router(theme: AppTheme.darkTheme, routerConfig: router),
+        MaterialApp.router(
+          theme: AppTheme.theme(Brightness.dark, Accent.jade),
+          routerConfig: router,
+        ),
       );
       await tester.pumpAndSettle();
 

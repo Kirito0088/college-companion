@@ -9,6 +9,7 @@ import 'package:college_companion/features/attendance/widgets/evidence_thumbnail
 import 'package:college_companion/providers/app_providers.dart';
 import 'package:college_companion/services/image_storage_service.dart';
 import 'package:college_companion/theme/app_theme.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -130,7 +131,7 @@ void main() {
         ...overrides,
       ],
       child: MaterialApp(
-        theme: AppTheme.darkTheme,
+        theme: AppTheme.theme(Brightness.dark, Accent.jade),
         home: child is Scaffold ? child : Scaffold(body: child),
       ),
     );

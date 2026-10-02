@@ -81,7 +81,7 @@ void main() {
             ),
           ],
           child: MaterialApp(
-            theme: AppTheme.darkTheme,
+            theme: AppTheme.theme(Brightness.dark, Accent.jade),
             home: const CalendarScreen(),
           ),
         ),
@@ -131,7 +131,7 @@ void main() {
         late BuildContext capturedContext;
         await tester.pumpWidget(
           MaterialApp(
-            theme: AppTheme.darkTheme,
+            theme: AppTheme.theme(Brightness.dark, Accent.jade),
             home: Builder(
               builder: (context) {
                 capturedContext = context;

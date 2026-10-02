@@ -36,6 +36,7 @@ import 'package:college_companion/providers/app_providers.dart';
 import 'package:college_companion/shared/widgets/empty_states/cc_empty_states.dart';
 import 'package:college_companion/shared/widgets/errors/cc_error_state.dart';
 import 'package:college_companion/theme/app_theme.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -90,7 +91,10 @@ Future<void> _pump(
         authStateProvider.overrideWith(_TestAuthStateNotifier.new),
         ...overrides,
       ],
-      child: MaterialApp(theme: AppTheme.darkTheme, home: screen),
+      child: MaterialApp(
+        theme: AppTheme.theme(Brightness.dark, Accent.jade),
+        home: screen,
+      ),
     ),
   );
   await tester.pump();

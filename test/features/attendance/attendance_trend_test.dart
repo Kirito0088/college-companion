@@ -17,6 +17,7 @@ import 'package:college_companion/database/app_database.dart';
 import 'package:college_companion/features/attendance/providers/attendance_provider.dart';
 import 'package:college_companion/features/attendance/widgets/attendance_trend_card.dart';
 import 'package:college_companion/theme/app_theme.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -121,7 +122,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.darkTheme,
+          theme: AppTheme.theme(Brightness.dark, Accent.jade),
           home: Scaffold(body: AttendanceTrendCard(trend: trend)),
         ),
       );

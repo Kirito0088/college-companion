@@ -268,13 +268,6 @@ abstract final class AppTheme {
     );
   }
 
-  /// The dark theme, jade accent — kept as a stable default for call sites
-  /// that haven't migrated to the reactive [theme] factory yet.
-  static ThemeData get darkTheme => theme(Brightness.dark, Accent.jade);
-
-  /// The light theme, jade accent.
-  static ThemeData get lightTheme => theme(Brightness.light, Accent.jade);
-
   /// Derives an MD3 [ColorScheme] from [ccTokens] for the given [brightness].
   ///
   /// `secondary`/`tertiary` are not yet part of the redesign (the canvas

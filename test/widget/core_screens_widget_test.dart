@@ -16,6 +16,7 @@ import 'package:college_companion/features/resources/screens/resources_screen.da
 import 'package:college_companion/features/settings/providers/settings_provider.dart';
 import 'package:college_companion/features/settings/screens/settings_screen.dart';
 import 'package:college_companion/theme/app_theme.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -60,7 +61,7 @@ void main() {
               ),
             ],
             child: MaterialApp(
-              theme: AppTheme.darkTheme,
+              theme: AppTheme.theme(Brightness.dark, Accent.jade),
               home: const CalendarScreen(),
             ),
           ),
@@ -95,7 +96,7 @@ void main() {
               ),
             ],
             child: MaterialApp(
-              theme: AppTheme.darkTheme,
+              theme: AppTheme.theme(Brightness.dark, Accent.jade),
               home: const AssignmentsScreen(),
             ),
           ),
@@ -133,7 +134,7 @@ void main() {
               ),
             ],
             child: MaterialApp(
-              theme: AppTheme.darkTheme,
+              theme: AppTheme.theme(Brightness.dark, Accent.jade),
               home: const ResourcesScreen(),
             ),
           ),
@@ -169,7 +170,7 @@ void main() {
               ),
             ],
             child: MaterialApp(
-              theme: AppTheme.darkTheme,
+              theme: AppTheme.theme(Brightness.dark, Accent.jade),
               home: const SettingsScreen(),
             ),
           ),
@@ -198,7 +199,7 @@ void main() {
               ),
             ],
             child: MaterialApp(
-              theme: AppTheme.darkTheme,
+              theme: AppTheme.theme(Brightness.dark, Accent.jade),
               home: const DashboardScreen(),
             ),
           ),
@@ -234,7 +235,7 @@ void main() {
               ),
             ],
             child: MaterialApp(
-              theme: AppTheme.darkTheme,
+              theme: AppTheme.theme(Brightness.dark, Accent.jade),
               home: const MediaQuery(
                 data: MediaQueryData(
                   size: Size(1200, 3000),

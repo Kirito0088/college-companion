@@ -14,6 +14,7 @@ import 'package:college_companion/features/timetable/widgets/lecture_card.dart';
 import 'package:college_companion/providers/app_providers.dart';
 import 'package:college_companion/shared/widgets/cc_empty_state.dart';
 import 'package:college_companion/theme/app_theme.dart';
+import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -93,7 +94,7 @@ void main() {
               ).overrideWith((ref) => Stream.value([])),
             ],
             child: MaterialApp(
-              theme: AppTheme.darkTheme,
+              theme: AppTheme.theme(Brightness.dark, Accent.jade),
               home: const TimetableScreen(),
             ),
           ),
@@ -122,7 +123,7 @@ void main() {
               ).overrideWith((ref) => Stream.value(mondayLectures)),
             ],
             child: MaterialApp(
-              theme: AppTheme.darkTheme,
+              theme: AppTheme.theme(Brightness.dark, Accent.jade),
               home: const TimetableScreen(),
             ),
           ),
@@ -154,7 +155,7 @@ void main() {
             ).overrideWith((ref) => Stream.value(mondayLectures)),
           ],
           child: MaterialApp(
-            theme: AppTheme.darkTheme,
+            theme: AppTheme.theme(Brightness.dark, Accent.jade),
             home: const TimetableScreen(),
           ),
         ),
@@ -186,7 +187,7 @@ void main() {
         UncontrolledProviderScope(
           container: container,
           child: MaterialApp(
-            theme: AppTheme.darkTheme,
+            theme: AppTheme.theme(Brightness.dark, Accent.jade),
             home: const TimetableScreen(),
           ),
         ),
@@ -269,7 +270,7 @@ void main() {
               timetableRepositoryProvider.overrideWithValue(timetableRepo),
             ],
             child: MaterialApp(
-              theme: AppTheme.darkTheme,
+              theme: AppTheme.theme(Brightness.dark, Accent.jade),
               home: const TimetableScreen(),
             ),
           ),

@@ -248,8 +248,12 @@ final attendanceTrendProvider =
     });
 
 /// Computes attendance insights based on records and subjects.
+///
+/// Null when no subject has a recorded lecture yet: a subject without
+/// records has no percentage, and treating it as 0% skewed the average,
+/// marked it below target, and rendered "N/A (0%)" on empty accounts (#38).
 final attendanceInsightsProvider =
-    Provider.family<AsyncValue<AttendanceInsights>, String>((ref, userId) {
+    Provider.family<AsyncValue<AttendanceInsights?>, String>((ref, userId) {
       final subjectsAsync = ref.watch(subjectsStreamProvider(userId));
       final recordsAsync = ref.watch(attendanceRecordsStreamProvider(userId));
 
@@ -264,21 +268,13 @@ final attendanceInsightsProvider =
         return AsyncError(recordsAsync.error!, recordsAsync.stackTrace!);
       }
 
-      final subjects = subjectsAsync.value ?? [];
       final records = recordsAsync.value ?? [];
+      final recordedSubjectIds = records.map((r) => r.subjectId).toSet();
+      final subjects = (subjectsAsync.value ?? [])
+          .where((s) => recordedSubjectIds.contains(s.id))
+          .toList();
 
-      if (subjects.isEmpty) {
-        return const AsyncData(
-          AttendanceInsights(
-            highestSubject: 'N/A',
-            lowestSubject: 'N/A',
-            highestPercentage: 0.0,
-            lowestPercentage: 0.0,
-            subjectsBelowTarget: 0,
-            averagePercentage: 0.0,
-          ),
-        );
-      }
+      if (subjects.isEmpty) return const AsyncData(null);
 
       String highestSubject = 'N/A';
       String lowestSubject = 'N/A';
@@ -296,7 +292,7 @@ final attendanceInsightsProvider =
             .length;
         final total = subjRecords.length;
 
-        final pct = total > 0 ? (present / total) * 100 : 0.0;
+        final pct = (present / total) * 100;
         if (pct > highestPercentage) {
           highestPercentage = pct;
           highestSubject = subject.name;
@@ -315,14 +311,10 @@ final attendanceInsightsProvider =
         AttendanceInsights(
           highestSubject: highestSubject,
           lowestSubject: lowestSubject,
-          highestPercentage: highestPercentage == -1.0
-              ? 0.0
-              : highestPercentage,
-          lowestPercentage: lowestPercentage == 101.0 ? 0.0 : lowestPercentage,
+          highestPercentage: highestPercentage,
+          lowestPercentage: lowestPercentage,
           subjectsBelowTarget: subjectsBelowTarget,
-          averagePercentage: subjects.isNotEmpty
-              ? totalPercentage / subjects.length
-              : 0.0,
+          averagePercentage: totalPercentage / subjects.length,
         ),
       );
     });

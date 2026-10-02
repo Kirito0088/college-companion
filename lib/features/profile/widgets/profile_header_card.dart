@@ -15,8 +15,20 @@ class ProfileHeaderCard extends StatelessWidget {
 
   final String name;
   final String email;
+
+  /// The semester number as the student entered it (e.g. `5`), or empty.
   final String semester;
+
+  /// The student's course/branch, or empty.
   final String course;
+
+  String? get _pillLabel {
+    final parts = [
+      if (semester.isNotEmpty) 'SEM $semester',
+      if (course.isNotEmpty) course,
+    ];
+    return parts.isEmpty ? null : parts.join(' • ');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,23 +74,28 @@ class ProfileHeaderCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: SpacingTokens.sm), // mt-2 approx
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12, // slightly increased for pill shape
-                    vertical: 6, // better breathing room
+                // Only the parts the student has filled in; an empty
+                // profile used to render "SEM •" (#38).
+                if (_pillLabel case final label?)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12, // slightly increased for pill shape
+                      vertical: 6, // better breathing room
+                    ),
+                    decoration: BoxDecoration(
+                      color: cc.raise2,
+                      borderRadius: RadiusTokens.borderRadiusPill,
+                      border: Border.all(color: cc.line),
+                    ),
+                    child: Text(
+                      label,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: cc.mut,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                  decoration: BoxDecoration(
-                    color: cc.raise2,
-                    borderRadius: RadiusTokens.borderRadiusPill,
-                    border: Border.all(color: cc.line),
-                  ),
-                  child: Text(
-                    '$semester • $course',
-                    style: theme.textTheme.labelLarge?.copyWith(color: cc.mut),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
               ],
             ),
           ),

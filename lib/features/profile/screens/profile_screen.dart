@@ -48,7 +48,7 @@ class ProfileScreen extends ConsumerWidget {
                     ProfileHeaderCard(
                       name: name,
                       email: email,
-                      semester: 'SEM ${profile.semester}',
+                      semester: profile.semester,
                       course: profile.branch,
                     ),
                     const SizedBox(height: LayoutTokens.sectionGap),

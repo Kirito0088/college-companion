@@ -122,7 +122,7 @@ void main() {
             body: ProfileHeaderCard(
               name: 'Jayesh',
               email: 'jayesh@example.com',
-              semester: 'SEM 5',
+              semester: '5',
               course: 'CSE',
             ),
           ),
@@ -131,6 +131,48 @@ void main() {
 
       expect(find.text('Jayesh'), findsOneWidget);
       expect(find.text('SEM 5 • CSE'), findsOneWidget);
+    });
+
+    // #38: an empty profile rendered the pill as "SEM •".
+    testWidgets('ProfileHeaderCard hides the pill when semester and course '
+        'are empty', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.theme(Brightness.dark, Accent.jade),
+          home: const Scaffold(
+            body: ProfileHeaderCard(
+              name: 'Jayesh',
+              email: 'jayesh@example.com',
+              semester: '',
+              course: '',
+            ),
+          ),
+        ),
+      );
+
+      expect(find.textContaining('SEM'), findsNothing);
+      expect(find.textContaining('•'), findsNothing);
+    });
+
+    testWidgets('ProfileHeaderCard shows only the parts that exist', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.theme(Brightness.dark, Accent.jade),
+          home: const Scaffold(
+            body: ProfileHeaderCard(
+              name: 'Jayesh',
+              email: 'jayesh@example.com',
+              semester: '',
+              course: 'CSE',
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('CSE'), findsOneWidget);
+      expect(find.textContaining('SEM'), findsNothing);
     });
 
     testWidgets('ProfileMenuList renders every menu destination', (

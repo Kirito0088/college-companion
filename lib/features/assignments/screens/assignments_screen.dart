@@ -1,4 +1,5 @@
 import 'package:college_companion/database/app_database.dart';
+import 'package:college_companion/features/assignments/models/assignment_due.dart';
 import 'package:college_companion/features/assignments/models/assignment_subject.dart';
 import 'package:college_companion/features/assignments/providers/assignments_provider.dart';
 import 'package:college_companion/features/assignments/widgets/assignment_card.dart';
@@ -102,7 +103,7 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
                           case 1:
                             return status == 'pending';
                           case 2:
-                            final due = DateTime.tryParse(a.dueDate);
+                            final due = assignmentDue(a.dueDate);
                             if (due != null) {
                               final now = DateTime.now();
                               return due.year == now.year &&
@@ -377,7 +378,7 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
         statusColor = cc.warn;
       }
 
-      final dueDt = DateTime.tryParse(entity.dueDate);
+      final dueDt = assignmentDue(entity.dueDate);
       final dueStr = dueDt != null
           ? '${dueDt.month}/${dueDt.day}'
           : entity.dueDate;

@@ -73,6 +73,7 @@ Future<ProviderContainer> _container({
   bool onboarded = true,
   Stream<List<LectureScheduleItem>>? lectures,
   Stream<UserSettingsEntity?>? settings,
+  List<AssignmentEntity>? assignments,
 }) async {
   SharedPreferences.setMockInitialValues({
     'has_completed_onboarding': onboarded,
@@ -84,7 +85,9 @@ Future<ProviderContainer> _container({
         (ref) => lectures ?? Stream.value(_lectures),
       ),
       pendingAssignmentsStreamProvider.overrideWith(
-        (ref, u) => Stream.value([_assignmentDueIn(const Duration(days: 3))]),
+        (ref, u) => Stream.value(
+          assignments ?? [_assignmentDueIn(const Duration(days: 3))],
+        ),
       ),
       subjectsStreamProvider.overrideWith(
         (ref, u) => Stream.value([
@@ -177,5 +180,39 @@ void main() {
       ready.plan.where((r) => r.channel == ReminderChannel.lectures),
       isNotEmpty,
     );
+  });
+
+  test('a date-only deadline is reminded the evening before (#43)', () async {
+    final today = DateTime.now();
+    final dueDay = DateTime(today.year, today.month, today.day + 3);
+    final dueDate =
+        '${dueDay.year.toString().padLeft(4, '0')}-'
+        '${dueDay.month.toString().padLeft(2, '0')}-'
+        '${dueDay.day.toString().padLeft(2, '0')}';
+    final c = await _container(
+      assignments: [
+        AssignmentEntity(
+          id: 'a1',
+          userId: _uid,
+          subjectId: 's1',
+          title: 'Lab Report',
+          dueDate: dueDate,
+          status: 'pending',
+          createdAt: _iso,
+          updatedAt: _iso,
+        ),
+      ],
+    );
+    addTearDown(c.dispose);
+
+    final ready = c.read(reminderPlanProvider) as RemindersReady;
+    final dayBefore = ready.plan.firstWhere(
+      (r) => r.key.endsWith('assignment:a1:24h'),
+    );
+    expect(
+      dayBefore.fireAt,
+      DateTime(dueDay.year, dueDay.month, dueDay.day - 1, 23, 59),
+    );
+    expect(dayBefore.body, contains('11:59 PM'));
   });
 }

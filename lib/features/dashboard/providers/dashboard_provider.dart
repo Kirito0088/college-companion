@@ -4,6 +4,7 @@
 library;
 
 import 'package:college_companion/database/app_database.dart';
+import 'package:college_companion/features/assignments/models/assignment_due.dart';
 import 'package:college_companion/features/assignments/providers/assignments_provider.dart';
 import 'package:college_companion/features/attendance/providers/attendance_provider.dart';
 import 'package:college_companion/features/calendar/providers/calendar_provider.dart';
@@ -94,7 +95,7 @@ final dashboardSnapshotProvider =
           .where((a) => a.status != 'completed')
           .toList();
       final dueToday = pendingAssignments.where((a) {
-        final due = DateTime.tryParse(a.dueDate);
+        final due = assignmentDue(a.dueDate);
         if (due == null) return false;
         return due.isAfter(todayStart) && due.isBefore(todayEnd);
       }).length;
@@ -109,13 +110,13 @@ final dashboardSnapshotProvider =
       // Sort and map upcoming assignments
       final sortedAssignments = List<AssignmentEntity>.from(pendingAssignments)
         ..sort((a, b) {
-          final dateA = DateTime.tryParse(a.dueDate) ?? DateTime(2100);
-          final dateB = DateTime.tryParse(b.dueDate) ?? DateTime(2100);
+          final dateA = assignmentDue(a.dueDate) ?? DateTime(2100);
+          final dateB = assignmentDue(b.dueDate) ?? DateTime(2100);
           return dateA.compareTo(dateB);
         });
 
       final upcomingList = sortedAssignments.take(3).map((a) {
-        final dueDate = DateTime.tryParse(a.dueDate);
+        final dueDate = assignmentDue(a.dueDate);
         final daysLeft = dueDate != null ? dueDate.difference(now).inDays : 0;
 
         // Find subject name

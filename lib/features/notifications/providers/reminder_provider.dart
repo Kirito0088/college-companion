@@ -8,6 +8,7 @@ library;
 
 import 'dart:async';
 
+import 'package:college_companion/features/assignments/models/assignment_due.dart';
 import 'package:college_companion/features/assignments/providers/assignments_provider.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
@@ -104,12 +105,12 @@ final reminderPlanProvider = Provider<ReminderPlanState>((ref) {
       lectures: lectures.requireValue,
       assignments: [
         for (final a in assignments.requireValue)
-          if (DateTime.tryParse(a.dueDate) case final due?)
+          if (assignmentDue(a.dueDate) case final due?)
             ReminderAssignment(
               id: a.id,
               title: a.title,
               subjectName: subjectNames[a.subjectId],
-              due: due.toLocal(),
+              due: due,
             ),
       ],
       preferences: notificationPreferencesFrom(settings.requireValue),

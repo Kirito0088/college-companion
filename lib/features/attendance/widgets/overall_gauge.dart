@@ -16,21 +16,28 @@ class OverallGauge extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cc = context.cc;
-    final pct = safeBunk != null ? safeBunk!.currentPercentage : 0.0;
+    // With no recorded lectures there is no percentage to be on target
+    // with: 0% "On target" was a claim without data (#38).
+    final hasRecords = safeBunk != null && safeBunk!.total > 0;
+    final pct = hasRecords ? safeBunk!.currentPercentage : 0.0;
     final progress = (pct / 100.0).clamp(0.0, 1.0);
-    final pctText = safeBunk != null ? '${pct.round()}%' : '–';
+    final pctText = hasRecords ? '${pct.round()}%' : '–';
     final isSafe =
-        safeBunk == null ||
-        safeBunk!.total == 0 ||
+        !hasRecords ||
         safeBunk!.currentPercentage >= safeBunk!.targetPercentage;
-    final badgeColor = isSafe ? cc.pri : cc.risk;
-    final badgeText = safeBunk != null
-        ? (safeBunk!.safeBunks > 0
-              ? 'You can miss ${safeBunk!.safeBunks} lectures'
-              : (safeBunk!.mustAttend > 0
-                    ? 'Must attend ${safeBunk!.mustAttend} lectures'
-                    : 'On target (${safeBunk!.targetPercentage.round()}%)'))
-        : 'Loading...';
+    final badgeColor = !hasRecords ? cc.mut : (isSafe ? cc.pri : cc.risk);
+    final String badgeText;
+    if (safeBunk == null) {
+      badgeText = 'Loading...';
+    } else if (!hasRecords) {
+      badgeText = 'No lectures recorded yet';
+    } else if (safeBunk!.safeBunks > 0) {
+      badgeText = 'You can miss ${safeBunk!.safeBunks} lectures';
+    } else if (safeBunk!.mustAttend > 0) {
+      badgeText = 'Must attend ${safeBunk!.mustAttend} lectures';
+    } else {
+      badgeText = 'On target (${safeBunk!.targetPercentage.round()}%)';
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xl),

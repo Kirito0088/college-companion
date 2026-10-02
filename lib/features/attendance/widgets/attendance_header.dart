@@ -5,7 +5,10 @@ import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class AttendanceHeader extends StatelessWidget {
-  const AttendanceHeader({super.key});
+  const AttendanceHeader({super.key, this.semesterName});
+
+  /// The current semester's name, or null to show no semester chip.
+  final String? semesterName;
 
   @override
   Widget build(BuildContext context) {
@@ -51,32 +54,34 @@ class AttendanceHeader extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(width: SpacingTokens.sm),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: SpacingTokens.lg,
-                vertical: 8,
-              ),
-              decoration: BoxDecoration(
-                color: cc.surf,
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: cc.line),
-              ),
-              child: Row(
-                children: [
-                  Text(
-                    'SEM 5',
+            // Was a literal 'SEM 5' with a dropdown chevron that opened
+            // nothing (#38). Shows the real current semester, or nothing.
+            if (semesterName case final name? when name.isNotEmpty) ...[
+              const SizedBox(width: SpacingTokens.sm),
+              Flexible(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SpacingTokens.lg,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: cc.surf,
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: cc.line),
+                  ),
+                  child: Text(
+                    name,
                     style: theme.textTheme.labelLarge?.copyWith(
                       color: cc.mut,
                       letterSpacing: 0.5,
                       fontWeight: FontWeight.w500,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(width: SpacingTokens.xs),
-                  Icon(Symbols.expand_more_rounded, color: cc.mut, size: 18),
-                ],
+                ),
               ),
-            ),
+            ],
           ],
         ),
       ),

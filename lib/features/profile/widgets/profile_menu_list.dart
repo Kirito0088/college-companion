@@ -49,8 +49,6 @@ class ProfileMenuList extends StatelessWidget {
           CCListRow(
             icon: Symbols.sync,
             label: 'Data & Sync',
-            subtitle: 'Last synced: Today, 9:30 AM',
-            trailing: Icon(Symbols.check_circle, color: cc.pri, fill: 1.0),
             showBorder: true,
             onTap: () => context.push(RoutePaths.dataSync),
           ),

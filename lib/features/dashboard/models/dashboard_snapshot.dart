@@ -23,7 +23,7 @@ class DashboardSnapshot {
         attendanceState: 'No Data',
         workloadState: 'Clear',
         deadlinesState: 'All clear',
-        nextBreakState: 'N/A',
+        nextBreakState: 'No classes',
         attendancePercentage: 0,
         isAttendanceSafe: true,
         hasAttendanceData: false,

@@ -8,6 +8,7 @@ import 'package:college_companion/features/assignments/providers/assignments_pro
 import 'package:college_companion/features/attendance/providers/attendance_provider.dart';
 import 'package:college_companion/features/calendar/providers/calendar_provider.dart';
 import 'package:college_companion/features/dashboard/models/dashboard_snapshot.dart';
+import 'package:college_companion/features/dashboard/models/next_break.dart';
 import 'package:college_companion/features/subjects/providers/subjects_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -151,7 +152,16 @@ final dashboardSnapshotProvider =
         attendanceState: attendanceState,
         workloadState: workloadState,
         deadlinesState: deadlinesState,
-        nextBreakState: 'In 2 hrs',
+        nextBreakState: describeNextBreak([
+          for (final e in todayEvents)
+            if (DateTime.tryParse(e.startDate) case final start?)
+              (
+                start: start,
+                end:
+                    DateTime.tryParse(e.endDate) ??
+                    start.add(const Duration(hours: 1)),
+              ),
+        ], now),
         attendancePercentage: safeBunk.currentPercentage,
         isAttendanceSafe:
             safeBunk.currentPercentage >= safeBunk.targetPercentage,

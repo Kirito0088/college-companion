@@ -7,6 +7,7 @@ import 'package:college_companion/features/attendance/widgets/segmented_control.
 import 'package:college_companion/features/attendance/widgets/stats_row.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
+import 'package:college_companion/features/semester/providers/semester_provider.dart';
 import 'package:college_companion/features/subjects/providers/subjects_provider.dart';
 import 'package:college_companion/shared/widgets/empty_states/cc_empty_states.dart';
 import 'package:college_companion/shared/widgets/errors/cc_error_state.dart';
@@ -46,12 +47,17 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
 
     final trend = ref.watch(attendanceTrendProvider(userId));
 
+    final semesterName = ref
+        .watch(currentSemesterStreamProvider(userId))
+        .valueOrNull
+        ?.name;
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: Column(
           children: [
-            const AttendanceHeader(),
+            AttendanceHeader(semesterName: semesterName),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.only(
@@ -236,17 +242,26 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
   Widget _buildHealthCard(BuildContext context, SafeBunkResult? safeBunk) {
     final theme = Theme.of(context);
     final cc = context.cc;
+    // No records means no margin to report either way (#38).
+    final hasRecords = safeBunk != null && safeBunk.total > 0;
     final isSafe =
-        safeBunk == null ||
-        safeBunk.total == 0 ||
-        safeBunk.currentPercentage >= safeBunk.targetPercentage;
-    final title = isSafe ? 'Safe' : 'Action Required';
-    final color = isSafe ? cc.pri : cc.risk;
-    final message = safeBunk != null
-        ? (isSafe
-              ? 'You can miss approximately ${safeBunk.safeBunks} more lectures before reaching ${safeBunk.targetPercentage.round()}%.'
-              : 'You must attend ${safeBunk.mustAttend} more lectures to reach ${safeBunk.targetPercentage.round()}%.')
-        : 'Loading...';
+        !hasRecords || safeBunk.currentPercentage >= safeBunk.targetPercentage;
+    final title = !hasRecords
+        ? 'No data yet'
+        : (isSafe ? 'Safe' : 'Action Required');
+    final color = !hasRecords ? cc.mut : (isSafe ? cc.pri : cc.risk);
+    final String message;
+    if (safeBunk == null) {
+      message = 'Loading...';
+    } else if (!hasRecords) {
+      message = 'Record a lecture to see how many you can safely miss.';
+    } else if (isSafe) {
+      message =
+          'You can miss approximately ${safeBunk.safeBunks} more lectures before reaching ${safeBunk.targetPercentage.round()}%.';
+    } else {
+      message =
+          'You must attend ${safeBunk.mustAttend} more lectures to reach ${safeBunk.targetPercentage.round()}%.';
+    }
 
     return Container(
       padding: const EdgeInsets.all(LayoutTokens.cardPadding),
@@ -262,7 +277,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
             padding: const EdgeInsets.all(SpacingTokens.sm),
             decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             child: Icon(
-              isSafe ? Symbols.check : Symbols.warning,
+              !hasRecords
+                  ? Symbols.info
+                  : (isSafe ? Symbols.check : Symbols.warning),
               color: cc.priFg,
               size: 24,
             ),
@@ -409,12 +426,13 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
     final targetStr = safeBunk != null
         ? '${safeBunk.targetPercentage.round()}%'
         : '--%';
-    final currentStr = safeBunk != null
+    // Eligibility needs at least one recorded lecture to judge (#38).
+    final hasRecords = safeBunk != null && safeBunk.total > 0;
+    final currentStr = hasRecords
         ? '${safeBunk.currentPercentage.round()}%'
         : '--%';
-    final statusStr = safeBunk != null
-        ? (safeBunk.total == 0 ||
-                  safeBunk.currentPercentage >= safeBunk.targetPercentage
+    final statusStr = hasRecords
+        ? (safeBunk.currentPercentage >= safeBunk.targetPercentage
               ? 'Eligible'
               : 'Ineligible')
         : '--';

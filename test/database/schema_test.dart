@@ -30,7 +30,7 @@ void main() {
     });
 
     test('schema version is 6 baseline', () async {
-      expect(backend.db.schemaVersion, 6);
+      expect(backend.db.schemaVersion, 7);
     });
 
     test('Drift stamps user_version to match schemaVersion', () async {

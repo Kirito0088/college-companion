@@ -64,6 +64,15 @@ class _AddAssignmentDialogState extends ConsumerState<AddAssignmentDialog> {
       );
       return;
     }
+    // Every assignment belongs to a subject: the cloud column is a NOT NULL
+    // foreign key, so a placeholder like 'General' could never sync (#40).
+    final subjectId = _selectedSubjectId;
+    if (subjectId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Choose a subject for this assignment')),
+      );
+      return;
+    }
 
     setState(() => _isSaving = true);
 
@@ -80,7 +89,7 @@ class _AddAssignmentDialogState extends ConsumerState<AddAssignmentDialog> {
       final companion = AssignmentsCompanion(
         id: Value(const Uuid().v4()),
         userId: Value(userId),
-        subjectId: Value(_selectedSubjectId ?? 'General'),
+        subjectId: Value(subjectId),
         title: Value(title),
         description: Value(
           _descriptionController.text.trim().isNotEmpty
@@ -189,30 +198,24 @@ class _AddAssignmentDialogState extends ConsumerState<AddAssignmentDialog> {
             ),
             const SizedBox(height: SpacingTokens.md),
             DropdownButtonFormField<String>(
-              initialValue:
-                  subjects.any(
-                    (s) =>
-                        s.id == _selectedSubjectId ||
-                        s.name == _selectedSubjectId,
-                  )
+              initialValue: subjects.any((s) => s.id == _selectedSubjectId)
                   ? _selectedSubjectId
                   : null,
               decoration: InputDecoration(
                 labelText: 'Subject',
+                helperText: subjects.isEmpty
+                    ? 'Add a subject under Profile → Semesters first'
+                    : null,
                 filled: true,
                 fillColor: cc.raise,
                 border: const OutlineInputBorder(
                   borderRadius: RadiusTokens.borderRadiusMd,
                 ),
               ),
+              // The value is the subject's id; the name is only its label.
               items: [
-                const DropdownMenuItem(
-                  value: 'General',
-                  child: Text('General'),
-                ),
-                ...subjects.map(
-                  (s) => DropdownMenuItem(value: s.name, child: Text(s.name)),
-                ),
+                for (final s in subjects)
+                  DropdownMenuItem(value: s.id, child: Text(s.name)),
               ],
               onChanged: (val) {
                 setState(() => _selectedSubjectId = val);

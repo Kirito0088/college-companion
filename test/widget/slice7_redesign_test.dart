@@ -120,6 +120,11 @@ void main() {
           const AssignmentsScreen(),
           brightness: brightness,
           overrides: [
+            // A fixed stream, like the other reads here: a live Drift watch
+            // leaves a pending timer when the widget tree is disposed.
+            subjectsStreamProvider.overrideWith(
+              (ref, userId) => Stream.value(const <SubjectEntity>[]),
+            ),
             assignmentsStreamProvider.overrideWith(
               (ref, userId) => Stream.value([assignment('Lab Report 3')]),
             ),
@@ -137,6 +142,9 @@ void main() {
         tester,
         const AssignmentsScreen(),
         overrides: [
+          subjectsStreamProvider.overrideWith(
+            (ref, userId) => Stream.value(const <SubjectEntity>[]),
+          ),
           assignmentsStreamProvider.overrideWith(
             (ref, userId) => Stream.value([]),
           ),
@@ -151,6 +159,9 @@ void main() {
         tester,
         const AssignmentsScreen(),
         overrides: [
+          subjectsStreamProvider.overrideWith(
+            (ref, userId) => Stream.value(const <SubjectEntity>[]),
+          ),
           assignmentsStreamProvider.overrideWith(
             (ref, userId) => Stream<List<AssignmentEntity>>.error(
               const DatabaseException('no such table: assignments'),
@@ -175,6 +186,9 @@ void main() {
         tester,
         const AssignmentsScreen(),
         overrides: [
+          subjectsStreamProvider.overrideWith(
+            (ref, userId) => Stream.value(const <SubjectEntity>[]),
+          ),
           assignmentsStreamProvider.overrideWith(
             (ref, userId) => Stream<List<AssignmentEntity>>.error(
               const SocketException('failed host lookup'),

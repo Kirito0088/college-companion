@@ -1,9 +1,11 @@
 import 'package:college_companion/database/app_database.dart';
+import 'package:college_companion/features/assignments/models/assignment_subject.dart';
 import 'package:college_companion/features/assignments/providers/assignments_provider.dart';
 import 'package:college_companion/features/assignments/widgets/assignment_card.dart';
 import 'package:college_companion/features/assignments/widgets/assignments_fab.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
+import 'package:college_companion/features/subjects/providers/subjects_provider.dart';
 import 'package:college_companion/shared/widgets/empty_states/cc_empty_states.dart';
 import 'package:college_companion/shared/widgets/errors/cc_error_state.dart';
 import 'package:college_companion/shared/widgets/loading/cc_skeletons.dart';
@@ -69,6 +71,8 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
         : 'default_user';
 
     final assignmentsAsync = ref.watch(assignmentsStreamProvider(userId));
+    final subjects =
+        ref.watch(subjectsStreamProvider(userId)).valueOrNull ?? const [];
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -85,12 +89,10 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
                       // Filter by search query
                       final searchFiltered = allAssignments.where((a) {
                         if (_searchQuery.isEmpty) return true;
-                        return a.title.toLowerCase().contains(
-                              _searchQuery.toLowerCase(),
-                            ) ||
-                            a.subjectId.toLowerCase().contains(
-                              _searchQuery.toLowerCase(),
-                            );
+                        final query = _searchQuery.toLowerCase();
+                        final subject = subjectNameFor(a.subjectId, subjects);
+                        return a.title.toLowerCase().contains(query) ||
+                            (subject?.toLowerCase().contains(query) ?? false);
                       }).toList();
 
                       // Filter by chip category
@@ -148,7 +150,12 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
                               totalCount: totalCount,
                             ),
                             const SizedBox(height: SpacingTokens.xl),
-                            _buildAssignmentList(context, cc, filtered),
+                            _buildAssignmentList(
+                              context,
+                              cc,
+                              filtered,
+                              subjects,
+                            ),
                             const SizedBox(height: 120),
                           ],
                         ),
@@ -353,6 +360,7 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
     BuildContext context,
     CCTokens cc,
     List<AssignmentEntity> filteredAssignments,
+    List<SubjectEntity> subjects,
   ) {
     if (filteredAssignments.isEmpty) {
       return const EmptyAssignments();
@@ -376,7 +384,7 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
 
       return AssignmentCard(
         title: entity.title,
-        subject: entity.subjectId,
+        subject: subjectNameFor(entity.subjectId, subjects) ?? noSubjectLabel,
         subjectColor: cc.pri,
         dueDate: dueStr,
         status: entity.status,

@@ -18,8 +18,8 @@ void main() {
   });
 
   group('Database Migration & Schema Tests', () {
-    test('Drift database instantiates with schema version 6', () {
-      expect(database.schemaVersion, 6);
+    test('Drift database instantiates with schema version 7', () {
+      expect(database.schemaVersion, 7);
     });
 
     test('All tables are registered in database schema', () {

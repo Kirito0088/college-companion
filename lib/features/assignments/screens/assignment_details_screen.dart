@@ -1,7 +1,9 @@
 import 'package:college_companion/database/app_database.dart';
+import 'package:college_companion/features/assignments/models/assignment_subject.dart';
 import 'package:college_companion/features/assignments/providers/assignments_provider.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
+import 'package:college_companion/features/subjects/providers/subjects_provider.dart';
 import 'package:college_companion/shared/widgets/dialogs/cc_dialogs.dart';
 import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
@@ -255,6 +257,8 @@ class _AssignmentDetailsScreenState
     final theme = Theme.of(context);
     final cc = context.cc;
     final repo = ref.watch(assignmentRepositoryProvider);
+    final subjects =
+        ref.watch(subjectsStreamProvider(_userId)).valueOrNull ?? const [];
 
     return StreamBuilder<AssignmentEntity?>(
       stream: repo.watchById(_userId, widget.assignmentId),
@@ -326,10 +330,11 @@ class _AssignmentDetailsScreenState
                       color: cc.fg,
                     ),
                   ),
-                  if (assignment.subjectId.isNotEmpty) ...[
+                  if (subjectNameFor(assignment.subjectId, subjects)
+                      case final subject?) ...[
                     const SizedBox(height: SpacingTokens.xs),
                     Text(
-                      assignment.subjectId,
+                      subject,
                       style: theme.textTheme.titleMedium?.copyWith(
                         color: cc.mut,
                       ),

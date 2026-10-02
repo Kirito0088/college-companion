@@ -58,7 +58,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration {
@@ -122,8 +122,60 @@ class AppDatabase extends _$AppDatabase {
           // hand-written step per table, which is what failed twice already.
           await _createMissingSchemaEntities(m);
         }
+        if (from < 7) {
+          await _repairAssignmentSubjectIds();
+        }
       },
     );
+  }
+
+  /// Points assignments back at their subject by id (#40).
+  ///
+  /// Before #40 the add dialog stored the chosen subject's *name* in
+  /// `subject_id`, so lookups by id missed those rows and the cloud, whose
+  /// column is a UUID foreign key, could never accept them. Each such row is
+  /// matched to the owner's subject of that name (the current semester's
+  /// first, then the most recently updated) and queued for sync. Values that
+  /// match no subject, such as the old 'General' placeholder, are left as
+  /// they are rather than guessed at.
+  Future<void> _repairAssignmentSubjectIds() async {
+    final broken = await customSelect('''
+      SELECT a.id AS assignment_id, (
+        SELECT s.id FROM subjects s
+        LEFT JOIN semesters sem ON sem.id = s.semester_id
+        WHERE s.user_id = a.user_id
+          AND s.name = a.subject_id
+          AND s.deleted_at IS NULL
+        ORDER BY COALESCE(sem.is_current, 0) DESC, s.updated_at DESC
+        LIMIT 1
+      ) AS subject_id
+      FROM assignments a
+      WHERE NOT EXISTS (SELECT 1 FROM subjects s WHERE s.id = a.subject_id)
+    ''').get();
+
+    final now = DateTime.now().toUtc().toIso8601String();
+    for (final row in broken) {
+      final subjectId = row.readNullable<String>('subject_id');
+      if (subjectId == null) continue;
+      final assignmentId = row.read<String>('assignment_id');
+      await customUpdate(
+        'UPDATE assignments SET subject_id = ?, updated_at = ? WHERE id = ?',
+        variables: [
+          Variable<String>(subjectId),
+          Variable<String>(now),
+          Variable<String>(assignmentId),
+        ],
+        updates: {assignments},
+      );
+      await into(syncQueueItems).insert(
+        SyncQueueItemsCompanion.insert(
+          targetTable: 'assignments',
+          recordId: assignmentId,
+          operation: 'UPDATE',
+          createdAt: now,
+        ),
+      );
+    }
   }
 
   /// Creates every entity the current schema declares that is missing from

@@ -18,7 +18,6 @@ import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -286,16 +285,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           'Are you sure you want to clear the local cache? This will not delete your account data.',
                     );
                     if (confirmed == true && context.mounted) {
-                      final prefs = await SharedPreferences.getInstance();
-                      // Remove non-essential keys
-                      final keysToKeep = ['last_sync_timestamp'];
-                      final allKeys = prefs.getKeys();
-                      for (final key in allKeys) {
-                        if (!keysToKeep.contains(key)) {
-                          await prefs.remove(key);
-                        }
-                      }
-
+                      // Only the temp directory is cache. SharedPreferences
+                      // holds the student's onboarding state, Focus history
+                      // and the notification-permission guard, which this
+                      // used to wipe (#41).
                       try {
                         final tempDir = await getTemporaryDirectory();
                         if (tempDir.existsSync()) {

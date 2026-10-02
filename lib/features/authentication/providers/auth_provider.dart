@@ -7,6 +7,7 @@ library;
 
 import 'dart:async';
 
+import 'package:college_companion/core/config/env_config.dart';
 import 'package:college_companion/features/authentication/models/app_user.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/repositories/user_repository.dart';
@@ -20,6 +21,12 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 final authServiceProvider = Provider<AuthService>((ref) {
   return AuthService();
 });
+
+/// Whether the dev-only auth bypass is active (see [EnvConfig.devAuthBypass]).
+///
+/// A provider so tests can flip it; the underlying flag is a compile-time
+/// constant.
+final devAuthBypassProvider = Provider<bool>((ref) => EnvConfig.devAuthBypass);
 
 /// Provides the [UserRepository] instance.
 final userRepositoryProvider = Provider<UserRepository>((ref) {
@@ -40,10 +47,25 @@ final authStateProvider = NotifierProvider<AuthStateNotifier, AuthState>(
 /// Notifier that manages the [AuthState] lifecycle.
 class AuthStateNotifier extends Notifier<AuthState> {
   static const String _tag = 'AuthStateNotifier';
+
+  /// Stand-in user for the dev auth bypass. Never synced to Supabase.
+  static const AppUser devUser = AppUser(
+    uid: 'dev-bypass-user',
+    displayName: 'Dev Student',
+    email: 'dev.student@college.test',
+  );
+
   StreamSubscription<supabase.AuthState>? _authSubscription;
 
   @override
   AuthState build() {
+    // Dev bypass: skip Supabase/Google entirely and start authenticated so
+    // every route is reachable. Opt-in via --dart-define, never in release.
+    if (ref.watch(devAuthBypassProvider)) {
+      AppLogger.info('Dev auth bypass active', tag: _tag);
+      return const AuthAuthenticated(devUser);
+    }
+
     final authService = ref.watch(authServiceProvider);
 
     _authSubscription?.cancel();
@@ -137,6 +159,10 @@ class AuthStateNotifier extends Notifier<AuthState> {
 
   /// Signs out the current user.
   Future<void> signOut() async {
+    // Dev bypass has no real session; stay put rather than strand the driver
+    // on the login screen it cannot pass.
+    if (ref.read(devAuthBypassProvider)) return;
+
     state = const AuthLoading();
 
     try {

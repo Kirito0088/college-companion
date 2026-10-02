@@ -45,6 +45,17 @@ abstract final class EnvConfig {
   /// Whether the app is running in production mode.
   static bool get isProduction => appEnv == 'production';
 
+  // ── Dev tooling ────────────────────────────────────────────────────────
+
+  /// Whether the dev-only authentication bypass is active.
+  ///
+  /// Opt-in at build time with `--dart-define=DEV_AUTH_BYPASS=true` so an
+  /// automated driver can traverse the app without Google Sign-In. Always
+  /// `false` in release builds, whatever the define says. Deliberately a
+  /// compile-time define, not a `.env` key, so it cannot ship by accident.
+  static const bool devAuthBypass =
+      bool.fromEnvironment('DEV_AUTH_BYPASS') && !kReleaseMode;
+
   // ── Supabase ──────────────────────────────────────────────────────────
 
   /// The Supabase project URL.

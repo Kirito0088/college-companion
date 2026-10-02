@@ -428,10 +428,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
 
   Widget _buildStatisticsCard(BuildContext context, FocusTimerState state) {
     final cc = context.cc;
-    final totalMins = state.history.fold<int>(
-      0,
-      (sum, s) => sum + s.durationMinutes,
-    );
+    final totalMins = state.focusMinutesToday();
     final hours = totalMins ~/ 60;
     final mins = totalMins % 60;
     // Unknown, not zero: a failed history load must not read as no focus.
@@ -465,7 +462,13 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
             height: 40,
             color: cc.line.withValues(alpha: 0.15),
           ),
-          Expanded(child: _buildStatItem(context, 'Streak', '3')),
+          Expanded(
+            child: _buildStatItem(
+              context,
+              'Streak',
+              historyFailed ? '--' : '${state.streakDays()}',
+            ),
+          ),
         ],
       ),
     );

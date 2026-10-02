@@ -7,37 +7,19 @@ class FocusRepository {
   static const String _historyKey = 'focus_session_history';
   static const String _dndKey = 'focus_dnd_enabled';
 
+  /// Ids of the sample sessions earlier builds wrote into a fresh install's
+  /// history (#36). Real sessions are keyed by a millisecond timestamp, so
+  /// these cannot collide with anything a student recorded.
+  static const Set<String> _seededSampleIds = {'sess_1', 'sess_2', 'sess_3'};
+
   Future<List<FocusSession>> loadSessions() async {
     final prefs = await SharedPreferences.getInstance();
     final jsonList = prefs.getStringList(_historyKey);
-    if (jsonList == null || jsonList.isEmpty) {
-      // Default initial mock history so users see realistic history out of the box
-      final initialHistory = [
-        FocusSession(
-          id: 'sess_1',
-          subject: 'Mathematics',
-          durationMinutes: 25,
-          completedAt: DateTime.now().subtract(const Duration(hours: 3)),
-        ),
-        FocusSession(
-          id: 'sess_2',
-          subject: 'Operating Systems',
-          durationMinutes: 45,
-          completedAt: DateTime.now().subtract(const Duration(hours: 5)),
-        ),
-        FocusSession(
-          id: 'sess_3',
-          subject: 'DBMS Revision',
-          durationMinutes: 25,
-          completedAt: DateTime.now().subtract(const Duration(hours: 24)),
-        ),
-      ];
-      await saveSessions(initialHistory);
-      return initialHistory;
-    }
+    if (jsonList == null || jsonList.isEmpty) return [];
 
+    final List<FocusSession> sessions;
     try {
-      return jsonList
+      sessions = jsonList
           .map(
             (item) => FocusSession.fromJson(
               json.decode(item) as Map<String, dynamic>,
@@ -47,6 +29,12 @@ class FocusRepository {
     } catch (_) {
       return [];
     }
+
+    final real = sessions
+        .where((s) => !_seededSampleIds.contains(s.id))
+        .toList();
+    if (real.length != sessions.length) await saveSessions(real);
+    return real;
   }
 
   Future<void> saveSessions(List<FocusSession> sessions) async {

@@ -75,6 +75,40 @@ class FocusTimerState {
     return (elapsed / totalSeconds).clamp(0.0, 1.0);
   }
 
+  /// Minutes of focus completed on [now]'s calendar day.
+  int focusMinutesToday({DateTime? now}) {
+    final today = _day(now ?? DateTime.now());
+    return history
+        .where((s) => _day(s.completedAt) == today)
+        .fold(0, (sum, s) => sum + s.durationMinutes);
+  }
+
+  /// Consecutive calendar days with at least one completed session.
+  ///
+  /// The run must end today or yesterday: a streak is still alive on a day
+  /// whose first session has not happened yet, and broken after a full day
+  /// without one.
+  int streakDays({DateTime? now}) {
+    final days = history.map((s) => _day(s.completedAt)).toSet();
+    var cursor = _day(now ?? DateTime.now());
+    if (!days.contains(cursor)) {
+      cursor = _previousDay(cursor);
+    }
+    var streak = 0;
+    while (days.contains(cursor)) {
+      streak++;
+      cursor = _previousDay(cursor);
+    }
+    return streak;
+  }
+
+  static DateTime _day(DateTime t) => DateTime(t.year, t.month, t.day);
+
+  // Calendar arithmetic rather than subtracting 24h, which lands on the
+  // wrong day across a DST change.
+  static DateTime _previousDay(DateTime d) =>
+      DateTime(d.year, d.month, d.day - 1);
+
   bool get isRunning =>
       status == FocusTimerStatus.running ||
       status == FocusTimerStatus.breakMode;

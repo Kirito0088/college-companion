@@ -42,6 +42,17 @@ void main() {
       expect(find.text('60 min'), findsWidgets);
       expect(find.text('Custom'), findsOneWidget);
 
+      // A fresh install shows no synthesized history or stats (#36).
+      expect(
+        find.text(
+          'No study sessions recorded yet. Start your first session above!',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('0m'), findsOneWidget); // Focus Time
+      expect(find.text('0'), findsNWidgets(2)); // Sessions, Streak
+      expect(find.text('Mathematics'), findsNothing);
+
       // Tap on Start Focus Session
       await tester.tap(find.text('Start Focus Session'));
       await tester.pump();

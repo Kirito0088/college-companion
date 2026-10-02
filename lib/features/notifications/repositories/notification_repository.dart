@@ -8,14 +8,12 @@ import 'dart:async';
 import 'package:college_companion/core/errors/exceptions.dart';
 import 'package:college_companion/core/repositories/sync_queue_repository.dart';
 import 'package:college_companion/database/app_database.dart';
+import 'package:college_companion/features/notifications/models/reminder_planner.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart' show listEquals;
 
 /// Prefix of the ids of rows written by the reminder scheduler (#10).
-///
-/// Mirrors `PlannedReminder.keyPrefix`; kept here so the repository does not
-/// depend on the planner.
-const String reminderIdPrefix = 'reminder:';
+const String reminderIdPrefix = PlannedReminder.keyPrefix;
 
 /// Repository for notification operations.
 class NotificationRepository {
@@ -121,9 +119,26 @@ class NotificationRepository {
   /// Not queued for cloud sync: reminder rows are derived on each device
   /// from data that does sync (timetable, assignments, settings), and the
   /// cloud schema has no notifications table.
-  Future<void> saveScheduledReminder(NotificationsCompanion row) async {
+  Future<void> saveScheduledReminder(
+    String userId,
+    PlannedReminder reminder,
+  ) async {
     try {
-      await _database.into(_database.notifications).insertOnConflictUpdate(row);
+      await _database
+          .into(_database.notifications)
+          .insertOnConflictUpdate(
+            NotificationsCompanion(
+              id: Value(reminder.key),
+              userId: Value(userId),
+              title: Value(reminder.title),
+              message: Value(reminder.body),
+              type: Value(reminder.type),
+              targetRoute: Value(reminder.targetRoute),
+              isRead: const Value(false),
+              // Delivery time: the row stays out of watchAll until then.
+              createdAt: Value(reminder.fireAt.toUtc().toIso8601String()),
+            ),
+          );
     } catch (e) {
       throw DatabaseException('Failed to save scheduled reminder', e);
     }

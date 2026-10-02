@@ -6,8 +6,8 @@ import 'package:college_companion/features/assignments/providers/assignments_pro
 import 'package:college_companion/features/authentication/models/app_user.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
+import 'package:college_companion/features/notifications/models/reminder_planner.dart';
 import 'package:college_companion/features/notifications/providers/reminder_provider.dart';
-import 'package:college_companion/features/notifications/services/reminder_planner.dart';
 import 'package:college_companion/features/settings/providers/settings_provider.dart';
 import 'package:college_companion/features/subjects/providers/subjects_provider.dart';
 import 'package:college_companion/features/timetable/models/lecture_schedule_item.dart';

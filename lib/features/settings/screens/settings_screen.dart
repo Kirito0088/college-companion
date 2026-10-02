@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
+import 'package:college_companion/features/settings/models/notification_preferences.dart';
 import 'package:college_companion/features/settings/providers/settings_provider.dart';
 import 'package:college_companion/routing/app_router.dart';
 import 'package:college_companion/shared/widgets/cc_list_row.dart';
@@ -10,6 +11,7 @@ import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/providers/app_theme_provider.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
+import 'package:college_companion/utilities/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -26,26 +28,84 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  bool? _localPushNotifications;
-  bool _lectureReminders = true;
   String _cacheSize = 'Calculating...';
 
   @override
   void initState() {
     super.initState();
-    _loadPrefs();
     _calculateCacheSize();
   }
 
-  Future<void> _loadPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (mounted) {
-      setState(() {
-        if (prefs.containsKey('push_notifications')) {
-          _localPushNotifications = prefs.getBool('push_notifications');
+  /// Turns the master switch on or off. Turning it on asks for the Android
+  /// 13+ notification permission first; if the student declines, the switch
+  /// stays off and they are pointed to system settings.
+  Future<void> _setPush(String userId, bool enabled) async {
+    if (enabled) {
+      final status = await Permission.notification.request();
+      if (status.isDenied || status.isPermanentlyDenied) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text(
+                'Please enable notifications in system settings.',
+              ),
+              action: SnackBarAction(
+                label: 'Settings',
+                onPressed: () => openAppSettings(),
+              ),
+            ),
+          );
         }
-      });
+        return;
+      }
     }
+    await _save(
+      () => ref
+          .read(userSettingsRepositoryProvider)
+          .updateNotificationPreferences(userId, notificationsEnabled: enabled),
+    );
+  }
+
+  /// Runs a settings write, telling the student if it did not stick rather
+  /// than letting the error vanish into an unawaited future.
+  Future<void> _save(Future<void> Function() write) async {
+    try {
+      await write();
+    } on Object catch (error, stackTrace) {
+      AppLogger.error(
+        'Saving a setting failed',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Couldn't save that setting. Please try again."),
+        ),
+      );
+    }
+  }
+
+  /// A reminder-channel switch row.
+  Widget _channelSwitch({
+    required IconData icon,
+    required String label,
+    required String subtitle,
+    required bool value,
+    required bool enabled,
+    required bool showBorder,
+    required Future<void> Function(bool) save,
+  }) {
+    return CCListRow(
+      icon: icon,
+      label: label,
+      subtitle: subtitle,
+      showBorder: showBorder,
+      trailing: Switch(
+        value: value,
+        onChanged: enabled ? (val) => _save(() => save(val)) : null,
+      ),
+    );
   }
 
   Future<void> _calculateCacheSize() async {
@@ -84,10 +144,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         : 'default_user';
 
     final settingsAsync = ref.watch(userSettingsStreamProvider(userId));
-    final dbSettings = settingsAsync.valueOrNull;
-
-    final pushNotifications =
-        _localPushNotifications ?? (dbSettings?.notificationsEnabled ?? true);
+    // The database is the only source: the reminder scheduler plans from
+    // the same row (#11).
+    final notifications = notificationPreferencesFrom(
+      settingsAsync.valueOrNull,
+    );
+    final repo = ref.read(userSettingsRepositoryProvider);
+    // Nothing is editable until the stored values are known, so a slow or
+    // failed load cannot be mistaken for "everything on".
+    final loaded = settingsAsync.hasValue && !settingsAsync.hasError;
+    // Channel switches mean nothing while everything is off.
+    final channelsEnabled = loaded && notifications.notificationsEnabled;
 
     return Scaffold(
       backgroundColor: cc.bg,
@@ -144,52 +211,50 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   label: 'Push Notifications',
                   showBorder: true,
                   trailing: Switch(
-                    value: pushNotifications,
-                    onChanged: (val) async {
-                      if (val) {
-                        final status = await Permission.notification.request();
-                        if (status.isDenied || status.isPermanentlyDenied) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: const Text(
-                                  'Please enable notifications in system settings.',
-                                ),
-                                action: SnackBarAction(
-                                  label: 'Settings',
-                                  onPressed: () => openAppSettings(),
-                                ),
-                              ),
-                            );
-                          }
-                          val = false;
-                        }
-                      }
-
-                      setState(() {
-                        _localPushNotifications = val;
-                      });
-
-                      final prefs = await SharedPreferences.getInstance();
-                      await prefs.setBool('push_notifications', val);
-
-                      final repo = ref.read(userSettingsRepositoryProvider);
-                      await repo.ensureForUser(userId);
-                      await repo.updateNotificationsEnabled(userId, val);
-                    },
+                    value: notifications.notificationsEnabled,
+                    onChanged: loaded ? (val) => _setPush(userId, val) : null,
                   ),
                 ),
-                CCListRow(
+                _channelSwitch(
                   icon: Symbols.schedule,
                   label: 'Lecture Reminders',
+                  subtitle:
+                      '${lectureReminderLead.inMinutes} minutes before '
+                      'each class',
+                  value: notifications.lectureRemindersEnabled,
+                  enabled: channelsEnabled,
+                  showBorder: true,
+                  save: (val) => repo.updateNotificationPreferences(
+                    userId,
+                    lectureRemindersEnabled: val,
+                  ),
+                ),
+                _channelSwitch(
+                  icon: Symbols.assignment,
+                  label: 'Assignment Reminders',
+                  subtitle:
+                      'A day and ${assignmentFinalReminder.inHours} hours '
+                      'before',
+                  value: notifications.assignmentRemindersEnabled,
+                  enabled: channelsEnabled,
+                  showBorder: true,
+                  save: (val) => repo.updateNotificationPreferences(
+                    userId,
+                    assignmentRemindersEnabled: val,
+                  ),
+                ),
+                _channelSwitch(
+                  icon: Symbols.wb_sunny,
+                  label: 'Morning Briefing',
+                  subtitle:
+                      'A quiet summary of your day at '
+                      '${morningBriefingTime.hour} AM',
+                  value: notifications.morningBriefingEnabled,
+                  enabled: channelsEnabled,
                   showBorder: false,
-                  trailing: Switch(
-                    value: _lectureReminders,
-                    onChanged: (val) {
-                      setState(() {
-                        _lectureReminders = val;
-                      });
-                    },
+                  save: (val) => repo.updateNotificationPreferences(
+                    userId,
+                    morningBriefingEnabled: val,
                   ),
                 ),
               ],
@@ -223,10 +288,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     if (confirmed == true && context.mounted) {
                       final prefs = await SharedPreferences.getInstance();
                       // Remove non-essential keys
-                      final keysToKeep = [
-                        'push_notifications',
-                        'last_sync_timestamp',
-                      ];
+                      final keysToKeep = ['last_sync_timestamp'];
                       final allKeys = prefs.getKeys();
                       for (final key in allKeys) {
                         if (!keysToKeep.contains(key)) {

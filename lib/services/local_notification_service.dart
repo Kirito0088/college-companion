@@ -1,6 +1,6 @@
 /// Local Notification Service (#10)
 ///
-/// The flutter_local_notifications-backed [ReminderGateway]: Android
+/// The OS side of reminders, over flutter_local_notifications: Android
 /// notification channels, the Android 13+ runtime permission, and one-shot
 /// scheduling at absolute instants.
 ///
@@ -12,8 +12,7 @@ library;
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:college_companion/features/notifications/services/reminder_planner.dart';
-import 'package:college_companion/features/notifications/services/reminder_scheduler.dart';
+import 'package:college_companion/features/notifications/models/reminder_planner.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -22,7 +21,7 @@ import 'package:timezone/timezone.dart' as tz;
 typedef ReminderTap = ({String route, String id});
 
 /// Schedules and shows reminders through the OS.
-class LocalNotificationService implements ReminderGateway {
+class LocalNotificationService {
   LocalNotificationService({FlutterLocalNotificationsPlugin? plugin})
     : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
 
@@ -98,7 +97,8 @@ class LocalNotificationService implements ReminderGateway {
     return _decode(details.notificationResponse?.payload);
   }
 
-  @override
+  /// Whether reminders can be shown. Asks for the Android 13+ permission
+  /// the first time only, so a "no" is respected.
   Future<bool> canNotify() async {
     if (!await _initialize()) return false;
     final android = _android!;
@@ -110,14 +110,14 @@ class LocalNotificationService implements ReminderGateway {
     return await android.requestNotificationsPermission() ?? false;
   }
 
-  @override
+  /// Ids of reminders the OS still has scheduled.
   Future<Set<int>> pendingIds() async {
     if (!await _initialize()) return <int>{};
     final pending = await _plugin.pendingNotificationRequests();
     return {for (final request in pending) request.id};
   }
 
-  @override
+  /// Schedules [reminder], replacing any pending one with the same id.
   Future<void> schedule(PlannedReminder reminder) async {
     if (!await _initialize()) return;
     final channel = _channels[reminder.channel]!;
@@ -158,13 +158,13 @@ class LocalNotificationService implements ReminderGateway {
         : AndroidScheduleMode.inexactAllowWhileIdle;
   }
 
-  @override
+  /// Cancels the pending reminder with [id], if any.
   Future<void> cancel(int id) async {
     if (!await _initialize()) return;
     await _plugin.cancel(id);
   }
 
-  @override
+  /// Cancels every pending reminder.
   Future<void> cancelAll() async {
     if (!await _initialize()) return;
     await _plugin.cancelAll();

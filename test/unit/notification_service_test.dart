@@ -1,7 +1,7 @@
 /// Tests for applying a reminder plan to the OS and the notifications
 /// table (#10).
 ///
-/// The OS side sits behind [ReminderGateway] so a fake can record what was
+/// The OS side is a [FakeLocalNotificationService] that records what was
 /// scheduled; the table side runs on a real in-memory Drift database.
 ///
 /// The notifications table is the read surface for reminders: each planned
@@ -11,46 +11,15 @@
 library;
 
 import 'package:college_companion/database/app_database.dart';
+import 'package:college_companion/features/notifications/models/reminder_planner.dart';
 import 'package:college_companion/features/notifications/repositories/notification_repository.dart';
-import 'package:college_companion/features/notifications/services/reminder_planner.dart';
-import 'package:college_companion/features/notifications/services/reminder_scheduler.dart';
+import 'package:college_companion/services/reminder_scheduler.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/fake_local_notification_service.dart';
+
 const _user = 'u1';
-
-class _FakeGateway implements ReminderGateway {
-  bool allowed = true;
-  final Map<int, PlannedReminder> pending = {};
-  int scheduleCalls = 0;
-  int cancelAllCalls = 0;
-
-  @override
-  Future<bool> canNotify() async => allowed;
-
-  @override
-  Future<Set<int>> pendingIds() async => pending.keys.toSet();
-
-  @override
-  Future<void> schedule(PlannedReminder reminder) async {
-    scheduleCalls++;
-    pending[reminder.notificationId] = reminder;
-  }
-
-  @override
-  Future<void> cancel(int id) async => pending.remove(id);
-
-  @override
-  Future<void> cancelAll() async {
-    cancelAllCalls++;
-    pending.clear();
-  }
-
-  /// What the OS would fire, keyed by reminder key.
-  Map<String, PlannedReminder> get byKey => {
-    for (final r in pending.values) r.key: r,
-  };
-}
 
 PlannedReminder _reminder(
   String key,
@@ -70,14 +39,14 @@ PlannedReminder _reminder(
 void main() {
   late AppDatabase db;
   late NotificationRepository repo;
-  late _FakeGateway gateway;
+  late FakeLocalNotificationService gateway;
   late ReminderScheduler scheduler;
   final now = DateTime(2026, 10, 5, 8);
 
   setUp(() {
     db = AppDatabase.forTesting(NativeDatabase.memory());
     repo = NotificationRepository(db);
-    gateway = _FakeGateway();
+    gateway = FakeLocalNotificationService();
     scheduler = ReminderScheduler(gateway, repo);
   });
 
@@ -294,7 +263,7 @@ void main() {
   });
 }
 
-class _ThrowingGateway extends _FakeGateway {
+class _ThrowingGateway extends FakeLocalNotificationService {
   @override
   Future<void> schedule(PlannedReminder reminder) async =>
       throw StateError('plugin unavailable');

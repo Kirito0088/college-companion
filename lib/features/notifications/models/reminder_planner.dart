@@ -13,6 +13,7 @@
 /// depending on the device's IANA time zone name.
 library;
 
+import 'package:college_companion/features/settings/models/notification_preferences.dart';
 import 'package:college_companion/features/timetable/models/lecture_schedule_item.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
@@ -21,29 +22,8 @@ import 'package:intl/intl.dart';
 /// resume and data change rolls the window forward.
 const Duration reminderHorizon = Duration(days: 7);
 
-/// How long before a lecture its warning fires.
-const Duration lectureLead = Duration(minutes: 10);
-
-/// When the daily briefing fires, local time.
-const ({int hour, int minute}) briefingTime = (hour: 8, minute: 0);
-
 /// The Android channel (and settings group) a reminder belongs to.
 enum ReminderChannel { lectures, assignments, briefing }
-
-/// The student's notification preferences, as stored in `user_settings`.
-@immutable
-class ReminderPreferences {
-  const ReminderPreferences({
-    required this.notificationsEnabled,
-    required this.lectureRemindersEnabled,
-  });
-
-  /// Master switch: when off, nothing is planned.
-  final bool notificationsEnabled;
-
-  /// Pre-lecture warnings.
-  final bool lectureRemindersEnabled;
-}
 
 /// A pending assignment, reduced to what reminders need.
 @immutable
@@ -118,7 +98,7 @@ final DateFormat _day = DateFormat('yyyy-MM-dd');
 List<PlannedReminder> planReminders({
   required List<LectureScheduleItem> lectures,
   required List<ReminderAssignment> assignments,
-  required ReminderPreferences preferences,
+  required NotificationPreferences preferences,
   required DateTime now,
 }) {
   if (!preferences.notificationsEnabled) return const [];
@@ -143,7 +123,7 @@ List<PlannedReminder> planReminders({
 
     if (preferences.lectureRemindersEnabled) {
       for (final (:lecture, :start) in dayLectures) {
-        final fireAt = start!.subtract(lectureLead);
+        final fireAt = start!.subtract(lectureReminderLead);
         if (!inWindow(fireAt)) continue;
         plan.add(
           PlannedReminder(
@@ -154,7 +134,7 @@ List<PlannedReminder> planReminders({
             title: 'Upcoming Class',
             body:
                 '${lecture.subjectName}${_where(lecture.room)} in '
-                '${lectureLead.inMinutes}m',
+                '${lectureReminderLead.inMinutes}m',
             channel: ReminderChannel.lectures,
             type: 'lecture_reminder',
             targetRoute: '/timetable',
@@ -167,15 +147,17 @@ List<PlannedReminder> planReminders({
       date.year,
       date.month,
       date.day,
-      briefingTime.hour,
-      briefingTime.minute,
+      morningBriefingTime.hour,
+      morningBriefingTime.minute,
     );
     final dueToday = assignments.where((a) => _sameDay(a.due, date)).length;
     final briefing = _briefing(
       dayLectures.map((e) => e.start!).toList(),
       dueToday,
     );
-    if (briefing != null && inWindow(briefingAt)) {
+    if (preferences.morningBriefingEnabled &&
+        briefing != null &&
+        inWindow(briefingAt)) {
       plan.add(
         PlannedReminder(
           key: '${PlannedReminder.keyPrefix}briefing:${_day.format(date)}',
@@ -190,22 +172,25 @@ List<PlannedReminder> planReminders({
     }
   }
 
-  for (final a in assignments) {
+  for (final a
+      in preferences.assignmentRemindersEnabled
+          ? assignments
+          : const <ReminderAssignment>[]) {
     final what = a.subjectName == null || a.subjectName!.isEmpty
         ? a.title
         : '${a.title} (${a.subjectName})';
     final at = _time.format(a.due);
     for (final (offset, label, title, body) in [
       (
-        const Duration(hours: 24),
+        assignmentDayBeforeReminder,
         '24h',
         'Due tomorrow',
         '$what is due at $at. Plenty of time to wrap it up.',
       ),
       (
-        const Duration(hours: 2),
+        assignmentFinalReminder,
         '2h',
-        'Due in 2 hours',
+        'Due in ${assignmentFinalReminder.inHours} hours',
         '$what is due at $at.',
       ),
     ]) {

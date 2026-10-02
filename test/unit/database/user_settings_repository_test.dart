@@ -1,6 +1,7 @@
 import 'package:college_companion/core/errors/exceptions.dart';
 import 'package:college_companion/core/repositories/sync_queue_repository.dart';
 import 'package:college_companion/database/app_database.dart';
+import 'package:college_companion/features/settings/models/notification_preferences.dart';
 import 'package:college_companion/features/settings/repositories/user_settings_repository.dart';
 import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';
@@ -93,14 +94,17 @@ void main() {
       );
 
       await repository.updateTheme('user_1', 'light');
-      await repository.updateNotificationsEnabled('user_1', false);
+      await repository.updateNotificationPreferences(
+        'user_1',
+        notificationsEnabled: false,
+      );
 
       final updated = await repository.getByUserId('user_1');
       expect(updated?.theme, 'light');
       expect(updated?.notificationsEnabled, false);
 
       final pendingSync = await syncQueueRepository.getPendingItems();
-      // 1 from initial saveSettings, 2 from updateTheme, 3 from updateNotificationsEnabled
+      // 1 from initial saveSettings, 2 from updateTheme, 3 from updateNotificationPreferences
       expect(pendingSync.length, 3);
       expect(pendingSync.last.targetTable, 'user_settings');
       expect(pendingSync.last.operation, 'UPDATE');
@@ -191,5 +195,87 @@ void main() {
       expect(row!.theme, 'system');
       expect(row.preferences, contains('sand'));
     });
+  });
+
+  group('updateNotificationPreferences (#11)', () {
+    test('writes the column switches and leaves the rest alone', () async {
+      await repository.ensureForUser('u');
+      await repository.updateAccent('u', 'azure');
+
+      await repository.updateNotificationPreferences(
+        'u',
+        lectureRemindersEnabled: false,
+      );
+
+      final row = (await repository.getByUserId('u'))!;
+      expect(row.lectureRemindersEnabled, isFalse);
+      expect(row.notificationsEnabled, isTrue);
+      expect(row.preferences, contains('azure'));
+    });
+
+    test('stores the per-channel switches in preferences', () async {
+      await repository.ensureForUser('u');
+      await repository.updateAccent('u', 'sand');
+
+      await repository.updateNotificationPreferences(
+        'u',
+        morningBriefingEnabled: false,
+        assignmentRemindersEnabled: false,
+      );
+
+      final row = (await repository.getByUserId('u'))!;
+      final prefs = notificationPreferencesFrom(row);
+      expect(prefs.morningBriefingEnabled, isFalse);
+      expect(prefs.assignmentRemindersEnabled, isFalse);
+      expect(prefs.lectureRemindersEnabled, isTrue);
+      expect(row.preferences, contains('sand'));
+    });
+
+    test('defaults everything on for a missing row', () {
+      final prefs = notificationPreferencesFrom(null);
+      expect(prefs.notificationsEnabled, isTrue);
+      expect(prefs.lectureRemindersEnabled, isTrue);
+      expect(prefs.assignmentRemindersEnabled, isTrue);
+      expect(prefs.morningBriefingEnabled, isTrue);
+    });
+
+    test('queues one sync update per change', () async {
+      await repository.ensureForUser('u');
+      final before = (await syncQueueRepository.getPendingItems()).length;
+
+      await repository.updateNotificationPreferences(
+        'u',
+        notificationsEnabled: false,
+        morningBriefingEnabled: false,
+      );
+
+      final after = await syncQueueRepository.getPendingItems();
+      expect(after.length - before, 1);
+      expect(after.last.operation, 'UPDATE');
+    });
+  });
+
+  test('a corrupt preferences blob does not block notification writes '
+      '(#11)', () async {
+    final now = DateTime.now().toUtc().toIso8601String();
+    await repository.saveSettings(
+      UserSettingsCompanion(
+        id: const Value('settings_bad'),
+        userId: const Value('bad'),
+        preferences: const Value('not json'),
+        createdAt: Value(now),
+        updatedAt: Value(now),
+      ),
+    );
+
+    await repository.updateNotificationPreferences(
+      'bad',
+      morningBriefingEnabled: false,
+    );
+
+    final prefs = notificationPreferencesFrom(
+      await repository.getByUserId('bad'),
+    );
+    expect(prefs.morningBriefingEnabled, isFalse);
   });
 }

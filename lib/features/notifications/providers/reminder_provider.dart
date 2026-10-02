@@ -1,38 +1,37 @@
 /// Reminder Providers (#10)
 ///
 /// Wires the reminder planner to the student's live data. The plan is a
-/// pure derivation ([reminderPlanProvider]); applying it to the OS is a side
-/// effect owned by the app root, which listens to the plan and calls
-/// [ReminderScheduler.reconcile] (see `lib/app.dart`).
+/// pure derivation ([reminderPlanProvider]); [reminderSyncProvider] applies
+/// it to the OS, and the app root keeps that provider alive (see
+/// `lib/app.dart`).
 library;
+
+import 'dart:async';
 
 import 'package:college_companion/features/assignments/providers/assignments_provider.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
+import 'package:college_companion/features/notifications/models/reminder_planner.dart';
 import 'package:college_companion/features/notifications/providers/notification_provider.dart';
-import 'package:college_companion/features/notifications/services/local_notification_service.dart';
-import 'package:college_companion/features/notifications/services/reminder_planner.dart';
-import 'package:college_companion/features/notifications/services/reminder_scheduler.dart';
 import 'package:college_companion/features/onboarding/providers/onboarding_provider.dart';
+import 'package:college_companion/features/settings/models/notification_preferences.dart';
 import 'package:college_companion/features/settings/providers/settings_provider.dart';
 import 'package:college_companion/features/subjects/providers/subjects_provider.dart';
 import 'package:college_companion/features/timetable/providers/timetable_provider.dart';
+import 'package:college_companion/services/local_notification_service.dart';
+import 'package:college_companion/services/reminder_scheduler.dart';
+import 'package:college_companion/utilities/logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// The plugin-backed notification service.
+/// The plugin-backed notification service; overridden with a fake in tests.
 final localNotificationServiceProvider = Provider<LocalNotificationService>(
   (ref) => LocalNotificationService(),
-);
-
-/// The OS side of reminders; overridden with a fake in tests.
-final reminderGatewayProvider = Provider<ReminderGateway>(
-  (ref) => ref.watch(localNotificationServiceProvider),
 );
 
 /// Applies reminder plans to the OS and the notifications table.
 final reminderSchedulerProvider = Provider<ReminderScheduler>(
   (ref) => ReminderScheduler(
-    ref.watch(reminderGatewayProvider),
+    ref.watch(localNotificationServiceProvider),
     ref.watch(notificationRepositoryProvider),
   ),
 );
@@ -96,7 +95,6 @@ final reminderPlanProvider = Provider<ReminderPlanState>((ref) {
   }
 
   final subjectNames = {for (final s in subjects.requireValue) s.id: s.name};
-  final row = settings.requireValue;
   final now = DateTime.now();
 
   return RemindersReady(
@@ -114,12 +112,41 @@ final reminderPlanProvider = Provider<ReminderPlanState>((ref) {
               due: due.toLocal(),
             ),
       ],
-      // No row yet means the column defaults, which are both on.
-      preferences: ReminderPreferences(
-        notificationsEnabled: row?.notificationsEnabled ?? true,
-        lectureRemindersEnabled: row?.lectureRemindersEnabled ?? true,
-      ),
+      preferences: notificationPreferencesFrom(settings.requireValue),
       now: now,
     ),
   );
+});
+
+/// Applies [reminderPlanProvider] to the OS for as long as it is listened
+/// to: reconciles on every new plan and clears on sign-out.
+///
+/// A provider rather than code in the app widget so the whole chain, from
+/// a settings write through re-plan to an OS cancel, is testable without a
+/// widget tree.
+final reminderSyncProvider = Provider<void>((ref) {
+  ref.listen<ReminderPlanState>(reminderPlanProvider, (previous, next) {
+    final scheduler = ref.read(reminderSchedulerProvider);
+    final Future<void> work;
+    switch (next) {
+      case RemindersReady(:final userId, :final plan, :final now):
+        work = scheduler.reconcile(userId: userId, plan: plan, now: now);
+      // Only a transition out of a live schedule (sign-out) clears it. A
+      // cold start also begins Off while onboarding state loads, and must
+      // not wipe reminders that are about to be re-planned anyway.
+      case RemindersOff() when previous is RemindersReady:
+        work = scheduler.clear();
+      case RemindersOff() || RemindersWaiting():
+        return;
+    }
+    unawaited(
+      work.catchError((Object error, StackTrace stackTrace) {
+        AppLogger.error(
+          'Reminder scheduling failed',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }),
+    );
+  }, fireImmediately: true);
 });

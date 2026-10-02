@@ -6,7 +6,8 @@
 /// table) lives in ReminderScheduler; these tests pin *what* gets planned.
 library;
 
-import 'package:college_companion/features/notifications/services/reminder_planner.dart';
+import 'package:college_companion/features/notifications/models/reminder_planner.dart';
+import 'package:college_companion/features/settings/models/notification_preferences.dart';
 import 'package:college_companion/features/timetable/models/lecture_schedule_item.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -37,7 +38,7 @@ ReminderAssignment _assignment({
   required DateTime due,
 }) => ReminderAssignment(id: id, title: title, subjectName: subject, due: due);
 
-const _allOn = ReminderPreferences(
+const _allOn = NotificationPreferences(
   notificationsEnabled: true,
   lectureRemindersEnabled: true,
 );
@@ -45,7 +46,7 @@ const _allOn = ReminderPreferences(
 List<PlannedReminder> _plan({
   List<LectureScheduleItem> lectures = const [],
   List<ReminderAssignment> assignments = const [],
-  ReminderPreferences preferences = _allOn,
+  NotificationPreferences preferences = _allOn,
   required DateTime now,
 }) => planReminders(
   lectures: lectures,
@@ -124,7 +125,7 @@ void main() {
         assignments: [
           _assignment(due: _monday.add(const Duration(days: 2, hours: 12))),
         ],
-        preferences: const ReminderPreferences(
+        preferences: const NotificationPreferences(
           notificationsEnabled: true,
           lectureRemindersEnabled: false,
         ),
@@ -228,12 +229,50 @@ void main() {
     });
   });
 
+  group('channel switches (#11)', () {
+    final now = _monday.add(const Duration(hours: 7));
+    final assignments = [
+      _assignment(due: _monday.add(const Duration(days: 2, hours: 12))),
+    ];
+
+    test('morning briefing can be turned off on its own', () {
+      final plan = _plan(
+        lectures: [_lecture()],
+        assignments: assignments,
+        preferences: const NotificationPreferences(
+          notificationsEnabled: true,
+          lectureRemindersEnabled: true,
+          morningBriefingEnabled: false,
+        ),
+        now: now,
+      );
+      expect(_of(plan, ReminderChannel.briefing), isEmpty);
+      expect(_of(plan, ReminderChannel.lectures), isNotEmpty);
+      expect(_of(plan, ReminderChannel.assignments), isNotEmpty);
+    });
+
+    test('assignment reminders can be turned off on their own', () {
+      final plan = _plan(
+        lectures: [_lecture()],
+        assignments: assignments,
+        preferences: const NotificationPreferences(
+          notificationsEnabled: true,
+          lectureRemindersEnabled: true,
+          assignmentRemindersEnabled: false,
+        ),
+        now: now,
+      );
+      expect(_of(plan, ReminderChannel.assignments), isEmpty);
+      expect(_of(plan, ReminderChannel.lectures), isNotEmpty);
+    });
+  });
+
   group('preferences and identity', () {
     test('nothing is planned when notifications are off', () {
       final plan = _plan(
         lectures: [_lecture()],
         assignments: [_assignment(due: _monday.add(const Duration(days: 2)))],
-        preferences: const ReminderPreferences(
+        preferences: const NotificationPreferences(
           notificationsEnabled: false,
           lectureRemindersEnabled: true,
         ),

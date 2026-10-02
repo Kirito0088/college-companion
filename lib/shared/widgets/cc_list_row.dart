@@ -70,12 +70,15 @@ class CCListRow extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Two lines, wrapping at word boundaries, before any
+                    // ellipsis: a row beside a Switch on a 320dp screen
+                    // otherwise loses half its label ("Lecture Remind…").
                     Text(
                       label,
                       style: theme.textTheme.bodyLarge?.copyWith(
                         color: labelColor ?? cc.fg,
                       ),
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                     if (subtitle != null) ...[
@@ -85,7 +88,7 @@ class CCListRow extends StatelessWidget {
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: cc.mut,
                         ),
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],

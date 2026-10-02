@@ -1,8 +1,8 @@
 /// Reminder Scheduler (#10)
 ///
 /// Applies a reminder plan (see `reminder_planner.dart`) to two places at
-/// once: the OS notification schedule, via [ReminderGateway], and the
-/// `notifications` table, which the Notifications screen reads.
+/// once: the OS notification schedule, via [LocalNotificationService], and
+/// the `notifications` table, which the Notifications screen reads.
 ///
 /// Each planned reminder is stored as a row dated to its fire time. The
 /// repository only surfaces rows whose time has come, so a row appears in
@@ -12,39 +12,18 @@ library;
 
 import 'dart:async';
 
-import 'package:college_companion/database/app_database.dart';
+import 'package:college_companion/features/notifications/models/reminder_planner.dart';
 import 'package:college_companion/features/notifications/repositories/notification_repository.dart';
-import 'package:college_companion/features/notifications/services/reminder_planner.dart';
-import 'package:drift/drift.dart' show Value;
-
-/// The OS side of reminders. Implemented over flutter_local_notifications
-/// by `LocalNotificationService`; faked in tests.
-abstract interface class ReminderGateway {
-  /// Whether reminders can be shown. May ask the student for permission
-  /// (Android 13+), but never more than once.
-  Future<bool> canNotify();
-
-  /// Ids of reminders the OS still has scheduled.
-  Future<Set<int>> pendingIds();
-
-  /// Schedules [reminder], replacing any pending one with the same id.
-  Future<void> schedule(PlannedReminder reminder);
-
-  /// Cancels the pending reminder with [id], if any.
-  Future<void> cancel(int id);
-
-  /// Cancels every pending reminder.
-  Future<void> cancelAll();
-}
+import 'package:college_companion/services/local_notification_service.dart';
 
 typedef _Request = ({String userId, List<PlannedReminder> plan, DateTime now});
 
 /// Keeps the OS schedule and the notifications table in step with a plan.
 class ReminderScheduler {
-  ReminderScheduler(this._gateway, this._notifications);
+  ReminderScheduler(this._localNotifications, this._notificationRepository);
 
-  final ReminderGateway _gateway;
-  final NotificationRepository _notifications;
+  final LocalNotificationService _localNotifications;
+  final NotificationRepository _notificationRepository;
 
   Future<void>? _inFlight;
   _Request? _queued;
@@ -66,7 +45,7 @@ class ReminderScheduler {
   /// Cancels everything pending, e.g. on sign-out.
   Future<void> clear() async {
     await _inFlight;
-    await _gateway.cancelAll();
+    await _localNotifications.cancelAll();
   }
 
   Future<void> _drain() async {
@@ -87,24 +66,29 @@ class ReminderScheduler {
     var wanted = plan.where((r) => r.fireAt.isAfter(now)).toList();
     // Without permission nothing would be shown, so nothing may be recorded
     // as delivered either.
-    if (wanted.isNotEmpty && !await _gateway.canNotify()) wanted = const [];
+    if (wanted.isNotEmpty && !await _localNotifications.canNotify()) {
+      wanted = const [];
+    }
 
     final wantedByKey = {for (final r in wanted) r.key: r};
-    final stored = await _notifications.getScheduledReminders(userId, now);
+    final stored = await _notificationRepository.getScheduledReminders(
+      userId,
+      now,
+    );
     final storedByKey = {for (final row in stored) row.id: row};
-    final pending = await _gateway.pendingIds();
+    final pending = await _localNotifications.pendingIds();
 
     for (final row in stored) {
       if (wantedByKey.containsKey(row.id)) continue;
-      await _gateway.cancel(PlannedReminder.idForKey(row.id));
-      await _notifications.removeScheduledReminder(userId, row.id);
+      await _localNotifications.cancel(PlannedReminder.idForKey(row.id));
+      await _notificationRepository.removeScheduledReminder(userId, row.id);
     }
 
     // Anything else the OS holds that the plan does not want, e.g. rows
     // lost with cleared app data while their alarms survived.
     final wantedIds = {for (final r in wanted) r.notificationId};
     for (final id in pending.difference(wantedIds)) {
-      await _gateway.cancel(id);
+      await _localNotifications.cancel(id);
     }
 
     for (final reminder in wanted) {
@@ -117,19 +101,8 @@ class ReminderScheduler {
           row.message == reminder.body;
       if (unchanged && pending.contains(reminder.notificationId)) continue;
 
-      await _gateway.schedule(reminder);
-      await _notifications.saveScheduledReminder(
-        NotificationsCompanion(
-          id: Value(reminder.key),
-          userId: Value(userId),
-          title: Value(reminder.title),
-          message: Value(reminder.body),
-          type: Value(reminder.type),
-          targetRoute: Value(reminder.targetRoute),
-          isRead: const Value(false),
-          createdAt: Value(fireIso),
-        ),
-      );
+      await _localNotifications.schedule(reminder);
+      await _notificationRepository.saveScheduledReminder(userId, reminder);
     }
   }
 }

@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:college_companion/core/errors/exceptions.dart';
 import 'package:college_companion/core/repositories/sync_queue_repository.dart';
 import 'package:college_companion/database/app_database.dart';
+import 'package:college_companion/features/settings/models/notification_preferences.dart';
 import 'package:drift/drift.dart';
 
 /// Repository for managing per-user application preferences.
@@ -148,9 +149,8 @@ class UserSettingsRepository {
           'Cannot update accent: no settings row for user: $userId',
         );
       }
-      final preferences = Map<String, dynamic>.from(
-        jsonDecode(existing.preferences) as Map,
-      )..['accent'] = accent;
+      final preferences = decodePreferences(existing.preferences)
+        ..['accent'] = accent;
       final now = DateTime.now().toUtc().toIso8601String();
       await (_database.update(
         _database.userSettings,
@@ -172,60 +172,53 @@ class UserSettingsRepository {
     }
   }
 
-  /// Updates notifications enabled state for a user.
-  Future<void> updateNotificationsEnabled(String userId, bool enabled) async {
+  /// Updates any of the student's notification switches (#11).
+  ///
+  /// Only the switches passed are changed. The master switch and lecture
+  /// reminders are columns; assignment reminders and the morning briefing
+  /// live in the `preferences` JSON, merged so the accent and other keys
+  /// survive. Creates the row first if the student has none yet. One
+  /// write, one sync entry.
+  Future<void> updateNotificationPreferences(
+    String userId, {
+    bool? notificationsEnabled,
+    bool? lectureRemindersEnabled,
+    bool? assignmentRemindersEnabled,
+    bool? morningBriefingEnabled,
+  }) async {
+    final existing = await ensureForUser(userId);
     try {
-      final now = DateTime.now().toUtc().toIso8601String();
-      await (_database.update(
-        _database.userSettings,
-      )..where((t) => t.userId.equals(userId))).write(
-        UserSettingsCompanion(
-          notificationsEnabled: Value(enabled),
-          updatedAt: Value(now),
-        ),
-      );
-      final existing = await getByUserId(userId);
-      if (existing != null) {
-        await _syncQueueRepository?.enqueue(
-          targetTable: 'user_settings',
-          recordId: existing.id,
-          operation: 'UPDATE',
-        );
+      var preferences = const Value<String>.absent();
+      if (assignmentRemindersEnabled != null ||
+          morningBriefingEnabled != null) {
+        final json = decodePreferences(existing.preferences);
+        if (assignmentRemindersEnabled != null) {
+          json[assignmentRemindersKey] = assignmentRemindersEnabled;
+        }
+        if (morningBriefingEnabled != null) {
+          json[morningBriefingKey] = morningBriefingEnabled;
+        }
+        preferences = Value(jsonEncode(json));
       }
-    } catch (e) {
-      throw DatabaseException(
-        'Failed to update notifications enabled for user: $userId',
-        e,
-      );
-    }
-  }
 
-  /// Updates lecture reminders enabled state for a user.
-  Future<void> updateLectureRemindersEnabled(
-    String userId,
-    bool enabled,
-  ) async {
-    try {
-      final now = DateTime.now().toUtc().toIso8601String();
       await (_database.update(
         _database.userSettings,
       )..where((t) => t.userId.equals(userId))).write(
         UserSettingsCompanion(
-          lectureRemindersEnabled: Value(enabled),
-          updatedAt: Value(now),
+          notificationsEnabled: Value.absentIfNull(notificationsEnabled),
+          lectureRemindersEnabled: Value.absentIfNull(lectureRemindersEnabled),
+          preferences: preferences,
+          updatedAt: Value(DateTime.now().toUtc().toIso8601String()),
         ),
       );
-      final existing = await getByUserId(userId);
-      if (existing != null) {
-        await _syncQueueRepository?.enqueue(
-          targetTable: 'user_settings',
-          recordId: existing.id,
-          operation: 'UPDATE',
-        );
-      }
+      await _syncQueueRepository?.enqueue(
+        targetTable: 'user_settings',
+        recordId: existing.id,
+        operation: 'UPDATE',
+      );
     } catch (e) {
       throw DatabaseException(
-        'Failed to update lecture reminders enabled for user: $userId',
+        'Failed to update notification preferences for user: $userId',
         e,
       );
     }

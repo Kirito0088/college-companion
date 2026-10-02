@@ -152,4 +152,44 @@ void main() {
       throwsA(isA<DatabaseException>()),
     );
   });
+
+  group('ensureForUser (#37)', () {
+    test('creates a row that follows the system theme', () async {
+      final created = await repository.ensureForUser('fresh_user');
+
+      expect(created.userId, 'fresh_user');
+      // Not the column's SQL default of 'dark'.
+      expect(created.theme, 'system');
+      expect(await repository.getByUserId('fresh_user'), isNotNull);
+    });
+
+    test('returns an existing row untouched', () async {
+      final now = DateTime.now().toUtc().toIso8601String();
+      await repository.saveSettings(
+        UserSettingsCompanion(
+          id: const Value('settings_existing'),
+          userId: const Value('existing_user'),
+          theme: const Value('light'),
+          preferences: const Value('{"accent":"azure"}'),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+        ),
+      );
+
+      final row = await repository.ensureForUser('existing_user');
+
+      expect(row.id, 'settings_existing');
+      expect(row.theme, 'light');
+      expect(row.preferences, '{"accent":"azure"}');
+    });
+
+    test('updateAccent on a fresh user leaves the theme as system', () async {
+      await repository.ensureForUser('fresh_user');
+      await repository.updateAccent('fresh_user', 'sand');
+
+      final row = await repository.getByUserId('fresh_user');
+      expect(row!.theme, 'system');
+      expect(row.preferences, contains('sand'));
+    });
+  });
 }

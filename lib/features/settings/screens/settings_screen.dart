@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'dart:io';
-import 'package:college_companion/database/app_database.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/features/settings/providers/settings_provider.dart';
@@ -12,7 +10,6 @@ import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/providers/app_theme_provider.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
-import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -177,28 +174,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       await prefs.setBool('push_notifications', val);
 
                       final repo = ref.read(userSettingsRepositoryProvider);
-                      final nowIso = DateTime.now().toUtc().toIso8601String();
-                      final existing = await repo.getByUserId(userId);
-                      if (existing != null) {
-                        await repo.saveSettings(
-                          UserSettingsCompanion(
-                            id: Value(existing.id),
-                            userId: Value(userId),
-                            notificationsEnabled: Value(val),
-                            updatedAt: Value(nowIso),
-                          ),
-                        );
-                      } else {
-                        await repo.saveSettings(
-                          UserSettingsCompanion(
-                            id: Value('settings_$userId'),
-                            userId: Value(userId),
-                            notificationsEnabled: Value(val),
-                            createdAt: Value(nowIso),
-                            updatedAt: Value(nowIso),
-                          ),
-                        );
-                      }
+                      await repo.ensureForUser(userId);
+                      await repo.updateNotificationsEnabled(userId, val);
                     },
                   ),
                 ),
@@ -324,10 +301,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 /// read-stream/write-repo shape as the Push Notifications toggle above.
 ///
 /// [UserSettingsRepository.updateTheme]/`updateAccent` both require an
-/// existing settings row (an `UPDATE ... WHERE userId` and, for `updateAccent`,
-/// an explicit null-check that throws). A brand-new account has no row yet —
-/// the Push Notifications toggle above already handles this with a
-/// get-or-create; [_setTheme]/[_setAccent] mirror that same pattern.
+/// existing settings row. A brand-new account has none yet, so each write
+/// calls [UserSettingsRepository.ensureForUser] first, which creates the
+/// row following the system theme (#37).
 class _AppearanceSection extends ConsumerWidget {
   const _AppearanceSection({required this.userId});
 
@@ -335,40 +311,14 @@ class _AppearanceSection extends ConsumerWidget {
 
   Future<void> _setTheme(WidgetRef ref, String value) async {
     final repo = ref.read(userSettingsRepositoryProvider);
-    final existing = await repo.getByUserId(userId);
-    if (existing == null) {
-      final nowIso = DateTime.now().toUtc().toIso8601String();
-      await repo.saveSettings(
-        UserSettingsCompanion(
-          id: Value('settings_$userId'),
-          userId: Value(userId),
-          theme: Value(value),
-          createdAt: Value(nowIso),
-          updatedAt: Value(nowIso),
-        ),
-      );
-    } else {
-      await repo.updateTheme(userId, value);
-    }
+    await repo.ensureForUser(userId);
+    await repo.updateTheme(userId, value);
   }
 
   Future<void> _setAccent(WidgetRef ref, String accentName) async {
     final repo = ref.read(userSettingsRepositoryProvider);
-    final existing = await repo.getByUserId(userId);
-    if (existing == null) {
-      final nowIso = DateTime.now().toUtc().toIso8601String();
-      await repo.saveSettings(
-        UserSettingsCompanion(
-          id: Value('settings_$userId'),
-          userId: Value(userId),
-          preferences: Value(jsonEncode({'accent': accentName})),
-          createdAt: Value(nowIso),
-          updatedAt: Value(nowIso),
-        ),
-      );
-    } else {
-      await repo.updateAccent(userId, accentName);
-    }
+    await repo.ensureForUser(userId);
+    await repo.updateAccent(userId, accentName);
   }
 
   @override

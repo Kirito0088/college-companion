@@ -46,6 +46,54 @@ class UserSettingsRepository {
     }
   }
 
+  /// Theme a newly created row starts with: follow the device, matching
+  /// `AppThemePreference.fallback` before any row exists.
+  ///
+  /// Written explicitly because the column's SQL default is `'dark'`, and
+  /// SQLite bakes that into existing tables, so changing it in the schema
+  /// would not reach installed databases (#37).
+  static const String defaultTheme = 'system';
+
+  /// Returns [userId]'s settings row, creating it first if there is none.
+  ///
+  /// Every settings write goes through this, so a first write (an accent
+  /// pick, a toggle) changes only the setting it targets instead of
+  /// inheriting column defaults for the rest of the row.
+  Future<UserSettingsEntity> ensureForUser(String userId) async {
+    final existing = await getByUserId(userId);
+    if (existing != null) return existing;
+
+    final id = 'settings_$userId';
+    try {
+      final now = DateTime.now().toUtc().toIso8601String();
+      // insertOrIgnore, not an upsert: if a concurrent first write created
+      // the row in between, keep whatever it wrote.
+      await _database
+          .into(_database.userSettings)
+          .insert(
+            UserSettingsCompanion.insert(
+              id: id,
+              userId: userId,
+              theme: const Value(defaultTheme),
+              createdAt: now,
+              updatedAt: now,
+            ),
+            mode: InsertMode.insertOrIgnore,
+          );
+      await _syncQueueRepository?.enqueue(
+        targetTable: 'user_settings',
+        recordId: id,
+        operation: 'INSERT',
+      );
+    } catch (e) {
+      throw DatabaseException(
+        'Failed to create user settings for user: $userId',
+        e,
+      );
+    }
+    return (await getByUserId(userId))!;
+  }
+
   /// Upserts user settings for a given user.
   Future<void> saveSettings(UserSettingsCompanion settings) async {
     try {

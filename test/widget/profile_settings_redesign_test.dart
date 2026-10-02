@@ -21,6 +21,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class _TestAuthStateNotifier extends AuthStateNotifier {
   @override
@@ -309,6 +310,41 @@ void main() {
       )..where((t) => t.userId.equals('test_user_id'))).getSingle();
       final preferences = jsonDecode(saved.preferences) as Map;
       expect(preferences['accent'], 'sand');
+    });
+
+    // #37: the row used to be created without a theme, so it took the
+    // column's SQL default ('dark') and the first accent pick or toggle
+    // silently switched a system-themed app to dark.
+    testWidgets('tapping Sand keeps the theme following the system (#37)', (
+      tester,
+    ) async {
+      await pumpFreshSettings(tester);
+
+      await tester.tap(find.text('Sand'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      final saved = await (database.select(
+        database.userSettings,
+      )..where((t) => t.userId.equals('test_user_id'))).getSingle();
+      expect(saved.theme, 'system');
+    });
+
+    testWidgets('toggling Push Notifications keeps the theme following the '
+        'system (#37)', (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      await pumpFreshSettings(tester);
+
+      // Switching off needs no runtime permission prompt.
+      await tester.tap(find.byType(Switch).first);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      final saved = await (database.select(
+        database.userSettings,
+      )..where((t) => t.userId.equals('test_user_id'))).getSingle();
+      expect(saved.notificationsEnabled, isFalse);
+      expect(saved.theme, 'system');
     });
 
     testWidgets('tapping Dark creates the settings row instead of no-op', (

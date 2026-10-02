@@ -1,6 +1,5 @@
 import 'package:college_companion/database/app_database.dart';
 import 'package:college_companion/features/attendance/providers/attendance_provider.dart';
-import 'package:college_companion/features/attendance/repositories/attendance_repository.dart';
 import 'package:college_companion/features/attendance/widgets/attendance_header.dart';
 import 'package:college_companion/features/attendance/widgets/attendance_trend_card.dart';
 import 'package:college_companion/features/attendance/widgets/overall_gauge.dart';
@@ -9,6 +8,7 @@ import 'package:college_companion/features/attendance/widgets/stats_row.dart';
 import 'package:college_companion/features/authentication/models/auth_state.dart';
 import 'package:college_companion/features/authentication/providers/auth_provider.dart';
 import 'package:college_companion/features/subjects/providers/subjects_provider.dart';
+import 'package:college_companion/shared/widgets/empty_states/cc_empty_states.dart';
 import 'package:college_companion/theme/cc_tokens.dart';
 import 'package:college_companion/theme/radius_tokens.dart';
 import 'package:college_companion/theme/spacing_tokens.dart';
@@ -143,8 +143,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
 
   List<Widget> _buildSubjectsTab(BuildContext context, String userId) {
     final subjectsAsync = ref.watch(subjectsStreamProvider(userId));
-    final repo = ref.watch(attendanceRepositoryProvider);
-    final recordsStream = repo.watchAll(userId);
+    final recordsAsync = ref.watch(attendanceRecordsStreamProvider(userId));
     final cc = context.cc;
 
     return [
@@ -159,57 +158,40 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
             );
           }).toList();
 
-          return StreamBuilder<List<AttendanceEntity>>(
-            stream: recordsStream,
-            builder: (context, snapshot) {
-              final records = snapshot.data ?? [];
+          if (filteredSubjects.isEmpty) {
+            return _subjectSearchQuery.isEmpty
+                ? const EmptySubjects()
+                : const EmptySearch();
+          }
 
-              if (filteredSubjects.isEmpty) {
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(SpacingTokens.xl),
-                    child: Text(
-                      _subjectSearchQuery.isEmpty
-                          ? 'No subjects added yet.'
-                          : 'No subjects found matching query.',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodyLarge?.copyWith(color: cc.mut),
-                    ),
-                  ),
-                );
-              }
+          final records = recordsAsync.valueOrNull ?? const [];
+          final cards = filteredSubjects.map((subject) {
+            final subjRecords = records
+                .where((r) => r.subjectId == subject.id)
+                .toList();
+            final present = subjRecords
+                .where((x) => x.primaryStatus == 'present')
+                .length;
+            final total = subjRecords.length;
+            final pct = total > 0 ? (present / total) : 0.0;
+            final pctStr = '${(pct * 100).round()}%';
 
-              final cards = filteredSubjects.map((subject) {
-                final subjRecords = records
-                    .where((r) => r.subjectId == subject.id)
-                    .toList();
-                final present = subjRecords
-                    .where((x) => x.primaryStatus == 'present')
-                    .length;
-                final total = subjRecords.length;
-                final pct = total > 0 ? (present / total) : 0.0;
-                final pctStr = '${(pct * 100).round()}%';
+            return Padding(
+              padding: const EdgeInsets.only(bottom: SpacingTokens.md),
+              child: _buildSubjectCard(
+                context,
+                subject.id,
+                subject.name,
+                pctStr,
+                present,
+                total > 0 ? total : 0,
+                pct,
+                userId,
+              ),
+            );
+          }).toList();
 
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: SpacingTokens.md),
-                  child: _buildSubjectCard(
-                    context,
-                    subject.id,
-                    subject.name,
-                    pctStr,
-                    present,
-                    total > 0 ? total : 0,
-                    pct,
-                    repo,
-                    userId,
-                  ),
-                );
-              }).toList();
-
-              return Column(children: cards);
-            },
-          );
+          return Column(children: cards);
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(
@@ -608,7 +590,6 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
     int present,
     int total,
     double progress,
-    AttendanceRepository repo,
     String userId,
   ) {
     final theme = Theme.of(context);
@@ -676,52 +657,56 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                         icon: Icon(Symbols.check_circle, color: cc.pri),
                         tooltip: 'Mark Present',
                         onPressed: () async {
-                          await repo.create(
-                            AttendanceCompanion.insert(
-                              id: const Uuid().v4(),
-                              userId: userId,
-                              subjectId: subjectId,
-                              date: DateTime.now()
-                                  .toUtc()
-                                  .toIso8601String()
-                                  .split('T')
-                                  .first,
-                              primaryStatus: 'present',
-                              lectureType: 'theory',
-                              createdAt: DateTime.now()
-                                  .toUtc()
-                                  .toIso8601String(),
-                              updatedAt: DateTime.now()
-                                  .toUtc()
-                                  .toIso8601String(),
-                            ),
-                          );
+                          await ref
+                              .read(attendanceRepositoryProvider)
+                              .create(
+                                AttendanceCompanion.insert(
+                                  id: const Uuid().v4(),
+                                  userId: userId,
+                                  subjectId: subjectId,
+                                  date: DateTime.now()
+                                      .toUtc()
+                                      .toIso8601String()
+                                      .split('T')
+                                      .first,
+                                  primaryStatus: 'present',
+                                  lectureType: 'theory',
+                                  createdAt: DateTime.now()
+                                      .toUtc()
+                                      .toIso8601String(),
+                                  updatedAt: DateTime.now()
+                                      .toUtc()
+                                      .toIso8601String(),
+                                ),
+                              );
                         },
                       ),
                       IconButton(
                         icon: Icon(Symbols.cancel, color: cc.risk),
                         tooltip: 'Mark Absent',
                         onPressed: () async {
-                          await repo.create(
-                            AttendanceCompanion.insert(
-                              id: const Uuid().v4(),
-                              userId: userId,
-                              subjectId: subjectId,
-                              date: DateTime.now()
-                                  .toUtc()
-                                  .toIso8601String()
-                                  .split('T')
-                                  .first,
-                              primaryStatus: 'absent',
-                              lectureType: 'theory',
-                              createdAt: DateTime.now()
-                                  .toUtc()
-                                  .toIso8601String(),
-                              updatedAt: DateTime.now()
-                                  .toUtc()
-                                  .toIso8601String(),
-                            ),
-                          );
+                          await ref
+                              .read(attendanceRepositoryProvider)
+                              .create(
+                                AttendanceCompanion.insert(
+                                  id: const Uuid().v4(),
+                                  userId: userId,
+                                  subjectId: subjectId,
+                                  date: DateTime.now()
+                                      .toUtc()
+                                      .toIso8601String()
+                                      .split('T')
+                                      .first,
+                                  primaryStatus: 'absent',
+                                  lectureType: 'theory',
+                                  createdAt: DateTime.now()
+                                      .toUtc()
+                                      .toIso8601String(),
+                                  updatedAt: DateTime.now()
+                                      .toUtc()
+                                      .toIso8601String(),
+                                ),
+                              );
                         },
                       ),
                       const SizedBox(width: SpacingTokens.xs),

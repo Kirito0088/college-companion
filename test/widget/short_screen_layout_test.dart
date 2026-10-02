@@ -66,11 +66,30 @@ void main() {
         final controls = find.byKey(OnboardingScreen.controlsKey);
         for (var page = 0; page < 5; page++) {
           expect(tester.takeException(), isNull, reason: 'page $page');
+          final pageRect = tester.getRect(find.byType(PageView));
           expect(
-            tester.getRect(find.byType(PageView)).bottom,
+            pageRect.bottom,
             lessThanOrEqualTo(tester.getRect(controls).top),
             reason: 'page $page content extends under the controls',
           );
+          // At the default scale nothing should need scrolling to be read:
+          // every text, including the last page's call to action, is fully
+          // inside the page. Larger scales may scroll the copy instead.
+          if (scale == 1.0) {
+            final texts = find.descendant(
+              of: find.byType(PageView),
+              matching: find.byType(Text),
+            );
+            for (final text in texts.evaluate()) {
+              final rect = tester.getRect(find.byWidget(text.widget));
+              expect(
+                rect.bottom,
+                lessThanOrEqualTo(pageRect.bottom + 0.5),
+                reason:
+                    'page $page: "${(text.widget as Text).data}" is clipped',
+              );
+            }
+          }
           if (page < 4) {
             await tester.drag(find.byType(PageView), const Offset(-400, 0));
             await tester.pumpAndSettle();

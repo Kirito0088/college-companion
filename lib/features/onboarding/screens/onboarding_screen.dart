@@ -178,63 +178,78 @@ class _OnboardingPageLayout extends StatelessWidget {
     final cc = context.cc;
     final topPadding = MediaQuery.of(context).padding.top + SpacingTokens.xxxl;
 
+    final copy = TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.easeOutQuint,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value.clamp(0.0, 1.0),
+          child: Transform.translate(
+            offset: Offset(0, 20 * (1 - value)),
+            child: child,
+          ),
+        );
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TypographyTokens.serifTextTheme.headlineLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: cc.fg,
+              height: 1.2,
+            ),
+          ),
+          const SizedBox(height: SpacingTokens.lg),
+          Text(
+            subtitle,
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(color: cc.mut, height: 1.5),
+          ),
+          if (bottomContent != null) ...[
+            const SizedBox(height: SpacingTokens.xxl),
+            bottomContent!,
+          ],
+        ],
+      ),
+    );
+
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: LayoutTokens.screenPadding,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(height: topPadding),
-          Expanded(flex: 3, child: Center(child: heroVisual)),
-          Expanded(
-            flex: 2,
-            // Scrolls rather than overflowing when the copy outgrows its
-            // share of a short screen or a large text scale (#39).
-            child: SingleChildScrollView(
-              child: TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0.0, end: 1.0),
-                duration: const Duration(milliseconds: 800),
-                curve: Curves.easeOutQuint,
-                builder: (context, value, child) {
-                  return Opacity(
-                    opacity: value.clamp(0.0, 1.0),
-                    child: Transform.translate(
-                      offset: Offset(0, 20 * (1 - value)),
-                      child: child,
-                    ),
-                  );
-                },
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TypographyTokens.serifTextTheme.headlineLarge
-                          ?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: cc.fg,
-                            height: 1.2,
-                          ),
-                    ),
-                    const SizedBox(height: SpacingTokens.lg),
-                    Text(
-                      subtitle,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: cc.mut,
-                        height: 1.5,
-                      ),
-                    ),
-                    if (bottomContent != null) ...[
-                      const SizedBox(height: SpacingTokens.xxl),
-                      bottomContent!,
-                    ],
-                  ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final body = constraints.maxHeight - topPadding;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(height: topPadding),
+              // Content first (#39): the copy is what the student must read;
+              // the hero is decoration. The hero takes whatever the copy
+              // leaves and scales down to fit, where a fixed 3:2 split used
+              // to clip the copy on short screens.
+              Expanded(
+                child: Center(
+                  child: FittedBox(fit: BoxFit.scaleDown, child: heroVisual),
                 ),
               ),
-            ),
-          ),
-        ],
+              // At least the old 2/5 share, so tall screens look as before;
+              // up to 70% on short ones; scrolls beyond that at large text
+              // scales.
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: body * 0.4,
+                  maxHeight: body * 0.7,
+                ),
+                child: SingleChildScrollView(child: copy),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

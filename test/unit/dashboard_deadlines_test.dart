@@ -10,6 +10,7 @@ import 'package:college_companion/features/attendance/providers/attendance_provi
 import 'package:college_companion/features/calendar/providers/calendar_provider.dart';
 import 'package:college_companion/features/dashboard/providers/dashboard_provider.dart';
 import 'package:college_companion/features/subjects/providers/subjects_provider.dart';
+import 'package:college_companion/features/timetable/providers/timetable_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -25,6 +26,9 @@ void main() {
   test('an assignment due today (date only) counts as due today', () async {
     final container = ProviderContainer(
       overrides: [
+        todayLecturesStreamProvider.overrideWith(
+          (ref, u) => Stream.value(const []),
+        ),
         calendarEventsStreamProvider.overrideWith(
           (ref, u) => Stream.value(const []),
         ),

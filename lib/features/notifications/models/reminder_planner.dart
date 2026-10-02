@@ -116,7 +116,7 @@ List<PlannedReminder> planReminders({
     final dayLectures =
         lectures
             .where((l) => l.dayOfWeek == date.weekday - 1)
-            .map((l) => (lecture: l, start: _at(date, l.startTime)))
+            .map((l) => (lecture: l, start: l.startOn(date)))
             .where((e) => e.start != null)
             .toList()
           ..sort((a, b) => a.start!.compareTo(b.start!));
@@ -237,16 +237,6 @@ String _where(String? room) {
   final r = room?.trim() ?? '';
   if (r.isEmpty) return '';
   return RegExp(r'^\d').hasMatch(r) ? ' in Room $r' : ' in $r';
-}
-
-/// [date] at the `HH:MM` or `HH:MM:SS` [time], or null if unparseable.
-DateTime? _at(DateTime date, String time) {
-  final parts = time.split(':');
-  if (parts.length < 2) return null;
-  final h = int.tryParse(parts[0]);
-  final m = int.tryParse(parts[1]);
-  if (h == null || m == null) return null;
-  return DateTime(date.year, date.month, date.day, h, m);
 }
 
 bool _sameDay(DateTime a, DateTime b) =>

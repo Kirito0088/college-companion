@@ -55,6 +55,19 @@ final todayTimetableStreamProvider = StreamProvider<List<LectureScheduleItem>>((
   return repo.watchLecturesForDay(userId, todayOfWeek);
 });
 
+/// Watches [userId]'s lectures for today.
+///
+/// Keyed by user rather than read from auth, so providers that are already
+/// keyed by user, such as the dashboard snapshot, have one source of
+/// identity.
+final todayLecturesStreamProvider =
+    StreamProvider.family<List<LectureScheduleItem>, String>((ref, userId) {
+      final today = (DateTime.now().weekday - 1).clamp(0, 6);
+      return ref
+          .watch(timetableRepositoryProvider)
+          .watchLecturesForDay(userId, today);
+    });
+
 /// Watches all weekly scheduled lectures for the currently authenticated user.
 final weeklyTimetableStreamProvider = StreamProvider<List<LectureScheduleItem>>(
   (ref) {

@@ -66,6 +66,24 @@ class LectureScheduleItem {
     return '$displayHour:$displayMinute $period';
   }
 
+  /// When this slot starts on [date], local time, or null if [startTime]
+  /// cannot be read.
+  DateTime? startOn(DateTime date) => _timeOn(date, startTime);
+
+  /// When this slot ends on [date], local time, or null if [endTime] cannot
+  /// be read.
+  DateTime? endOn(DateTime date) => _timeOn(date, endTime);
+
+  /// [date] at an `HH:MM` or `HH:MM:SS` [time].
+  static DateTime? _timeOn(DateTime date, String time) {
+    final parts = time.split(':');
+    if (parts.length < 2) return null;
+    final h = int.tryParse(parts[0]);
+    final m = int.tryParse(parts[1]);
+    if (h == null || m == null) return null;
+    return DateTime(date.year, date.month, date.day, h, m);
+  }
+
   /// Formatted time range string (e.g., "9:00 AM - 10:00 AM").
   String get formattedTimeRange =>
       '${formatTimeSlot(startTime)} - ${formatTimeSlot(endTime)}';

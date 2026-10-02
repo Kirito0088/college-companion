@@ -124,19 +124,23 @@ class NextLectureCard extends ConsumerWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(width: SpacingTokens.md),
-                    Icon(Symbols.location_on, size: 16, color: cc.mut),
-                    const SizedBox(width: 4),
-                    Flexible(
-                      child: Text(
-                        nextAction.location,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: cc.mut,
+                    // No room or place recorded: no pin with nothing next to
+                    // it (#42).
+                    if (nextAction.location.isNotEmpty) ...[
+                      const SizedBox(width: SpacingTokens.md),
+                      Icon(Symbols.location_on, size: 16, color: cc.mut),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          nextAction.location,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: cc.mut,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ],

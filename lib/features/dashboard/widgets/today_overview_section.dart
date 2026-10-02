@@ -216,15 +216,17 @@ class _SpineRow extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: 2),
-                            Text(
-                              event.location,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: cc.mut,
+                            if (event.location.isNotEmpty) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                event.location,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: cc.mut,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                            ],
                           ],
                         ),
                       ),

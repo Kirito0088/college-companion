@@ -59,6 +59,19 @@ Before considering any task, branch, or PR complete:
 - [ ] **Automated Tests**: `flutter test` (100% pass rate)
 - [ ] **Virtual Device QA**: Integration test validation on `Automated_Device` (`emulator-5554`) when modifying core user flows.
 
+### Driving the real app (manual / agent QA)
+
+Google Sign-In blocks automated traversal. Launch with the dev-only auth bypass so every route is reachable:
+
+```bash
+flutter run -d emulator-5554 --dart-define=DEV_AUTH_BYPASS=true
+```
+
+- The app starts as `AuthStateNotifier.devUser` (uid `dev-bypass-user`); Supabase and Google are never touched, and the profile is not synced. Sign-out is a no-op in this mode.
+- It is a compile-time define, off by default, and forced `false` in release builds (`EnvConfig.devAuthBypass`). Never add it to a release/CI build config.
+- Onboarding is not bypassed. A fresh install still lands on `/onboarding` first; complete it (or reuse a seeded install) to reach the main shell.
+- Widget/integration tests don't need the define; they override `authStateProvider` (or `devAuthBypassProvider`) directly.
+
 ---
 
 ## 4. Key Behavioral Rules (Karpathy & Real-Engineer Guidelines)
@@ -67,3 +80,4 @@ Before considering any task, branch, or PR complete:
 - **Preserve Architecture**: Drift SQLite is always the local source of truth. UI never talks directly to Supabase.
 - **Never Synthesize Fake Data**: Use real database streams and proper empty/error states (`CcEmptyState`, `CcErrorState`).
 - **Material Design 3 Tokens Only**: Never hardcode colors, padding, or border radii. Use `lib/theme/` tokens.
+- **No AI Attribution**: Never add `Co-Authored-By: Claude ...`, `Generated with Claude Code`, or any other AI attribution line to commit messages, PR descriptions, or code. Commits are authored solely by the repo owner.

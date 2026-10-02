@@ -7,6 +7,7 @@ library;
 import 'package:college_companion/app.dart';
 import 'package:college_companion/core/config/env_config.dart';
 import 'package:college_companion/services/supabase_service.dart';
+import 'package:college_companion/theme/bundled_fonts.dart';
 import 'package:college_companion/utilities/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,6 +19,9 @@ Future<void> main() async {
 
   // Force portrait orientation (Android-first, mobile-first).
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
+  // Fonts come from the bundle, never the network (offline-first, #22).
+  BundledFonts.configure();
 
   // ── Environment Configuration ──────────────────────────────────────────
   await EnvConfig.load();
